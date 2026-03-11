@@ -39,10 +39,47 @@
           <p class="page-subtitle">
             공공데이터(도매시장/산지/기상)와 온라인 이슈를 묶어, 실시간 변동(급등/급락) 감지에 활용하는 예시입니다.
           </p>
+        </div>
+      </section>
 
-          <div class="filters" aria-label="빠른 이동">
-            <a class="chip" href="./index.html?category=agri">메인에서 농산물 워드클라우드 보기</a>
-            <a class="chip" href="./analysis-4.html">다른 카테고리(관광/환경) 보기</a>
+      <section class="panel">
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">그래프 예시</h2>
+              <p class="panel-desc">샘플 집계값으로 그린 “대시보드 형태” 예시입니다. (더미 데이터)</p>
+            </div>
+          </div>
+
+          <div class="grid">
+            <article class="card">
+              <h3>추세 (12개월)</h3>
+              <p>윈도우 집계 기반 변동 추이(예시)</p>
+              <canvas class="chart-canvas" id="chart-line" role="img" aria-label="추세 라인 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>Top 변화 품목</h3>
+              <p>최근 윈도우에서 급변 상위 5개(예시)</p>
+              <canvas class="chart-canvas" id="chart-bar" role="img" aria-label="변화 Top 막대 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>신호 구성비</h3>
+              <p>가격/수급/기상/키워드 비중(예시)</p>
+              <canvas class="chart-canvas chart-canvas--donut" id="chart-donut" role="img" aria-label="신호 구성 도넛 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>해석 포인트</h3>
+              <p>실제 구현 시에는 임계값·계절성·외부 이벤트를 함께 반영해 알림/원인추정을 붙입니다.</p>
+              <div class="tagrow">
+                <span class="tag">threshold</span>
+                <span class="tag">seasonality</span>
+                <span class="tag">event</span>
+                <span class="tag">alert</span>
+              </div>
+            </article>
           </div>
         </div>
       </section>
@@ -126,6 +163,9 @@
       </div>
     </footer>
 
+    <script src="./assets/js/auth.js"></script>
     <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/charts.js"></script>
+    <script src="./assets/js/analysis.js"></script>
   </body>
 </html>

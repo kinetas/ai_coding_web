@@ -59,6 +59,18 @@
     slot.className = "nav-auth";
     slot.setAttribute("data-auth-slot", "true");
 
+    var myCreate = document.createElement("a");
+    myCreate.className = "nav-link nav-link--btn";
+    myCreate.href = "./my-analysis.html";
+    myCreate.textContent = "내 분석 만들기";
+    myCreate.setAttribute("data-auth-mycreate", "true");
+
+    var mySaved = document.createElement("a");
+    mySaved.className = "nav-link nav-link--btn";
+    mySaved.href = "./my-analyses.html";
+    mySaved.textContent = "내 분석 보기";
+    mySaved.setAttribute("data-auth-mysaved", "true");
+
     var userPill = document.createElement("span");
     userPill.className = "user-pill";
     userPill.setAttribute("data-auth-user", "true");
@@ -75,6 +87,8 @@
     logoutBtn.textContent = "로그아웃";
     logoutBtn.setAttribute("data-auth-logout", "true");
 
+    slot.appendChild(myCreate);
+    slot.appendChild(mySaved);
     slot.appendChild(userPill);
     slot.appendChild(loginLink);
     slot.appendChild(logoutBtn);
@@ -85,11 +99,15 @@
       var user = authed && window.EtAuth.getUser ? window.EtAuth.getUser() : null;
 
       if (authed) {
+        myCreate.style.display = "inline-flex";
+        mySaved.style.display = "inline-flex";
         userPill.textContent = user && user.name ? user.name : "User";
         userPill.style.display = "inline-flex";
         loginLink.style.display = "none";
         logoutBtn.style.display = "inline-flex";
       } else {
+        myCreate.style.display = "none";
+        mySaved.style.display = "none";
         userPill.style.display = "none";
         loginLink.style.display = "inline-flex";
         logoutBtn.style.display = "none";

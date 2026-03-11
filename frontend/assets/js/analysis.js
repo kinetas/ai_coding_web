@@ -7,10 +7,15 @@
     return document.getElementById(id);
   }
 
+  function getApiBase() {
+    if (window.ET_API_BASE) return String(window.ET_API_BASE).replace(/\/+$/, "");
+    return "http://127.0.0.1:8000";
+  }
+
   function renderForPage(page) {
     if (!window.EtCharts) return;
 
-    // page별 샘플 데이터(나중에 서버/스트리밍 집계로 교체)
+    // page별 샘플 데이터(백엔드 연결 실패 시 fallback)
     var preset = {
       "analysis-1": {
         line: [38, 41, 45, 44, 52, 58, 55, 61, 66, 64, 70, 76],
@@ -38,12 +43,29 @@
       }
     };
 
-    var cfg = preset[page];
-    if (!cfg) return;
+    var fallback = preset[page];
+    if (!fallback) return;
 
-    window.EtCharts.lineChart(byId("chart-line"), cfg.line, { accent: cfg.accents.line });
-    window.EtCharts.barChart(byId("chart-bar"), cfg.bar, { accent: cfg.accents.bar });
-    window.EtCharts.donutChart(byId("chart-donut"), cfg.donut, {});
+    var url = getApiBase() + "/api/analysis?page=" + encodeURIComponent(page);
+    fetch(url, { method: "GET" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("bad response");
+        return res.json();
+      })
+      .then(function (cfg) {
+        var line = Array.isArray(cfg && cfg.line) ? cfg.line : fallback.line;
+        var bar = Array.isArray(cfg && cfg.bar) ? cfg.bar : fallback.bar;
+        var donut = Array.isArray(cfg && cfg.donut) ? cfg.donut : fallback.donut;
+        var accents = cfg && cfg.accents ? cfg.accents : fallback.accents;
+        window.EtCharts.lineChart(byId("chart-line"), line, { accent: accents.line || fallback.accents.line });
+        window.EtCharts.barChart(byId("chart-bar"), bar, { accent: accents.bar || fallback.accents.bar });
+        window.EtCharts.donutChart(byId("chart-donut"), donut, {});
+      })
+      .catch(function () {
+        window.EtCharts.lineChart(byId("chart-line"), fallback.line, { accent: fallback.accents.line });
+        window.EtCharts.barChart(byId("chart-bar"), fallback.bar, { accent: fallback.accents.bar });
+        window.EtCharts.donutChart(byId("chart-donut"), fallback.donut, {});
+      });
   }
 
   function setupResize(page) {
@@ -57,12 +79,6 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    // 분석 페이지는 로그인 필요
-    if (window.EtAuth) {
-      var ok = window.EtAuth.requireAuth({ redirect: true });
-      if (!ok) return;
-    }
-
     var page = document.body && document.body.dataset ? document.body.dataset.page : "";
     renderForPage(page);
     setupResize(page);

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 내 분석 만들기</title>
+    <meta name="description" content="키워드 기반으로 분석을 만들고 저장하는 페이지" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="my-analysis">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
+          <a class="nav-link" href="./analysis-1.html" data-nav="analysis-1">분석 1</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="analysis-2">분석 2</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="analysis-3">분석 3</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="analysis-4">분석 4</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">내 분석</p>
+          <h1 class="page-title">키워드로 분석 만들기</h1>
+          <p class="page-subtitle">키워드를 입력하면, 서버가 자주 쓰는 분석 카테고리를 추천하고 바로 지표를 그려줍니다.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">키워드 입력</h2>
+              <p class="panel-desc">예시: <code>게임</code>, <code>여행</code>, <code>미세먼지</code></p>
+            </div>
+          </div>
+
+          <form class="form" id="builder-form">
+            <label class="field">
+              <span class="field__label">키워드</span>
+              <input class="input" name="keyword" id="keyword" placeholder="키워드를 입력하세요 (예: 게임)" required />
+            </label>
+            <button class="btn" type="submit">추천 받기</button>
+            <a class="btn btn--ghost" href="./my-analyses.html">저장된 내 분석 보기</a>
+          </form>
+
+          <div class="alert alert--error" id="builder-error" role="alert" aria-live="polite" hidden></div>
+        </div>
+      </section>
+
+      <section class="panel" id="suggestions-panel" hidden>
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">추천 분석 카테고리</h2>
+              <p class="panel-desc">클릭하면 해당 지표를 서버에서 조회해 그립니다.</p>
+            </div>
+          </div>
+
+          <div class="filters" id="suggestions" aria-label="추천 분석 카테고리"></div>
+
+          <div class="hint" id="no-suggestions" hidden>
+            <p class="hint-title">추천이 부족해요</p>
+            <ul class="hint-list">
+              <li>아래 채팅으로 “무엇이 궁금한지” 적어보세요. (데모 응답)</li>
+            </ul>
+          </div>
+
+          <form class="form" id="chat-form" hidden>
+            <label class="field">
+              <span class="field__label">챗봇에게 질문</span>
+              <input class="input" name="question" id="question" placeholder="예: 게임 관련 유저 수 추이를 알려줘" />
+            </label>
+            <button class="btn btn--ghost" type="submit">질문 보내기</button>
+          </form>
+          <div class="alert" id="chat-answer" role="status" aria-live="polite" hidden></div>
+        </div>
+      </section>
+
+      <section class="panel" id="result-panel" hidden>
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">결과</h2>
+              <p class="panel-desc" id="result-title">지표 결과</p>
+            </div>
+          </div>
+
+          <div class="grid">
+            <article class="card">
+              <h3>추세</h3>
+              <p id="metric-desc">선택한 지표 추세(예시)</p>
+              <canvas class="chart-canvas" id="builder-line" role="img" aria-label="내 분석 라인 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>Top 요약</h3>
+              <p>최근 구간 Top (예시)</p>
+              <canvas class="chart-canvas" id="builder-bar" role="img" aria-label="내 분석 막대 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>저장</h3>
+              <p>이 분석을 저장해두고 나중에 다시 볼 수 있습니다.</p>
+              <form class="form" id="save-form">
+                <label class="field">
+                  <span class="field__label">저장 이름</span>
+                  <input class="input" name="title" id="save-title" placeholder="예: 게임 유저 수 추세" required />
+                </label>
+                <button class="btn" type="submit">내 분석 저장</button>
+              </form>
+              <div class="alert alert--success" id="save-ok" role="status" aria-live="polite" hidden></div>
+              <div class="alert alert--error" id="save-err" role="alert" aria-live="polite" hidden></div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <p class="muted">내 분석 만들기</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/charts.js"></script>
+    <script src="./assets/js/my_analysis.js"></script>
+  </body>
+</html>

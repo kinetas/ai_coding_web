@@ -1,6 +1,19 @@
 (function () {
   var MAX_WORDS = 28;
 
+  function getApiBase() {
+    if (window.ET_API_BASE) return String(window.ET_API_BASE).replace(/\/+$/, "");
+    return "http://127.0.0.1:8000";
+  }
+
+  function isAllowedCategory(c) {
+    return c === "all" || c === "agri" || c === "health" || c === "traffic" || c === "tour" || c === "env";
+  }
+
+  function isAllowedRegion(r) {
+    return r === "kr" || r === "global";
+  }
+
   var DATA = {
     agri: {
       label: "농산물",
@@ -117,7 +130,7 @@
     return b.weight - a.weight;
   }
 
-  function mergeAll(regionKey) {
+  function mergeAllLocal(regionKey) {
     var map = {};
     Object.keys(DATA).forEach(function (cat) {
       (DATA[cat][regionKey] || []).forEach(function (w) {
@@ -133,11 +146,37 @@
     return merged.slice(0, MAX_WORDS);
   }
 
-  function getWords(regionKey, category) {
-    if (category === "all") return mergeAll(regionKey);
+  function getWordsLocal(regionKey, category) {
+    if (category === "all") return mergeAllLocal(regionKey);
     var bucket = DATA[category] && DATA[category][regionKey] ? DATA[category][regionKey].slice() : [];
     bucket.sort(sortByWeightDesc);
     return bucket.slice(0, MAX_WORDS);
+  }
+
+  function normalizeWords(words) {
+    var arr = Array.isArray(words) ? words : [];
+    return arr
+      .map(function (w) {
+        return { text: String(w && w.text ? w.text : ""), weight: Number(w && w.weight ? w.weight : 0) };
+      })
+      .filter(function (w) { return w.text && isFinite(w.weight) && w.weight >= 0; })
+      .sort(sortByWeightDesc)
+      .slice(0, MAX_WORDS);
+  }
+
+  function fetchWords(regionKey, category) {
+    var cat = isAllowedCategory(category) ? category : "all";
+    var reg = isAllowedRegion(regionKey) ? regionKey : "kr";
+    var url = getApiBase() + "/api/wordcloud?category=" + encodeURIComponent(cat) + "&region=" + encodeURIComponent(reg);
+
+    return fetch(url, { method: "GET" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("bad response");
+        return res.json();
+      })
+      .then(function (json) {
+        return normalizeWords(json && json.words ? json.words : []);
+      });
   }
 
   function createPalette(regionKey) {
@@ -221,8 +260,17 @@
   function renderAllClouds() {
     var kr = document.getElementById("cloud-kr");
     var gl = document.getElementById("cloud-global");
-    renderWordCloud(kr, getWords("kr", state.category), "kr");
-    renderWordCloud(gl, getWords("global", state.category), "global");
+
+    return Promise.all([fetchWords("kr", state.category), fetchWords("global", state.category)])
+      .then(function (results) {
+        renderWordCloud(kr, results[0], "kr");
+        renderWordCloud(gl, results[1], "global");
+      })
+      .catch(function () {
+        // 백엔드가 꺼져있어도 데모가 깨지지 않도록 로컬 더미로 fallback
+        renderWordCloud(kr, getWordsLocal("kr", state.category), "kr");
+        renderWordCloud(gl, getWordsLocal("global", state.category), "global");
+      });
   }
 
   function setupFilters() {
@@ -309,7 +357,7 @@
     try {
       var params = new URLSearchParams(window.location.search || "");
       var requested = params.get("category");
-      if (requested && (requested === "all" || Object.prototype.hasOwnProperty.call(DATA, requested))) {
+      if (requested && isAllowedCategory(requested)) {
         state.category = requested;
       }
     } catch (e) {

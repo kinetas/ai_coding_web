@@ -39,10 +39,47 @@
           <p class="page-subtitle">
             실시간 교통(지하철/버스/도로) 데이터와 이벤트(날씨/행사)를 결합해 혼잡 예측/알림에 활용하는 예시입니다.
           </p>
+        </div>
+      </section>
 
-          <div class="filters" aria-label="빠른 이동">
-            <a class="chip" href="./index.html?category=traffic">메인에서 교통 워드클라우드 보기</a>
-            <a class="chip" href="./analysis-1.html">농산물 분석 보기</a>
+      <section class="panel">
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">그래프 예시</h2>
+              <p class="panel-desc">샘플 집계값으로 그린 “대시보드 형태” 예시입니다. (더미 데이터)</p>
+            </div>
+          </div>
+
+          <div class="grid">
+            <article class="card">
+              <h3>혼잡/지연 추세</h3>
+              <p>최근 기간 집계 기반 변동 추이(예시)</p>
+              <canvas class="chart-canvas" id="chart-line" role="img" aria-label="혼잡 지연 추세 라인 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>지연 Hotspot</h3>
+              <p>최근 윈도우 지연 상위 5개(예시)</p>
+              <canvas class="chart-canvas" id="chart-bar" role="img" aria-label="지연 hotspot 막대 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>원인 비중</h3>
+              <p>사고/날씨/행사/기타 비중(예시)</p>
+              <canvas class="chart-canvas chart-canvas--donut" id="chart-donut" role="img" aria-label="원인 비중 도넛 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>해석 포인트</h3>
+              <p>스트림-스트림 조인으로 이벤트를 붙이면, 단순 혼잡 수치뿐 아니라 “원인 힌트”까지 제공할 수 있습니다.</p>
+              <div class="tagrow">
+                <span class="tag">join</span>
+                <span class="tag">enrichment</span>
+                <span class="tag">SLA</span>
+                <span class="tag">alert</span>
+              </div>
+            </article>
           </div>
         </div>
       </section>
@@ -126,6 +163,9 @@
       </div>
     </footer>
 
+    <script src="./assets/js/auth.js"></script>
     <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/charts.js"></script>
+    <script src="./assets/js/analysis.js"></script>
   </body>
 </html>

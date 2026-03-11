@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 내 분석 보기</title>
+    <meta name="description" content="저장된 내 분석 목록을 보는 페이지" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="my-analyses">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
+          <a class="nav-link" href="./analysis-1.html" data-nav="analysis-1">분석 1</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="analysis-2">분석 2</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="analysis-3">분석 3</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="analysis-4">분석 4</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">내 분석</p>
+          <h1 class="page-title">저장된 내 분석</h1>
+          <p class="page-subtitle">내가 저장한 분석을 목록으로 보고, 다시 열 수 있습니다.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">목록</h2>
+              <p class="panel-desc">항목을 누르면 ‘내 분석 만들기’ 페이지로 이동해 다시 조회합니다.</p>
+            </div>
+          </div>
+
+          <div class="alert" id="list-empty" hidden>아직 저장된 분석이 없습니다.</div>
+          <table class="table" id="list-table" aria-label="저장된 내 분석 목록" hidden>
+            <tr>
+              <th>이름</th>
+              <th>키워드</th>
+              <th>카테고리</th>
+              <th>저장 시각</th>
+            </tr>
+          </table>
+
+          <div class="filters" style="margin-top:14px">
+            <a class="chip" href="./my-analysis.html">내 분석 만들기</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <p class="muted">내 분석 보기</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/my_analyses.js"></script>
+  </body>
+</html>
