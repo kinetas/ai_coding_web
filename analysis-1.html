@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 분석 1</title>
+    <meta name="description" content="Et 분석페이지 1: 농산물/물가 카테고리 예시" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="analysis-1">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
+          <a class="nav-link" href="./analysis-1.html" data-nav="analysis-1">분석 1</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="analysis-2">분석 2</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="analysis-3">분석 3</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="analysis-4">분석 4</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">분석 1</p>
+          <h1 class="page-title">농산물 · 물가 트렌드</h1>
+          <p class="page-subtitle">
+            공공데이터(도매시장/산지/기상)와 온라인 이슈를 묶어, 실시간 변동(급등/급락) 감지에 활용하는 예시입니다.
+          </p>
+
+          <div class="filters" aria-label="빠른 이동">
+            <a class="chip" href="./index.html?category=agri">메인에서 농산물 워드클라우드 보기</a>
+            <a class="chip" href="./analysis-4.html">다른 카테고리(관광/환경) 보기</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <h2 class="panel-title">구성 예시</h2>
+          <p class="panel-desc">“여러 데이터를 수집해 카테고리로 묶어두는” 형태의 데모 콘텐츠입니다.</p>
+
+          <div class="grid">
+            <article class="card">
+              <h3>수집 데이터 (예시)</h3>
+              <p>도매시장 가격, 산지 출하량, 기상(온도/강수), 뉴스/커뮤니티 키워드</p>
+              <div class="tagrow">
+                <span class="tag">가격</span>
+                <span class="tag">수급</span>
+                <span class="tag">기상</span>
+                <span class="tag">키워드</span>
+              </div>
+              <table class="table" aria-label="농산물 데이터 예시 테이블">
+                <tr>
+                  <th>필드</th>
+                  <th>설명</th>
+                </tr>
+                <tr>
+                  <td>item_name</td>
+                  <td>품목명 (예: 사과, 배추)</td>
+                </tr>
+                <tr>
+                  <td>price</td>
+                  <td>단가(원)</td>
+                </tr>
+                <tr>
+                  <td>volume</td>
+                  <td>거래량/출하량</td>
+                </tr>
+                <tr>
+                  <td>timestamp</td>
+                  <td>수집 시각</td>
+                </tr>
+              </table>
+            </article>
+
+            <article class="card">
+              <h3>Spark Streaming 아이디어</h3>
+              <p>스트림 데이터를 1~5분 윈도우로 집계해 급변 품목을 알림/대시보드로 표출합니다.</p>
+              <div class="tagrow">
+                <span class="tag">window</span>
+                <span class="tag">stateful</span>
+                <span class="tag">anomaly</span>
+                <span class="tag">join</span>
+              </div>
+              <table class="table" aria-label="지표 예시">
+                <tr>
+                  <th>지표</th>
+                  <th>설명</th>
+                </tr>
+                <tr>
+                  <td>price_change_rate</td>
+                  <td>이전 윈도우 대비 가격 변화율</td>
+                </tr>
+                <tr>
+                  <td>top_movers</td>
+                  <td>급등/급락 상위 품목</td>
+                </tr>
+                <tr>
+                  <td>keyword_spike</td>
+                  <td>관련 키워드 급증 탐지</td>
+                </tr>
+              </table>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <p class="muted">분석 1 · 농산물</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/common.js"></script>
+  </body>
+</html>

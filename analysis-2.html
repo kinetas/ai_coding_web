@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 분석 2</title>
+    <meta name="description" content="Et 분석페이지 2: 의료 카테고리 예시" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="analysis-2">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
+          <a class="nav-link" href="./analysis-1.html" data-nav="analysis-1">분석 1</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="analysis-2">분석 2</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="analysis-3">분석 3</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="analysis-4">분석 4</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">분석 2</p>
+          <h1 class="page-title">의료 · 감염 동향</h1>
+          <p class="page-subtitle">
+            공공 보건 통계와 검색/커뮤니티 키워드를 함께 보고, 지역/기간별 급증 신호를 빠르게 탐지하는 예시입니다.
+          </p>
+
+          <div class="filters" aria-label="빠른 이동">
+            <a class="chip" href="./index.html?category=health">메인에서 의료 워드클라우드 보기</a>
+            <a class="chip" href="./analysis-3.html">교통 분석 보기</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <h2 class="panel-title">구성 예시</h2>
+          <p class="panel-desc">개인정보가 아닌 “집계/공개 데이터” 중심의 데모 시나리오입니다.</p>
+
+          <div class="grid">
+            <article class="card">
+              <h3>수집 데이터 (예시)</h3>
+              <p>호흡기/감염 통계(집계), 병원/약국 혼잡도(집계), 검색 트렌드 키워드</p>
+              <div class="tagrow">
+                <span class="tag">집계</span>
+                <span class="tag">지역</span>
+                <span class="tag">기간</span>
+                <span class="tag">키워드</span>
+              </div>
+              <table class="table" aria-label="의료 데이터 예시 테이블">
+                <tr>
+                  <th>필드</th>
+                  <th>설명</th>
+                </tr>
+                <tr>
+                  <td>region</td>
+                  <td>지역(시/군/구)</td>
+                </tr>
+                <tr>
+                  <td>signal</td>
+                  <td>증상/질환 신호 지표(집계)</td>
+                </tr>
+                <tr>
+                  <td>visit_index</td>
+                  <td>방문/혼잡 지수(집계)</td>
+                </tr>
+                <tr>
+                  <td>timestamp</td>
+                  <td>수집 시각</td>
+                </tr>
+              </table>
+            </article>
+
+            <article class="card">
+              <h3>Spark Streaming 아이디어</h3>
+              <p>지역별 스트림을 윈도우로 집계하고, “급증 지역”을 top-N으로 산출해 경보를 띄웁니다.</p>
+              <div class="tagrow">
+                <span class="tag">top-N</span>
+                <span class="tag">watermark</span>
+                <span class="tag">trend</span>
+                <span class="tag">alert</span>
+              </div>
+              <table class="table" aria-label="지표 예시">
+                <tr>
+                  <th>지표</th>
+                  <th>설명</th>
+                </tr>
+                <tr>
+                  <td>region_rank</td>
+                  <td>기간별 급증 지역 순위</td>
+                </tr>
+                <tr>
+                  <td>keyword_cooccur</td>
+                  <td>증상 키워드 동시 출현(빈도)</td>
+                </tr>
+                <tr>
+                  <td>baseline_diff</td>
+                  <td>평시 대비 편차(예: z-score)</td>
+                </tr>
+              </table>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <p class="muted">분석 2 · 의료</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/common.js"></script>
+  </body>
+</html>

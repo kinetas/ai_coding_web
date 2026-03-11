@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 트렌드 워드클라우드</title>
+    <meta name="description" content="Et: 카테고리 기반 트렌드 워드클라우드(국내/해외)와 분석 페이지로 이동하는 데모 웹페이지" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="home">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
+          <a class="nav-link" href="./analysis-1.html" data-nav="analysis-1">분석 1</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="analysis-2">분석 2</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="analysis-3">분석 3</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="analysis-4">분석 4</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">ETL Streaming 준비용 데모</p>
+          <h1 class="hero-title">지금 유행하는 키워드를 한눈에</h1>
+          <p class="hero-subtitle">
+            카테고리를 고르면 국내/해외 트렌드 워드클라우드가 즉시 갱신됩니다. (샘플 데이터)
+          </p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">트렌드 워드클라우드</h2>
+              <p class="panel-desc">캐러셀로 국내/해외를 전환하고, 카테고리로 관심 분야에 집중하세요.</p>
+            </div>
+          </div>
+
+          <div class="filters" aria-label="카테고리 필터">
+            <button class="chip is-active" type="button" data-category="all">전체</button>
+            <button class="chip" type="button" data-category="agri">농산물</button>
+            <button class="chip" type="button" data-category="health">의료</button>
+            <button class="chip" type="button" data-category="traffic">교통</button>
+            <button class="chip" type="button" data-category="tour">관광</button>
+            <button class="chip" type="button" data-category="env">환경</button>
+          </div>
+
+          <div class="carousel" data-carousel>
+            <div class="carousel__viewport" aria-live="polite">
+              <div class="carousel__track" data-carousel-track>
+                <section class="carousel__slide" data-slide="0" aria-label="한국 트렌드">
+                  <div class="slide-head">
+                    <h3 class="slide-title">한국에서 유행 중</h3>
+                    <p class="slide-desc">소셜/뉴스 기반 키워드 예시</p>
+                  </div>
+                  <div class="wordcloud" id="cloud-kr" role="img" aria-label="한국 트렌드 워드클라우드"></div>
+                </section>
+
+                <section class="carousel__slide" data-slide="1" aria-label="해외 트렌드">
+                  <div class="slide-head">
+                    <h3 class="slide-title">해외에서 유행 중</h3>
+                    <p class="slide-desc">글로벌 이슈/커뮤니티 기반 키워드 예시</p>
+                  </div>
+                  <div class="wordcloud" id="cloud-global" role="img" aria-label="해외 트렌드 워드클라우드"></div>
+                </section>
+              </div>
+            </div>
+
+            <button class="carousel__btn carousel__btn--prev" type="button" data-carousel-prev aria-label="이전 슬라이드">
+              ‹
+            </button>
+            <button class="carousel__btn carousel__btn--next" type="button" data-carousel-next aria-label="다음 슬라이드">
+              ›
+            </button>
+
+            <div class="carousel__dots" role="tablist" aria-label="워드클라우드 캐러셀">
+              <button class="dot is-active" type="button" data-carousel-dot="0" role="tab" aria-selected="true">
+                <span class="sr-only">한국 트렌드</span>
+              </button>
+              <button class="dot" type="button" data-carousel-dot="1" role="tab" aria-selected="false">
+                <span class="sr-only">해외 트렌드</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="hint">
+            <p class="hint-title">다음 단계 아이디어</p>
+            <ul class="hint-list">
+              <li>실시간 수집(Streaming) 결과를 카프카/스토리지에 적재 → Spark Streaming으로 집계</li>
+              <li>집계 결과를 API로 제공 → 이 페이지 워드클라우드가 주기적으로 갱신</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <p class="muted">샘플 정적 페이지 · HTML/CSS/JS</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/index.js"></script>
+  </body>
+</html>

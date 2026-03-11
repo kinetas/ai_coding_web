@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 분석 4</title>
+    <meta name="description" content="Et 분석페이지 4: 관광/환경 카테고리 예시" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="analysis-4">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
+          <a class="nav-link" href="./analysis-1.html" data-nav="analysis-1">분석 1</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="analysis-2">분석 2</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="analysis-3">분석 3</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="analysis-4">분석 4</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">분석 4</p>
+          <h1 class="page-title">관광 · 환경 (카테고리 묶음)</h1>
+          <p class="page-subtitle">
+            “분석페이지가 여러 개”라는 의미를 보여주기 위해, 여기서는 관광/환경 두 카테고리를 한 페이지에 묶어 예시로 구성했습니다.
+          </p>
+
+          <div class="filters" aria-label="빠른 이동">
+            <a class="chip" href="./index.html?category=tour">메인에서 관광 워드클라우드 보기</a>
+            <a class="chip" href="./index.html?category=env">메인에서 환경 워드클라우드 보기</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <h2 class="panel-title">관광 카테고리</h2>
+          <p class="panel-desc">검색/리뷰/행사 일정 같은 데이터를 묶어 “어디가 뜨는지”를 빠르게 감지합니다.</p>
+
+          <div class="grid">
+            <article class="card">
+              <h3>수집 데이터 (예시)</h3>
+              <p>축제 일정, 숙박/항공 가격, 리뷰 키워드, 혼잡도(집계)</p>
+              <div class="tagrow">
+                <span class="tag">festival</span>
+                <span class="tag">price</span>
+                <span class="tag">review</span>
+                <span class="tag">crowd</span>
+              </div>
+              <table class="table" aria-label="관광 데이터 예시 테이블">
+                <tr>
+                  <th>필드</th>
+                  <th>설명</th>
+                </tr>
+                <tr>
+                  <td>place</td>
+                  <td>지역/장소</td>
+                </tr>
+                <tr>
+                  <td>keyword</td>
+                  <td>리뷰/검색 키워드</td>
+                </tr>
+                <tr>
+                  <td>price_index</td>
+                  <td>가격 지수(집계)</td>
+                </tr>
+                <tr>
+                  <td>timestamp</td>
+                  <td>수집 시각</td>
+                </tr>
+              </table>
+            </article>
+
+            <article class="card">
+              <h3>Spark Streaming 아이디어</h3>
+              <p>장소별 키워드/가격/혼잡을 같은 윈도우로 요약해 “급상승 여행지”를 산출합니다.</p>
+              <div class="tagrow">
+                <span class="tag">ranking</span>
+                <span class="tag">session</span>
+                <span class="tag">trend</span>
+                <span class="tag">enrichment</span>
+              </div>
+              <table class="table" aria-label="관광 지표 예시">
+                <tr>
+                  <th>지표</th>
+                  <th>설명</th>
+                </tr>
+                <tr>
+                  <td>hot_places</td>
+                  <td>키워드/리뷰 급증 기반 상위 장소</td>
+                </tr>
+                <tr>
+                  <td>price_spike</td>
+                  <td>숙박/항공 가격 급등 탐지</td>
+                </tr>
+                <tr>
+                  <td>crowd_risk</td>
+                  <td>혼잡 리스크 신호(집계)</td>
+                </tr>
+              </table>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" style="margin-top:14px">
+        <div class="container">
+          <h2 class="panel-title">환경 카테고리</h2>
+          <p class="panel-desc">대기질/기상/재난 관련 신호를 모아 “리스크”를 빠르게 요약하는 예시입니다.</p>
+
+          <div class="grid">
+            <article class="card">
+              <h3>수집 데이터 (예시)</h3>
+              <p>미세먼지/오존, 강수/기온, 재난 문자(집계), 관련 키워드</p>
+              <div class="tagrow">
+                <span class="tag">air</span>
+                <span class="tag">weather</span>
+                <span class="tag">disaster</span>
+                <span class="tag">keyword</span>
+              </div>
+              <table class="table" aria-label="환경 데이터 예시 테이블">
+                <tr>
+                  <th>필드</th>
+                  <th>설명</th>
+                </tr>
+                <tr>
+                  <td>station</td>
+                  <td>관측소/지역</td>
+                </tr>
+                <tr>
+                  <td>pm25</td>
+                  <td>PM2.5 (µg/m³)</td>
+                </tr>
+                <tr>
+                  <td>risk_level</td>
+                  <td>리스크 등급(집계)</td>
+                </tr>
+                <tr>
+                  <td>timestamp</td>
+                  <td>수집 시각</td>
+                </tr>
+              </table>
+            </article>
+
+            <article class="card">
+              <h3>Spark Streaming 아이디어</h3>
+              <p>지역별 시계열을 윈도우로 집계하고 임계값/추세 기반으로 경보 신호를 생성합니다.</p>
+              <div class="tagrow">
+                <span class="tag">threshold</span>
+                <span class="tag">trend</span>
+                <span class="tag">state</span>
+                <span class="tag">alert</span>
+              </div>
+              <table class="table" aria-label="환경 지표 예시">
+                <tr>
+                  <th>지표</th>
+                  <th>설명</th>
+                </tr>
+                <tr>
+                  <td>aqi_rollup</td>
+                  <td>대기질 지수 롤업</td>
+                </tr>
+                <tr>
+                  <td>heatwave_signal</td>
+                  <td>폭염 신호(지속 시간 포함)</td>
+                </tr>
+                <tr>
+                  <td>flood_watch</td>
+                  <td>강수/수위 기반 감시 신호</td>
+                </tr>
+              </table>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <p class="muted">분석 4 · 관광/환경</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/common.js"></script>
+  </body>
+</html>
