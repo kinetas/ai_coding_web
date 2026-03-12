@@ -1,22 +1,33 @@
+import argparse
 import json
+import os
 import random
-import time
 import urllib.request
 
-API_BASE = "http://127.0.0.1:8000"
+
+def parse_args():
+  parser = argparse.ArgumentParser(description="운영/테스트용 ETL 적재 스크립트")
+  parser.add_argument("--api-base", default=os.getenv("ET_API_BASE", "http://127.0.0.1:8000"))
+  parser.add_argument("--etl-token", default=os.getenv("ETL_SHARED_SECRET", ""))
+  return parser.parse_args()
 
 
-def post(path: str, payload: dict) -> dict:
-  url = API_BASE + path
+def post(api_base: str, etl_token: str, path: str, payload: dict) -> dict:
+  url = api_base.rstrip("/") + path
   data = json.dumps(payload).encode("utf-8")
   req = urllib.request.Request(url, data=data, method="POST")
   req.add_header("Content-Type", "application/json; charset=utf-8")
+  if etl_token:
+    req.add_header("X-ETL-Token", etl_token)
   with urllib.request.urlopen(req, timeout=10) as res:
     return json.loads(res.read().decode("utf-8"))
 
 
 def main():
-  # 워드클라우드: weight를 흔들어서 “연결 확인”하기
+  args = parse_args()
+  if not args.etl_token:
+    raise SystemExit("ETL_SHARED_SECRET 또는 --etl-token 값을 설정해 주세요.")
+
   base_words = [
     {"text": "사과", "weight": 86},
     {"text": "배추", "weight": 72},
@@ -35,6 +46,8 @@ def main():
     words.append({"text": w["text"], "weight": max(0, w["weight"] + jitter)})
 
   r1 = post(
+    args.api_base,
+    args.etl_token,
     "/api/ingest/wordcloud",
     {"category": "agri", "region": "kr", "words": words},
   )
@@ -45,6 +58,8 @@ def main():
   donut = [random.randint(10, 50) for _ in range(4)]
 
   r2 = post(
+    args.api_base,
+    args.etl_token,
     "/api/ingest/analysis",
     {
       "page": "analysis-1",
@@ -56,7 +71,7 @@ def main():
   )
 
   print("OK:", r1, r2)
-  print("다시 브라우저(메인/분석1)를 새로고침하면 값이 바뀐 걸 확인할 수 있습니다.")
+  print("적재 완료 후 브라우저에서 메인/분석1 페이지를 새로고침하면 최신 값이 반영됩니다.")
 
 
 if __name__ == "__main__":

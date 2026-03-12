@@ -1,85 +1,82 @@
 (function () {
-  var STORAGE_KEY = "et_auth_v1";
-  var DEFAULT_TTL_MS = 1000 * 60 * 60 * 24 * 7;
+  var state = {
+    user: null,
+    initPromise: null
+  };
 
-  function safeParse(json) {
-    try {
-      return JSON.parse(json);
-    } catch (e) {
-      return null;
-    }
+  function emitChange() {
+    window.dispatchEvent(new CustomEvent("et-auth-changed", { detail: { user: state.user } }));
   }
 
-  function now() {
-    return Date.now();
+  function setUser(user) {
+    state.user = user || null;
+    emitChange();
+    return state.user;
   }
 
-  function getSession() {
-    var raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    var parsed = safeParse(raw);
-    if (!parsed || !parsed.expiresAt) return null;
-    if (Number(parsed.expiresAt) <= now()) {
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-    return parsed;
+  function getApi() {
+    if (window.EtApi && window.EtApi.fetchJson) return window.EtApi;
+    throw new Error("EtApi 모듈을 먼저 로드해야 합니다.");
   }
 
-  function setSession(user) {
-    var session = {
-      user: {
-        email: String(user.email || ""),
-        name: String(user.name || "")
-      },
-      createdAt: now(),
-      expiresAt: now() + DEFAULT_TTL_MS
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    return session;
-  }
-
-  function clearSession() {
-    localStorage.removeItem(STORAGE_KEY);
-  }
-
-  function isAuthed() {
-    return !!getSession();
+  function init() {
+    if (state.initPromise) return state.initPromise;
+    state.initPromise = getApi().fetchJson("/api/auth/me")
+      .then(function (user) {
+        setUser(user);
+        return user;
+      })
+      .catch(function () {
+        setUser(null);
+        return null;
+      })
+      .finally(function () {
+        state.initPromise = null;
+      });
+    return state.initPromise;
   }
 
   function getUser() {
-    var s = getSession();
-    return s && s.user ? s.user : null;
+    return state.user;
   }
 
-  function normalizeNameFromEmail(email) {
-    var e = String(email || "").trim();
-    if (!e) return "User";
-    var at = e.indexOf("@");
-    var base = at > 0 ? e.slice(0, at) : e;
-    return base.slice(0, 18) || "User";
+  function isAuthed() {
+    return !!state.user;
   }
 
-  // 데모 로그인: 지금은 프론트에서만 검증합니다.
-  // 이후 서버 연동 시, 이 함수를 API 호출로 교체하면 됩니다.
   function login(email, password) {
-    var e = String(email || "").trim();
-    var p = String(password || "");
+    return getApi().fetchJson("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: String(email || "").trim(), password: String(password || "") })
+    }).then(function (json) {
+      setUser(json && json.user ? json.user : null);
+      return json;
+    });
+  }
 
-    if (!e) return { ok: false, message: "이메일/아이디를 입력해 주세요." };
-    if (p.length < 4) return { ok: false, message: "비밀번호는 4자 이상으로 입력해 주세요." };
-
-    // 데모 계정(예시): demo@et.ai / etl1234
-    if (e.toLowerCase() === "demo@et.ai" && p !== "etl1234") {
-      return { ok: false, message: "데모 계정 비밀번호가 일치하지 않습니다." };
-    }
-
-    var session = setSession({ email: e, name: normalizeNameFromEmail(e) });
-    return { ok: true, session: session };
+  function register(name, email, password) {
+    return getApi().fetchJson("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: String(name || "").trim(),
+        email: String(email || "").trim(),
+        password: String(password || "")
+      })
+    }).then(function (json) {
+      setUser(json && json.user ? json.user : null);
+      return json;
+    });
   }
 
   function logout() {
-    clearSession();
+    return getApi().fetchJson("/api/auth/logout", { method: "POST" })
+      .catch(function () { return { ok: true }; })
+      .then(function (json) {
+        setUser(null);
+        return json;
+      });
   }
 
   function buildLoginUrl(next) {
@@ -90,20 +87,24 @@
 
   function requireAuth(opts) {
     var options = opts || {};
-    if (isAuthed()) return true;
-    if (options.redirect !== false) {
-      var current = window.location.pathname.split("/").pop() || "index.html";
-      var query = window.location.search || "";
-      var hash = window.location.hash || "";
-      window.location.href = buildLoginUrl(current + query + hash);
-    }
-    return false;
+    return init().then(function (user) {
+      if (user) return true;
+      if (options.redirect !== false) {
+        var current = window.location.pathname.split("/").pop() || "index.html";
+        var query = window.location.search || "";
+        var hash = window.location.hash || "";
+        window.location.href = buildLoginUrl(current + query + hash);
+      }
+      return false;
+    });
   }
 
   window.EtAuth = {
+    init: init,
     isAuthed: isAuthed,
     getUser: getUser,
     login: login,
+    register: register,
     logout: logout,
     requireAuth: requireAuth,
     buildLoginUrl: buildLoginUrl

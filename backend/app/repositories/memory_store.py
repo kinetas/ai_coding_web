@@ -2,40 +2,65 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
-from backend.app.models.types import Category, Page, Region
+from sqlalchemy import delete, select
+from sqlalchemy.orm import sessionmaker
+
+from backend.app.db_models import AnalysisSnapshot, EtlRun, WordcloudTerm
 from backend.app.models.analysis import Accents
+from backend.app.models.types import Category, Page, Region
 from backend.app.models.wordcloud import Word
 
 
-class InMemoryStore:
-  def __init__(self):
-    self._wordcloud: Dict[str, Dict[str, List[Dict[str, float]]]] = default_wordcloud_store()
-    self._analysis: Dict[str, Dict] = default_analysis_store()
+class ContentStore:
+  def __init__(self, session_factory: sessionmaker):
+    self._session_factory = session_factory
 
   def get_wordcloud(self, category: Category, region: Region) -> List[Dict[str, float]]:
-    if category == "all":
-      return self.merge_all_words(region)
-    return self._wordcloud.get(category, {}).get(region, [])
+    with self._session_factory() as db:
+      if category == "all":
+        rows = db.scalars(select(WordcloudTerm).where(WordcloudTerm.region == region)).all()
+        merged: Dict[str, float] = {}
+        for row in rows:
+          merged[row.text] = merged.get(row.text, 0) + float(row.weight)
+        words = [{"text": key, "weight": value} for key, value in merged.items()]
+        words.sort(key=lambda item: float(item["weight"]), reverse=True)
+        return words[:28]
+
+      rows = db.scalars(
+        select(WordcloudTerm)
+        .where(WordcloudTerm.category == category)
+        .where(WordcloudTerm.region == region)
+        .order_by(WordcloudTerm.weight.desc())
+      ).all()
+      return [{"text": row.text, "weight": float(row.weight)} for row in rows[:28]]
 
   def set_wordcloud(self, category: Category, region: Region, words: List[Word]) -> int:
-    self._wordcloud.setdefault(category, {}).setdefault(region, [])
-    self._wordcloud[category][region] = [w.model_dump() for w in words]
-    return len(self._wordcloud[category][region])
-
-  def merge_all_words(self, region: Region) -> List[Dict[str, float]]:
-    merged: Dict[str, float] = {}
-    for _, regions in self._wordcloud.items():
-      for w in regions.get(region, []):
-        key = str(w.get("text", ""))
-        if not key:
-          continue
-        merged[key] = merged.get(key, 0) + float(w.get("weight", 0))
-    words = [{"text": k, "weight": v} for k, v in merged.items()]
-    words.sort(key=lambda x: float(x["weight"]), reverse=True)
-    return words[:28]
+    with self._session_factory() as db:
+      db.execute(delete(WordcloudTerm).where(WordcloudTerm.category == category).where(WordcloudTerm.region == region))
+      for word in words:
+        payload = word.model_dump() if hasattr(word, "model_dump") else dict(word)
+        db.add(
+          WordcloudTerm(
+            category=category,
+            region=region,
+            text=str(payload["text"]),
+            weight=float(payload["weight"]),
+          )
+        )
+      db.commit()
+    return len(words)
 
   def get_analysis(self, page: Page) -> Optional[Dict]:
-    return self._analysis.get(page)
+    with self._session_factory() as db:
+      row = db.scalar(select(AnalysisSnapshot).where(AnalysisSnapshot.page == page))
+      if not row:
+        return None
+      return {
+        "line": list(row.line or []),
+        "bar": list(row.bar or []),
+        "donut": list(row.donut or []),
+        "accents": dict(row.accents or {"line": "#6AE4FF", "bar": "#B79BFF"}),
+      }
 
   def set_analysis(
     self,
@@ -45,12 +70,62 @@ class InMemoryStore:
     donut: List[float],
     accents: Optional[Accents],
   ) -> None:
-    self._analysis[page] = {
-      "line": list(line),
-      "bar": list(bar),
-      "donut": list(donut),
-      "accents": (accents.model_dump() if accents else self._analysis.get(page, {}).get("accents") or {"line": "#6AE4FF", "bar": "#B79BFF"}),
-    }
+    with self._session_factory() as db:
+      row = db.scalar(select(AnalysisSnapshot).where(AnalysisSnapshot.page == page))
+      payload = accents.model_dump() if accents else None
+      if row:
+        row.line = list(line)
+        row.bar = list(bar)
+        row.donut = list(donut)
+        row.accents = payload or row.accents or {"line": "#6AE4FF", "bar": "#B79BFF"}
+      else:
+        db.add(
+          AnalysisSnapshot(
+            page=page,
+            line=list(line),
+            bar=list(bar),
+            donut=list(donut),
+            accents=payload or {"line": "#6AE4FF", "bar": "#B79BFF"},
+          )
+        )
+      db.commit()
+
+  def seed_defaults(self) -> None:
+    with self._session_factory() as db:
+      has_wordcloud = db.scalar(select(WordcloudTerm.id).limit(1))
+      has_analysis = db.scalar(select(AnalysisSnapshot.id).limit(1))
+
+      if not has_wordcloud:
+        for category, regions in default_wordcloud_store().items():
+          for region, words in regions.items():
+            for word in words:
+              db.add(
+                WordcloudTerm(
+                  category=category,
+                  region=region,
+                  text=str(word["text"]),
+                  weight=float(word["weight"]),
+                )
+              )
+
+      if not has_analysis:
+        for page, payload in default_analysis_store().items():
+          db.add(
+            AnalysisSnapshot(
+              page=page,
+              line=list(payload["line"]),
+              bar=list(payload["bar"]),
+              donut=list(payload["donut"]),
+              accents=dict(payload["accents"]),
+            )
+          )
+
+      db.commit()
+
+  def record_etl_run(self, source: str, status: str, details: str = "") -> None:
+    with self._session_factory() as db:
+      db.add(EtlRun(source=source, status=status, details=details))
+      db.commit()
 
 
 def default_wordcloud_store() -> Dict[str, Dict[str, List[Dict[str, float]]]]:

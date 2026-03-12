@@ -65,22 +65,28 @@ class BuilderService:
       "accents": data.get("accents") or {},
     }
 
-  def save(self, user: str, title: str, keyword: str, metric: str, metric_label: str):
-    item = self._store.save(user=user, title=title, keyword=keyword, metric=metric, metric_label=metric_label)
+  def save(self, user: dict, title: str, keyword: str, metric: str, metric_label: str):
+    item = self._store.save(
+      user_id=int(user["id"]),
+      title=title,
+      keyword=keyword,
+      metric=metric,
+      metric_label=metric_label,
+    )
     return item
 
-  def list_saved(self, user: str):
-    u = (user or "").strip() or "anonymous"
-    items = self._store.list_saved(u)
-    return {"user": u, "items": items}
+  def list_saved(self, user: dict):
+    items = self._store.list_saved(int(user["id"]))
+    return {"user": user["email"], "items": items}
 
-  def chat(self, user: str, keyword: str, question: str):
+  def chat(self, user: dict, keyword: str, question: str):
     # 데모 응답: 실제 구현 시 LLM + metric 매핑/쿼리 생성으로 교체
     kw = (keyword or "").strip()
     q = (question or "").strip()
     if not kw:
       answer = "키워드를 먼저 입력해 주세요. (예: 게임)"
     else:
-      answer = f"데모 응답: '{kw}' 관련 질문('{q}')을 받았습니다. 지금은 추천 카테고리에서 지표를 선택해 확인해 주세요."
+      name = user.get("name") or user.get("email") or "사용자"
+      answer = f"{name}님의 질문을 받았습니다. '{kw}' 관련 '{q}' 요청은 현재 데모 응답으로 제공되며, 추천 지표를 선택하면 바로 그래프를 확인할 수 있습니다."
     return {"answer": answer}
 

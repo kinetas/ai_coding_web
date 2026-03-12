@@ -1,0 +1,24 @@
+name: Scheduled ETL Demo
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  run-etl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run ETL
+        env:
+          ET_API_BASE: ${{ secrets.ET_API_BASE }}
+          ETL_SHARED_SECRET: ${{ secrets.ETL_SHARED_SECRET }}
+        run: python etl_demo.py

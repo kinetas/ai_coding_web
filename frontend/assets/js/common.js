@@ -1,14 +1,52 @@
 (function () {
+  function getApiBase() {
+    if (window.ET_APP_CONFIG && window.ET_APP_CONFIG.apiBase) {
+      return String(window.ET_APP_CONFIG.apiBase).replace(/\/+$/, "");
+    }
+    if (window.ET_API_BASE) {
+      return String(window.ET_API_BASE).replace(/\/+$/, "");
+    }
+    return "http://127.0.0.1:8000";
+  }
+
+  function buildApiUrl(path) {
+    var p = String(path || "");
+    if (/^https?:\/\//i.test(p)) return p;
+    if (p && p[0] !== "/") p = "/" + p;
+    return getApiBase() + p;
+  }
+
+  function parseJsonResponse(res) {
+    if (!res.ok) {
+      return res.json()
+        .catch(function () { return {}; })
+        .then(function (json) {
+          var err = new Error((json && (json.detail || json.message)) || "요청에 실패했습니다.");
+          err.status = res.status;
+          throw err;
+        });
+    }
+    return res.json();
+  }
+
+  function fetchJson(path, options) {
+    var opts = options || {};
+    var headers = opts.headers || {};
+    return fetch(buildApiUrl(path), {
+      method: opts.method || "GET",
+      headers: headers,
+      body: opts.body,
+      credentials: opts.credentials || "include"
+    }).then(parseJsonResponse);
+  }
+
   function setActiveNavLink() {
     var page = document.body && document.body.dataset ? document.body.dataset.page : "";
     if (!page) return;
     var links = document.querySelectorAll(".nav-link[data-nav]");
     links.forEach(function (a) {
-      if (a.getAttribute("data-nav") === page) {
-        a.setAttribute("aria-current", "page");
-      } else {
-        a.removeAttribute("aria-current");
-      }
+      if (a.getAttribute("data-nav") === page) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
     });
   }
 
@@ -63,29 +101,24 @@
     myCreate.className = "nav-link nav-link--btn";
     myCreate.href = "./my-analysis.html";
     myCreate.textContent = "내 분석 만들기";
-    myCreate.setAttribute("data-auth-mycreate", "true");
 
     var mySaved = document.createElement("a");
     mySaved.className = "nav-link nav-link--btn";
     mySaved.href = "./my-analyses.html";
     mySaved.textContent = "내 분석 보기";
-    mySaved.setAttribute("data-auth-mysaved", "true");
 
     var userPill = document.createElement("span");
     userPill.className = "user-pill";
-    userPill.setAttribute("data-auth-user", "true");
 
     var loginLink = document.createElement("a");
     loginLink.className = "nav-link nav-link--btn";
     loginLink.href = "./login.html";
     loginLink.textContent = "로그인";
-    loginLink.setAttribute("data-auth-login", "true");
 
     var logoutBtn = document.createElement("button");
     logoutBtn.className = "nav-link nav-link--btn";
     logoutBtn.type = "button";
     logoutBtn.textContent = "로그아웃";
-    logoutBtn.setAttribute("data-auth-logout", "true");
 
     slot.appendChild(myCreate);
     slot.appendChild(mySaved);
@@ -95,43 +128,47 @@
     nav.appendChild(slot);
 
     function render() {
-      var authed = window.EtAuth && window.EtAuth.isAuthed && window.EtAuth.isAuthed();
-      var user = authed && window.EtAuth.getUser ? window.EtAuth.getUser() : null;
+      var user = window.EtAuth && window.EtAuth.getUser ? window.EtAuth.getUser() : null;
+      var authed = !!user;
 
-      if (authed) {
-        myCreate.style.display = "inline-flex";
-        mySaved.style.display = "inline-flex";
-        userPill.textContent = user && user.name ? user.name : "User";
-        userPill.style.display = "inline-flex";
-        loginLink.style.display = "none";
-        logoutBtn.style.display = "inline-flex";
-      } else {
-        myCreate.style.display = "none";
-        mySaved.style.display = "none";
-        userPill.style.display = "none";
-        loginLink.style.display = "inline-flex";
-        logoutBtn.style.display = "none";
-      }
+      myCreate.style.display = authed ? "inline-flex" : "none";
+      mySaved.style.display = authed ? "inline-flex" : "none";
+      userPill.style.display = authed ? "inline-flex" : "none";
+      loginLink.style.display = authed ? "none" : "inline-flex";
+      logoutBtn.style.display = authed ? "inline-flex" : "none";
+      userPill.textContent = authed ? (user.name || user.email || "User") : "";
 
-      // 로그인 링크에 next 붙이기
       try {
         var current = window.location.pathname.split("/").pop() || "index.html";
         var query = window.location.search || "";
         var hash = window.location.hash || "";
         loginLink.href = window.EtAuth && window.EtAuth.buildLoginUrl ? window.EtAuth.buildLoginUrl(current + query + hash) : "./login.html";
       } catch (e) {
-        // ignore
+        loginLink.href = "./login.html";
       }
     }
 
     logoutBtn.addEventListener("click", function () {
-      if (window.EtAuth && window.EtAuth.logout) window.EtAuth.logout();
-      render();
-      window.location.href = "./index.html";
+      if (!window.EtAuth || !window.EtAuth.logout) return;
+      window.EtAuth.logout().finally(function () {
+        render();
+        window.location.href = "./index.html";
+      });
     });
 
-    render();
+    window.addEventListener("et-auth-changed", render);
+    if (window.EtAuth && window.EtAuth.init) {
+      window.EtAuth.init().finally(render);
+    } else {
+      render();
+    }
   }
+
+  window.EtApi = {
+    getBase: getApiBase,
+    url: buildApiUrl,
+    fetchJson: fetchJson
+  };
 
   document.addEventListener("DOMContentLoaded", function () {
     setActiveNavLink();

@@ -1,39 +1,43 @@
 from __future__ import annotations
 
 import random
-import uuid
-from typing import Dict, List
+from typing import List
 
-from backend.app.core.time import utc_now_iso
+from sqlalchemy import select
+from sqlalchemy.orm import sessionmaker
+
+from backend.app.db_models import SavedBuilderAnalysis, User
 
 
 class BuilderStore:
-  def __init__(self):
-    # user -> list[dict]
-    self._saved: Dict[str, List[dict]] = {}
+  def __init__(self, session_factory: sessionmaker):
+    self._session_factory = session_factory
 
-  def list_saved(self, user: str) -> List[dict]:
-    u = (user or "").strip() or "anonymous"
-    return list(self._saved.get(u, []))
+  def list_saved(self, user_id: int) -> List[dict]:
+    with self._session_factory() as db:
+      rows = db.scalars(
+        select(SavedBuilderAnalysis)
+        .where(SavedBuilderAnalysis.user_id == user_id)
+        .order_by(SavedBuilderAnalysis.created_at.desc())
+      ).all()
+      return [self._to_item(row, row.user) for row in rows]
 
-  def save(self, user: str, title: str, keyword: str, metric: str, metric_label: str) -> dict:
-    u = (user or "").strip() or "anonymous"
-    item = {
-      "id": uuid.uuid4().hex[:12],
-      "user": u,
-      "title": title,
-      "keyword": keyword,
-      "metric": metric,
-      "metric_label": metric_label,
-      "saved_at": utc_now_iso(),
-    }
-    self._saved.setdefault(u, [])
-    self._saved[u].insert(0, item)
-    self._saved[u] = self._saved[u][:50]
-    return item
+  def save(self, user_id: int, title: str, keyword: str, metric: str, metric_label: str) -> dict:
+    with self._session_factory() as db:
+      row = SavedBuilderAnalysis(
+        user_id=user_id,
+        title=title,
+        keyword=keyword,
+        metric=metric,
+        metric_label=metric_label,
+      )
+      db.add(row)
+      db.commit()
+      db.refresh(row)
+      user = db.get(User, user_id)
+      return self._to_item(row, user)
 
   def build_metric(self, keyword: str, metric: str) -> dict:
-    # 데모: keyword/metric에 따라 시드만 살짝 바꿔서 일관된 형태의 시계열 생성
     seed = abs(hash((keyword or "", metric or ""))) % 10_000
     rnd = random.Random(seed)
 
@@ -49,4 +53,16 @@ class BuilderStore:
       accents = {"line": "#FFD36A", "bar": "#FF7AD9"}
 
     return {"line": line, "bar": bar, "accents": accents}
+
+  @staticmethod
+  def _to_item(row: SavedBuilderAnalysis, user: User | None) -> dict:
+    return {
+      "id": str(row.id),
+      "user": user.email if user else "",
+      "title": row.title,
+      "keyword": row.keyword,
+      "metric": row.metric,
+      "metric_label": row.metric_label,
+      "saved_at": row.created_at.isoformat() if row.created_at else "",
+    }
 

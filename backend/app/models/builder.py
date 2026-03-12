@@ -26,7 +26,6 @@ class BuilderMetricResponse(BaseModel):
 
 
 class BuilderChatPayload(BaseModel):
-  user: str = Field(default="")
   keyword: str = Field(default="")
   question: str = Field(min_length=1, max_length=400)
 
@@ -36,7 +35,6 @@ class BuilderChatResponse(BaseModel):
 
 
 class SaveBuilderAnalysisPayload(BaseModel):
-  user: str = Field(default="")
   title: str = Field(min_length=1, max_length=80)
   keyword: str = Field(min_length=1, max_length=80)
   metric: str = Field(min_length=1, max_length=40)

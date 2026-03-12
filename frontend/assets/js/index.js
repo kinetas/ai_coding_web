@@ -1,11 +1,6 @@
 (function () {
   var MAX_WORDS = 28;
 
-  function getApiBase() {
-    if (window.ET_API_BASE) return String(window.ET_API_BASE).replace(/\/+$/, "");
-    return "http://127.0.0.1:8000";
-  }
-
   function isAllowedCategory(c) {
     return c === "all" || c === "agri" || c === "health" || c === "traffic" || c === "tour" || c === "env";
   }
@@ -13,107 +8,6 @@
   function isAllowedRegion(r) {
     return r === "kr" || r === "global";
   }
-
-  var DATA = {
-    agri: {
-      label: "농산물",
-      kr: [
-        { text: "사과", weight: 86 },
-        { text: "배추", weight: 72 },
-        { text: "양파", weight: 66 },
-        { text: "쌀값", weight: 64 },
-        { text: "기상", weight: 52 },
-        { text: "도매가격", weight: 58 },
-        { text: "산지", weight: 50 },
-        { text: "수급", weight: 46 },
-        { text: "물가", weight: 44 }
-      ],
-      global: [
-        { text: "food prices", weight: 80 },
-        { text: "drought", weight: 62 },
-        { text: "fertilizer", weight: 58 },
-        { text: "supply chain", weight: 56 },
-        { text: "coffee", weight: 54 },
-        { text: "wheat", weight: 52 },
-        { text: "crop yield", weight: 50 }
-      ]
-    },
-    health: {
-      label: "의료",
-      kr: [
-        { text: "독감", weight: 82 },
-        { text: "응급실", weight: 60 },
-        { text: "진료예약", weight: 58 },
-        { text: "비대면", weight: 54 },
-        { text: "건강검진", weight: 52 },
-        { text: "약국", weight: 48 },
-        { text: "감염", weight: 46 }
-      ],
-      global: [
-        { text: "flu", weight: 70 },
-        { text: "telehealth", weight: 62 },
-        { text: "vaccination", weight: 56 },
-        { text: "mental health", weight: 54 },
-        { text: "AI in healthcare", weight: 52 },
-        { text: "outbreak", weight: 50 }
-      ]
-    },
-    traffic: {
-      label: "교통",
-      kr: [
-        { text: "지하철 지연", weight: 74 },
-        { text: "버스", weight: 58 },
-        { text: "출근길", weight: 56 },
-        { text: "택시", weight: 50 },
-        { text: "전기차 충전", weight: 48 },
-        { text: "사고", weight: 44 },
-        { text: "혼잡", weight: 46 }
-      ],
-      global: [
-        { text: "EV charging", weight: 66 },
-        { text: "public transit", weight: 58 },
-        { text: "traffic congestion", weight: 56 },
-        { text: "autonomous", weight: 52 },
-        { text: "micro-mobility", weight: 50 }
-      ]
-    },
-    tour: {
-      label: "관광",
-      kr: [
-        { text: "벚꽃", weight: 78 },
-        { text: "축제", weight: 62 },
-        { text: "맛집", weight: 60 },
-        { text: "여행코스", weight: 54 },
-        { text: "숙박", weight: 50 },
-        { text: "항공권", weight: 48 }
-      ],
-      global: [
-        { text: "cherry blossom", weight: 64 },
-        { text: "budget travel", weight: 58 },
-        { text: "visa", weight: 54 },
-        { text: "travel deals", weight: 52 },
-        { text: "city break", weight: 50 }
-      ]
-    },
-    env: {
-      label: "환경",
-      kr: [
-        { text: "미세먼지", weight: 84 },
-        { text: "폭염", weight: 60 },
-        { text: "탄소중립", weight: 56 },
-        { text: "재활용", weight: 52 },
-        { text: "기후", weight: 48 },
-        { text: "홍수", weight: 44 }
-      ],
-      global: [
-        { text: "climate", weight: 70 },
-        { text: "heatwave", weight: 62 },
-        { text: "wildfire", weight: 58 },
-        { text: "renewables", weight: 54 },
-        { text: "carbon", weight: 52 }
-      ]
-    }
-  };
 
   var state = {
     category: "all",
@@ -130,29 +24,6 @@
     return b.weight - a.weight;
   }
 
-  function mergeAllLocal(regionKey) {
-    var map = {};
-    Object.keys(DATA).forEach(function (cat) {
-      (DATA[cat][regionKey] || []).forEach(function (w) {
-        var k = String(w.text);
-        map[k] = (map[k] || 0) + Number(w.weight || 0);
-      });
-    });
-
-    var merged = Object.keys(map).map(function (k) {
-      return { text: k, weight: map[k] };
-    });
-    merged.sort(sortByWeightDesc);
-    return merged.slice(0, MAX_WORDS);
-  }
-
-  function getWordsLocal(regionKey, category) {
-    if (category === "all") return mergeAllLocal(regionKey);
-    var bucket = DATA[category] && DATA[category][regionKey] ? DATA[category][regionKey].slice() : [];
-    bucket.sort(sortByWeightDesc);
-    return bucket.slice(0, MAX_WORDS);
-  }
-
   function normalizeWords(words) {
     var arr = Array.isArray(words) ? words : [];
     return arr
@@ -167,13 +38,7 @@
   function fetchWords(regionKey, category) {
     var cat = isAllowedCategory(category) ? category : "all";
     var reg = isAllowedRegion(regionKey) ? regionKey : "kr";
-    var url = getApiBase() + "/api/wordcloud?category=" + encodeURIComponent(cat) + "&region=" + encodeURIComponent(reg);
-
-    return fetch(url, { method: "GET" })
-      .then(function (res) {
-        if (!res.ok) throw new Error("bad response");
-        return res.json();
-      })
+    return window.EtApi.fetchJson("/api/wordcloud?category=" + encodeURIComponent(cat) + "&region=" + encodeURIComponent(reg), { method: "GET" })
       .then(function (json) {
         return normalizeWords(json && json.words ? json.words : []);
       });
@@ -249,6 +114,15 @@
     });
   }
 
+  function renderCloudError(container, message) {
+    if (!container) return;
+    container.innerHTML = "";
+    var note = document.createElement("p");
+    note.className = "chart-error";
+    note.textContent = message;
+    container.appendChild(note);
+  }
+
   function setActiveChip(category) {
     var chips = document.querySelectorAll(".chip[data-category]");
     chips.forEach(function (btn) {
@@ -266,10 +140,10 @@
         renderWordCloud(kr, results[0], "kr");
         renderWordCloud(gl, results[1], "global");
       })
-      .catch(function () {
-        // 백엔드가 꺼져있어도 데모가 깨지지 않도록 로컬 더미로 fallback
-        renderWordCloud(kr, getWordsLocal("kr", state.category), "kr");
-        renderWordCloud(gl, getWordsLocal("global", state.category), "global");
+      .catch(function (reason) {
+        var msg = reason && reason.message ? reason.message : "워드클라우드 데이터를 불러오지 못했습니다.";
+        renderCloudError(kr, msg);
+        renderCloudError(gl, msg);
       });
   }
 

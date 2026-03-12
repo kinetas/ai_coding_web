@@ -42,43 +42,71 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     var form = $("#login-form");
+    var registerForm = $("#register-form");
     var err = $("#login-error");
     var ok = $("#login-success");
+    var regErr = $("#register-error");
+    var regOk = $("#register-success");
 
-    if (!window.EtAuth || !window.EtAuth.login) {
+    if (!window.EtAuth || !window.EtAuth.login || !window.EtAuth.register) {
       setAlert(err, "로그인 모듈을 불러오지 못했습니다. (auth.js 확인)");
       return;
     }
 
     var next = getNext();
 
-    // 이미 로그인 상태면 바로 이동
-    if (window.EtAuth.isAuthed && window.EtAuth.isAuthed()) {
-      safeRedirect(next || "analysis-1.html");
-      return;
-    }
-
-    if (!form) return;
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      setAlert(err, "");
-      setAlert(ok, "");
-
-      var fd = new FormData(form);
-      var email = String(fd.get("email") || "").trim();
-      var password = String(fd.get("password") || "");
-
-      var res = window.EtAuth.login(email, password);
-      if (!res || !res.ok) {
-        setAlert(err, (res && res.message) || "로그인에 실패했습니다.");
+    window.EtAuth.init().then(function (user) {
+      if (user) {
+        safeRedirect(next || "analysis-1.html");
         return;
       }
 
-      setAlert(ok, "로그인 성공! 이동 중...");
-      window.setTimeout(function () {
-        safeRedirect(next || "analysis-1.html");
-      }, 350);
+      if (form) {
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          setAlert(err, "");
+          setAlert(ok, "");
+
+          var fd = new FormData(form);
+          var email = String(fd.get("email") || "").trim();
+          var password = String(fd.get("password") || "");
+
+          window.EtAuth.login(email, password)
+            .then(function () {
+              setAlert(ok, "로그인 성공! 이동 중...");
+              window.setTimeout(function () {
+                safeRedirect(next || "analysis-1.html");
+              }, 350);
+            })
+            .catch(function (error) {
+              setAlert(err, error && error.message ? error.message : "로그인에 실패했습니다.");
+            });
+        });
+      }
+
+      if (registerForm) {
+        registerForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          setAlert(regErr, "");
+          setAlert(regOk, "");
+
+          var fd = new FormData(registerForm);
+          var name = String(fd.get("name") || "").trim();
+          var email = String(fd.get("email") || "").trim();
+          var password = String(fd.get("password") || "");
+
+          window.EtAuth.register(name, email, password)
+            .then(function () {
+              setAlert(regOk, "회원가입 성공! 이동 중...");
+              window.setTimeout(function () {
+                safeRedirect(next || "analysis-1.html");
+              }, 350);
+            })
+            .catch(function (error) {
+              setAlert(regErr, error && error.message ? error.message : "회원가입에 실패했습니다.");
+            });
+        });
+      }
     });
   });
 })();

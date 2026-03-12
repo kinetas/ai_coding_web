@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 
+from backend.app.auth import get_current_user
 from backend.app.models.builder import (
   BuilderChatPayload,
   BuilderChatResponse,
@@ -25,13 +26,13 @@ def build_router(service: BuilderService) -> APIRouter:
     return service.metric(keyword, metric)
 
   @router.get("/builder/saved", response_model=SavedBuilderAnalysesResponse)
-  def saved(user: str = Query(default="")):
-    return service.list_saved(user)
+  def saved(current_user: dict = Depends(get_current_user)):
+    return service.list_saved(current_user)
 
   @router.post("/builder/save")
-  def save(payload: SaveBuilderAnalysisPayload):
+  def save(payload: SaveBuilderAnalysisPayload, current_user: dict = Depends(get_current_user)):
     return service.save(
-      user=payload.user,
+      user=current_user,
       title=payload.title,
       keyword=payload.keyword,
       metric=payload.metric,
@@ -39,8 +40,8 @@ def build_router(service: BuilderService) -> APIRouter:
     )
 
   @router.post("/builder/chat", response_model=BuilderChatResponse)
-  def chat(payload: BuilderChatPayload):
-    return service.chat(user=payload.user, keyword=payload.keyword, question=payload.question)
+  def chat(payload: BuilderChatPayload, current_user: dict = Depends(get_current_user)):
+    return service.chat(user=current_user, keyword=payload.keyword, question=payload.question)
 
   return router
 

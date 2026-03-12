@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 
+from backend.app.auth import require_etl_token
 from backend.app.models.types import Category, Region
 from backend.app.models.wordcloud import IngestWordcloudPayload, WordcloudResponse
 from backend.app.services.wordcloud_service import WordcloudService
@@ -18,7 +19,7 @@ def build_router(service: WordcloudService) -> APIRouter:
     return service.get_wordcloud(category, region)
 
   @router.post("/ingest/wordcloud")
-  def ingest_wordcloud(payload: IngestWordcloudPayload):
+  def ingest_wordcloud(payload: IngestWordcloudPayload, _: None = Depends(require_etl_token)):
     return service.ingest(payload.category, payload.region, payload.words)
 
   return router
