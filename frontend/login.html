@@ -35,8 +35,8 @@
       <section class="hero">
         <div class="container">
           <p class="badge">로그인</p>
-          <h1 class="page-title">분석 페이지 접근을 위해 로그인하세요</h1>
-          <p class="page-subtitle">이제 로그인은 백엔드 세션 쿠키 기반으로 처리되며, 배포 환경에서도 그대로 사용할 수 있습니다.</p>
+          <h1 class="page-title">내 분석 기능을 위해 로그인하세요</h1>
+          <p class="page-subtitle">로그인은 백엔드 세션 쿠키 기반으로 처리되며, 로그인 후에만 ‘내 분석 만들기/보기’를 사용할 수 있습니다.</p>
         </div>
       </section>
 
@@ -74,8 +74,8 @@
 
               <form class="form" id="register-form" novalidate style="margin-bottom: 20px;">
                 <label class="field">
-                  <span class="field__label">이름</span>
-                  <input class="input" type="text" name="name" autocomplete="name" placeholder="예: 홍길동" required />
+                  <span class="field__label">닉네임</span>
+                  <input class="input" type="text" name="name" autocomplete="nickname" placeholder="예: 홍길동" required />
                 </label>
 
                 <label class="field">
@@ -106,7 +106,7 @@
                 <ul class="hint-list">
                   <li>로그인 성공 시 서버가 세션 쿠키를 발급하고, 원래 가려던 페이지(<code>next</code>)로 이동합니다.</li>
                   <li>회원가입 직후에도 자동 로그인되어 바로 서비스를 사용할 수 있습니다.</li>
-                  <li>분석 페이지는 진입 시 로그인 여부를 서버 기준으로 확인하고, 미로그인이라면 이 페이지로 이동합니다.</li>
+                  <li><strong>내 분석 만들기/보기</strong> 페이지는 진입 시 로그인 여부를 서버 기준으로 확인하고, 미로그인이라면 이 페이지로 이동합니다.</li>
                 </ul>
               </div>
             </article>

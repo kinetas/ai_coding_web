@@ -13,9 +13,9 @@ class AuthStore:
   def __init__(self, session_factory: sessionmaker):
     self._session_factory = session_factory
 
-  def create_user(self, email: str, name: str, password_hash: str) -> dict:
+  def create_user(self, email: str, nickname: str, password_hash: str, status: str = "active") -> dict:
     with self._session_factory() as db:
-      user = User(email=email, name=name, password_hash=password_hash)
+      user = User(email=email, nickname=nickname, password_hash=password_hash, status=status)
       db.add(user)
       db.commit()
       db.refresh(user)
@@ -69,8 +69,10 @@ class AuthStore:
     data = {
       "id": user.id,
       "email": user.email,
-      "name": user.name,
+      "nickname": user.nickname,
+      "status": getattr(user, "status", "active"),
       "created_at": user.created_at.isoformat() if user.created_at else "",
+      "updated_at": user.updated_at.isoformat() if getattr(user, "updated_at", None) else "",
     }
     if include_password:
       data["password_hash"] = user.password_hash

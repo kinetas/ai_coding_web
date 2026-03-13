@@ -13,9 +13,13 @@ class User(Base):
 
   id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
   email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
-  name: Mapped[str] = mapped_column(String(80))
+  # data.md 기준: 화면 표시용 닉네임
+  nickname: Mapped[str] = mapped_column(String(80))
   password_hash: Mapped[str] = mapped_column(String(255))
+  # data.md 기준: active/inactive/deleted
+  status: Mapped[str] = mapped_column(String(20), server_default="active", index=True)
   created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+  updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
 class AuthSession(Base):

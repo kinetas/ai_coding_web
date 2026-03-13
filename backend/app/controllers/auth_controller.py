@@ -18,7 +18,7 @@ def register(
   settings: Settings = Depends(get_settings),
   auth_service: AuthService = Depends(get_auth_service),
 ):
-  user, token = auth_service.register(payload.email, payload.name, payload.password)
+  user, token = auth_service.register(payload.email, payload.nickname, payload.password)
   set_auth_cookie(response, token, settings)
   return {"ok": True, "user": user}
 

@@ -12,15 +12,16 @@ class AuthService:
     self._store = store
     self._settings = settings
 
-  def register(self, email: str, name: str, password: str) -> tuple[dict, str]:
+  def register(self, email: str, nickname: str, password: str) -> tuple[dict, str]:
     normalized_email = self._normalize_email(email)
     if self._store.get_user_by_email(normalized_email):
       raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="이미 사용 중인 이메일입니다.")
 
     user = self._store.create_user(
       email=normalized_email,
-      name=name.strip(),
+      nickname=nickname.strip(),
       password_hash=hash_password(password),
+      status="active",
     )
     token = generate_session_token()
     self._store.create_session(user["id"], token, self._settings.auth_session_ttl_hours)
@@ -31,6 +32,8 @@ class AuthService:
     user = self._store.get_user_with_password_by_email(normalized_email)
     if not user or not verify_password(password, user["password_hash"]):
       raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="이메일 또는 비밀번호가 올바르지 않습니다.")
+    if user.get("status") and user["status"] != "active":
+      raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="비활성화된 계정입니다.")
 
     token = generate_session_token()
     self._store.create_session(user["id"], token, self._settings.auth_session_ttl_hours)
@@ -58,6 +61,8 @@ class AuthService:
     return {
       "id": user["id"],
       "email": user["email"],
-      "name": user["name"],
+      "nickname": user.get("nickname") or "",
+      "status": user.get("status") or "active",
       "created_at": user.get("created_at", ""),
+      "updated_at": user.get("updated_at", ""),
     }

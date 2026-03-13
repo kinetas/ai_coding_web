@@ -136,7 +136,7 @@
       userPill.style.display = authed ? "inline-flex" : "none";
       loginLink.style.display = authed ? "none" : "inline-flex";
       logoutBtn.style.display = authed ? "inline-flex" : "none";
-      userPill.textContent = authed ? (user.name || user.email || "User") : "";
+      userPill.textContent = authed ? (user.nickname || user.email || "User") : "";
 
       try {
         var current = window.location.pathname.split("/").pop() || "index.html";

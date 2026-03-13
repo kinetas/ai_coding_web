@@ -86,7 +86,7 @@ class BuilderService:
     if not kw:
       answer = "키워드를 먼저 입력해 주세요. (예: 게임)"
     else:
-      name = user.get("name") or user.get("email") or "사용자"
+      name = user.get("nickname") or user.get("email") or "사용자"
       answer = f"{name}님의 질문을 받았습니다. '{kw}' 관련 '{q}' 요청은 현재 데모 응답으로 제공되며, 추천 지표를 선택하면 바로 그래프를 확인할 수 있습니다."
     return {"answer": answer}
 
