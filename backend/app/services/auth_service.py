@@ -60,6 +60,7 @@ class AuthService:
   def _public_user(user: dict) -> dict:
     return {
       "id": user["id"],
+      "supabase_uid": user.get("supabase_uid"),
       "email": user["email"],
       "nickname": user.get("nickname") or "",
       "status": user.get("status") or "active",

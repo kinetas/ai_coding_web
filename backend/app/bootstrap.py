@@ -67,3 +67,9 @@ def _migrate_sqlite_schema() -> None:
     if "updated_at" not in col_names:
       conn.exec_driver_sql("ALTER TABLE users ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP")
       col_names.add("updated_at")
+
+    if "supabase_uid" not in col_names:
+      # SQLite: ADD COLUMN ... UNIQUE 는 버전에 따라 실패할 수 있어 컬럼 추가 후 인덱스로 유일성 보장
+      conn.exec_driver_sql("ALTER TABLE users ADD COLUMN supabase_uid VARCHAR(36)")
+      conn.exec_driver_sql("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_supabase_uid ON users(supabase_uid)")
+      col_names.add("supabase_uid")

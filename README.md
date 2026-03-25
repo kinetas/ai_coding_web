@@ -4,7 +4,7 @@
 
 - 백엔드 인증: 서버 세션 쿠키 기반
 - 저장소: SQLAlchemy 기반 DB 저장
-- 로컬 기본 DB: SQLite
+- 로컬 기본 DB: SQLite (`et_demo.db`는 **프로젝트 루트**에 고정. 터미널에서 `cd`한 위치와 무관. 예전에 상위 폴더에만 DB가 있다면 `ai_coding_web`로 파일을 옮기면 됩니다)
 - 운영 DB 권장: PostgreSQL
 
 운영 배포 순서와 추천 서비스는 `DEPLOYMENT.md`를 참고하세요.
@@ -15,12 +15,53 @@
 
 먼저 `.env.example` 값을 참고해 환경변수를 준비하세요.
 
+**Cursor/VS Code 워크스페이스가 `a`(상위 폴더)만 열려 있으면** 터미널 cwd가 `...\a`입니다. 이 경우 아래 중 하나만 쓰면 됩니다.
+
+1. **가장 단순:** 상위 폴더에 있는 `run_backend.bat` 실행 (`a\run_backend.bat` 더블클릭 또는 터미널에서 `.\run_backend.bat`)
+2. 또는 먼저 `cd ai_coding_web` 한 뒤, 이 README가 있는 폴더에서 아래 수동 명령 실행
+
+아래 **수동** 명령을 복사할 때, 코드 블록 바깥의 **백틱 세 개로 된 줄**(편집기에서 보이는 구분선)은 터미널에 **붙여넣지 마세요.** 안쪽 명령만 복사합니다.
+
+---
+
+**프로젝트 루트는 `ai_coding_web` 폴더**입니다. 이미 그 안에 있다면 아래를 따르세요.
+
+**한 번에 실행 (Windows 권장)**
+
+- CMD: `ai_coding_web` 폴더의 `run_backend.bat` 더블클릭 또는 해당 폴더에서 `run_backend.bat`
+- PowerShell: `ai_coding_web` 안에서 `.\run_backend.ps1` (실행 정책 오류 시 `powershell -ExecutionPolicy Bypass -File .\run_backend.ps1`)
+- 워크스페이스가 `a`만 열려 있으면: **`a` 루트의 `run_backend.bat`** 또는 `.\run_backend.ps1` (둘 다 `ai_coding_web`으로 들어가서 실행함)
+
+**수동 실행**
+
+PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m backend.app.init_db
+python -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+CMD(명령 프롬프트):
+
+```bat
+python -m venv .venv
+.venv\Scripts\activate.bat
+python -m pip install -r requirements.txt
+python -m backend.app.init_db
+python -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+macOS / Linux:
+
 ```bash
 python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 python -m backend.app.init_db
-uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
+python -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 - 확인: `GET http://127.0.0.1:8000/api/health`

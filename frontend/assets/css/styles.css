@@ -465,3 +465,35 @@ a{color:inherit}
   .carousel__track{transition:none}
   .chip{transition:none}
 }
+
+/* Playwright MCP 수동 작업 구간: manual-handoff.html */
+body.manual-handoff--locked{overflow:hidden}
+.manual-handoff__backdrop{
+  position:fixed; inset:0; z-index:9998;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(6px);
+}
+.manual-handoff__panel{
+  position:fixed; z-index:9999;
+  left:50%; top:50%; transform:translate(-50%,-50%);
+  max-width:560px; width:calc(100% - 40px);
+  max-height:min(88vh, 720px); overflow:auto;
+  padding:28px;
+  border-radius:var(--radius);
+  background:var(--card2);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+}
+.manual-handoff__panel h1{margin:0 0 12px; font-size:22px; letter-spacing:-.02em}
+.manual-handoff__panel .manual-handoff__list{margin:16px 0 0; padding-left:20px; color:var(--muted)}
+.manual-handoff__panel .manual-handoff__list li{margin:10px 0}
+.manual-handoff__signal{
+  margin-top:16px; padding:12px 14px;
+  border-radius:14px;
+  border:1px solid rgba(154,247,208,.28);
+  background:rgba(154,247,208,.10);
+  color:rgba(234,240,255,.95);
+  font-size:14px;
+  font-weight:600;
+  text-align:center;
+}

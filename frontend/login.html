@@ -36,7 +36,7 @@
         <div class="container">
           <p class="badge">로그인</p>
           <h1 class="page-title">내 분석 기능을 위해 로그인하세요</h1>
-          <p class="page-subtitle">로그인은 백엔드 세션 쿠키 기반으로 처리되며, 로그인 후에만 ‘내 분석 만들기/보기’를 사용할 수 있습니다.</p>
+          <p class="page-subtitle">로그인은 Supabase Auth로 처리되며, 로그인 후에만 ‘내 분석 만들기/보기’를 사용할 수 있습니다.</p>
         </div>
       </section>
 
@@ -93,20 +93,16 @@
 
               <table class="table" aria-label="데모 계정 안내">
                 <tr>
-                  <th>아이디</th>
-                  <td><code>demo@et.ai</code></td>
-                </tr>
-                <tr>
-                  <th>비밀번호</th>
-                  <td><code>etl1234</code></td>
+                  <th>참고</th>
+                  <td>Supabase Authentication → Users에서 <code>demo@et.ai</code> 등 테스트 사용자를 만들거나, 위 회원가입으로 계정을 만드세요.</td>
                 </tr>
               </table>
               <div class="hint">
                 <p class="hint-title">동작 방식</p>
                 <ul class="hint-list">
-                  <li>로그인 성공 시 서버가 세션 쿠키를 발급하고, 원래 가려던 페이지(<code>next</code>)로 이동합니다.</li>
-                  <li>회원가입 직후에도 자동 로그인되어 바로 서비스를 사용할 수 있습니다.</li>
-                  <li><strong>내 분석 만들기/보기</strong> 페이지는 진입 시 로그인 여부를 서버 기준으로 확인하고, 미로그인이라면 이 페이지로 이동합니다.</li>
+                  <li>로그인 성공 시 브라우저에 Supabase 세션이 저장되고, 원래 가려던 페이지(<code>next</code>)로 이동합니다.</li>
+                  <li>프로젝트에서 이메일 확인을 켜 두면 회원가입 직후에는 메일 인증이 필요할 수 있습니다.</li>
+                  <li><strong>내 분석 만들기/보기</strong> 페이지는 진입 시 로그인 여부를 확인하고, 미로그인이라면 이 페이지로 이동합니다.</li>
                 </ul>
               </div>
             </article>
@@ -118,11 +114,12 @@
     <footer class="site-footer">
       <div class="container footer-inner">
         <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
-        <p class="muted">로그인 · 데모 세션</p>
+        <p class="muted">로그인 · Supabase Auth</p>
       </div>
     </footer>
 
     <script src="./assets/js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.js"></script>
     <script src="./assets/js/common.js"></script>
     <script src="./assets/js/auth.js"></script>
     <script src="./assets/js/login.js"></script>

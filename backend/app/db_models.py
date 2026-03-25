@@ -12,6 +12,7 @@ class User(Base):
   __tablename__ = "users"
 
   id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+  supabase_uid: Mapped[str | None] = mapped_column(String(36), unique=True, index=True, nullable=True)
   email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
   # data.md 기준: 화면 표시용 닉네임
   nickname: Mapped[str] = mapped_column(String(80))

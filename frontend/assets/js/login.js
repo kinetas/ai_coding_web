@@ -96,7 +96,11 @@
           var password = String(fd.get("password") || "");
 
           window.EtAuth.register(name, email, password)
-            .then(function () {
+            .then(function (res) {
+              if (res && res.needsEmailConfirmation) {
+                setAlert(regOk, "가입 확인 메일을 발송했습니다. 메일의 링크로 인증한 뒤 로그인해 주세요.");
+                return;
+              }
               setAlert(regOk, "회원가입 성공! 이동 중...");
               window.setTimeout(function () {
                 safeRedirect(next || "analysis-1.html");

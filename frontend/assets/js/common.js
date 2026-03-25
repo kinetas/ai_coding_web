@@ -31,13 +31,22 @@
 
   function fetchJson(path, options) {
     var opts = options || {};
-    var headers = opts.headers || {};
-    return fetch(buildApiUrl(path), {
-      method: opts.method || "GET",
-      headers: headers,
-      body: opts.body,
-      credentials: opts.credentials || "include"
-    }).then(parseJsonResponse);
+    var headers = Object.assign({}, opts.headers || {});
+    var tokenPromise = Promise.resolve(null);
+    if (window.EtAuth && typeof window.EtAuth.getAccessToken === "function") {
+      tokenPromise = window.EtAuth.getAccessToken();
+    }
+    return tokenPromise.then(function (token) {
+      if (token) {
+        headers["Authorization"] = "Bearer " + token;
+      }
+      return fetch(buildApiUrl(path), {
+        method: opts.method || "GET",
+        headers: headers,
+        body: opts.body,
+        credentials: opts.credentials || "include"
+      }).then(parseJsonResponse);
+    });
   }
 
   function setActiveNavLink() {
@@ -107,6 +116,11 @@
     mySaved.href = "./my-analyses.html";
     mySaved.textContent = "내 분석 보기";
 
+    var myPage = document.createElement("a");
+    myPage.className = "nav-link nav-link--btn";
+    myPage.href = "./mypage.html";
+    myPage.textContent = "마이페이지";
+
     var userPill = document.createElement("span");
     userPill.className = "user-pill";
 
@@ -122,6 +136,7 @@
 
     slot.appendChild(myCreate);
     slot.appendChild(mySaved);
+    slot.appendChild(myPage);
     slot.appendChild(userPill);
     slot.appendChild(loginLink);
     slot.appendChild(logoutBtn);
@@ -133,6 +148,7 @@
 
       myCreate.style.display = authed ? "inline-flex" : "none";
       mySaved.style.display = authed ? "inline-flex" : "none";
+      myPage.style.display = authed ? "inline-flex" : "none";
       userPill.style.display = authed ? "inline-flex" : "none";
       loginLink.style.display = authed ? "none" : "inline-flex";
       logoutBtn.style.display = authed ? "inline-flex" : "none";
