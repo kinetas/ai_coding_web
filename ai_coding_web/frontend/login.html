@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 로그인</title>
+    <meta name="description" content="Et 데모 로그인 페이지" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="login">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 시세</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="health">의료</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">교통</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="tour">관광</a>
+          <a class="nav-link" href="./analysis-5.html" data-nav="env">환경</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">로그인</p>
+          <h1 class="page-title">내 분석 기능을 위해 로그인하세요</h1>
+          <p class="page-subtitle">로그인은 Supabase Auth로 처리되며, 로그인 후에만 ‘내 분석 만들기/보기’를 사용할 수 있습니다.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <div class="grid">
+            <article class="card card--form">
+              <h2 class="panel-title">로그인</h2>
+              <p class="panel-desc">이메일/아이디와 비밀번호를 입력해 주세요.</p>
+
+              <div class="alert alert--error" id="login-error" role="alert" aria-live="polite" hidden></div>
+              <div class="alert alert--success" id="login-success" role="status" aria-live="polite" hidden></div>
+
+              <form class="form" id="login-form" novalidate>
+                <label class="field">
+                  <span class="field__label">이메일/아이디</span>
+                  <input class="input" type="email" name="email" autocomplete="username" placeholder="예: demo@et.ai" required />
+                </label>
+
+                <label class="field">
+                  <span class="field__label">비밀번호</span>
+                  <input class="input" type="password" name="password" autocomplete="current-password" placeholder="4자 이상" required />
+                </label>
+
+                <button class="btn" type="submit">로그인</button>
+                <a class="btn btn--ghost" href="./index.html">메인으로</a>
+              </form>
+            </article>
+
+            <article class="card">
+              <h3>회원가입 또는 데모 계정</h3>
+              <p>새 계정을 바로 만들거나, 미리 준비된 데모 계정으로 확인할 수 있습니다.</p>
+              <div class="alert alert--error" id="register-error" role="alert" aria-live="polite" hidden></div>
+              <div class="alert alert--success" id="register-success" role="status" aria-live="polite" hidden></div>
+
+              <form class="form" id="register-form" novalidate style="margin-bottom: 20px;">
+                <label class="field">
+                  <span class="field__label">닉네임</span>
+                  <input class="input" type="text" name="name" autocomplete="nickname" placeholder="예: 홍길동" required />
+                </label>
+
+                <label class="field">
+                  <span class="field__label">이메일</span>
+                  <input class="input" type="email" name="email" autocomplete="email" placeholder="예: hello@example.com" required />
+                </label>
+
+                <label class="field">
+                  <span class="field__label">비밀번호</span>
+                  <input class="input" type="password" name="password" autocomplete="new-password" placeholder="8자 이상" required />
+                </label>
+
+                <button class="btn btn--ghost" type="submit">회원가입</button>
+              </form>
+
+              <table class="table" aria-label="데모 계정 안내">
+                <tr>
+                  <th>참고</th>
+                  <td>Supabase Authentication → Users에서 <code>demo@et.ai</code> 등 테스트 사용자를 만들거나, 위 회원가입으로 계정을 만드세요.</td>
+                </tr>
+              </table>
+              <div class="hint">
+                <p class="hint-title">동작 방식</p>
+                <ul class="hint-list">
+                  <li>로그인 성공 시 브라우저에 Supabase 세션이 저장되고, 원래 가려던 페이지(<code>next</code>)로 이동합니다.</li>
+                  <li>프로젝트에서 이메일 확인을 켜 두면 회원가입 직후에는 메일 인증이 필요할 수 있습니다.</li>
+                  <li><strong>내 분석 만들기/보기</strong> 페이지는 진입 시 로그인 여부를 확인하고, 미로그인이라면 이 페이지로 이동합니다.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <p class="muted">로그인 · Supabase Auth</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.js"></script>
+    <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/login.js"></script>
+  </body>
+</html>

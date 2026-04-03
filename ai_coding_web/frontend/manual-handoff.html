@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 수동 작업 안내 (Playwright)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="manual-handoff" class="manual-handoff--locked">
+    <a class="skip-link" href="#manual-panel">안내 패널로 건너뛰기</a>
+
+    <div class="manual-handoff__backdrop" aria-hidden="true"></div>
+
+    <main id="manual-panel" class="manual-handoff__panel" role="dialog" aria-modal="true" aria-labelledby="manual-title">
+      <p class="badge">수동 작업 구간 · 자동화 일시 정지</p>
+      <h1 id="manual-title">작업 안내</h1>
+      <p class="muted" id="manual-desc"></p>
+      <ol class="manual-handoff__list" id="manual-steps"></ol>
+
+      <div class="alert alert--error" id="manual-hint" role="note" hidden></div>
+
+      <button class="btn" type="button" id="manual-done-btn">위 작업을 마쳤습니다 · 자동화 계속</button>
+      <a class="btn btn--ghost" href="./index.html" style="margin-top:10px; display:inline-flex">메인으로</a>
+
+      <div id="manual-continue-block" hidden>
+        <p class="manual-handoff__signal" id="pw-continue-text">PLAYWRIGHT_MANUAL_CONTINUE</p>
+        <p class="muted" style="margin-top:10px; font-size:12px">이 문구가 보이면 Playwright MCP가 다음 단계로 진행할 수 있습니다.</p>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var STEPS = {
+          supabase: {
+            title: "Supabase 키를 config에 넣기",
+            desc: "아래를 끝낸 뒤 버튼을 누르면 자동화(또는 에이전트)가 이어서 진행합니다.",
+            items: [
+              "Supabase 대시보드 → Project Settings → API에서 Project URL과 anon public 키를 복사합니다.",
+              "로컬에서 frontend/assets/js/config.js를 열고 supabaseUrl, supabaseAnonKey에 붙여 넣은 뒤 저장합니다.",
+              "Authentication에서 Email 제공자가 켜져 있는지 확인합니다.",
+              "필요하면 브라우저에서 로그인 페이지를 새로고침한 뒤 다시 시도합니다."
+            ]
+          },
+          login: {
+            title: "계정 준비 또는 로그인",
+            desc: "로그인 가능한 상태를 만든 뒤 계속하세요.",
+            items: [
+              "Supabase Authentication → Users에서 테스트 사용자를 만들거나, 회원가입 폼으로 새 계정을 만듭니다.",
+              "이메일 확인이 켜져 있으면 메일의 링크로 인증을 완료합니다.",
+              "로그인 페이지에서 이메일·비밀번호로 로그인할 수 있는지 확인합니다."
+            ]
+          },
+          backend: {
+            title: "FastAPI 백엔드 실행",
+            desc: "워드클라우드·분석 API를 쓰려면 백엔드가 필요합니다.",
+            items: [
+              "ai_coding_web 폴더에서 가상환경을 켜고 requirements를 설치합니다.",
+              "uvicorn으로 backend.app.main:app을 127.0.0.1:8000 에서 실행합니다.",
+              "GET /api/health 로 응답을 확인합니다.",
+              "frontend/assets/js/config.js의 apiBase가 백엔드 주소와 맞는지 확인합니다."
+            ]
+          },
+          default: {
+            title: "수동 작업",
+            desc: "에이전트가 안내한 작업을 진행한 뒤 아래 버튼을 누르세요.",
+            items: [
+              "채팅/로그에 적힌 지시를 따릅니다.",
+              "저장·빌드·대시보드 설정 등 사람이 해야 하는 단계를 완료합니다.",
+              "완료 후 아래 버튼으로 자동화를 재개합니다."
+            ]
+          }
+        };
+
+        function $(id) {
+          return document.getElementById(id);
+        }
+
+        function render() {
+          var params = new URLSearchParams(window.location.search || "");
+          var step = (params.get("step") || "default").toLowerCase();
+          var data = STEPS[step] || STEPS.default;
+          $("manual-title").textContent = data.title;
+          $("manual-desc").textContent = data.desc;
+          var ol = $("manual-steps");
+          ol.innerHTML = "";
+          (data.items || []).forEach(function (text) {
+            var li = document.createElement("li");
+            li.textContent = text;
+            ol.appendChild(li);
+          });
+          var hint = params.get("hint");
+          var hintEl = $("manual-hint");
+          if (hint) {
+            hintEl.hidden = false;
+            hintEl.textContent = decodeURIComponent(hint);
+          }
+        }
+
+        function onDone() {
+          $("manual-done-btn").disabled = true;
+          $("manual-done-btn").hidden = true;
+          $("manual-continue-block").hidden = false;
+          document.body.setAttribute("data-playwright-manual-done", "1");
+          try {
+            window.dispatchEvent(new CustomEvent("et-manual-handoff-complete"));
+          } catch (e) {}
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+          render();
+          $("manual-done-btn").addEventListener("click", onDone);
+        });
+      })();
+    </script>
+  </body>
+</html>

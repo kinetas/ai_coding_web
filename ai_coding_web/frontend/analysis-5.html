@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 환경</title>
+    <meta name="description" content="Et 환경 카테고리 · 공공 API·뉴스 집계" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="analysis-5">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 시세</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="health">의료</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">교통</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="tour">관광</a>
+          <a class="nav-link" href="./analysis-5.html" data-nav="env">환경</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">환경</p>
+          <h1 class="page-title">환경 · 공공 데이터</h1>
+          <p class="page-subtitle">
+            뉴스 RSS 집계와 <code>PD_ENV_API_PATH</code>로 적재한 공공 API 원본·요약이 스냅샷에 반영됩니다. API·테이블 스키마는 교체 가능합니다.
+          </p>
+        </div>
+      </section>
+
+      <div class="container">
+        <div id="analysis-kpi" class="kpi-cards"></div>
+      </div>
+
+      <section class="panel">
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">그래프</h2>
+              <p class="panel-desc"><code>analysis_snapshots</code> (page=analysis-5) · 범용 수치·범주 휴리스틱 차트</p>
+            </div>
+          </div>
+
+          <div class="grid">
+            <article class="card">
+              <h3>추세 (12 구간)</h3>
+              <p>원본 행 분할·첫 수치 컬럼 평균</p>
+              <canvas class="chart-canvas" id="chart-line" role="img" aria-label="추세 라인 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>수치 컬럼 Top</h3>
+              <p>평균 기준 상대 스케일(최대 5개)</p>
+              <canvas class="chart-canvas" id="chart-bar" role="img" aria-label="막대 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>구성비</h3>
+              <p>범주 컬럼 또는 기본 분포</p>
+              <canvas class="chart-canvas chart-canvas--donut" id="chart-donut" role="img" aria-label="도넛 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>API</h3>
+              <p>원본·가공 JSON: <code>/api/public-category/env/raw</code>, <code>…/analytics</code></p>
+              <div class="tagrow">
+                <span class="tag">public_category_raw</span>
+                <span class="tag">public_category_analytics</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <p class="muted">환경 · 트렌드</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.js"></script>
+    <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/charts.js"></script>
+    <script src="./assets/js/analysis.js"></script>
+  </body>
+</html>

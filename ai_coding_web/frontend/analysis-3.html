@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 교통</title>
+    <meta name="description" content="Et 교통 카테고리 분석 예시" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="analysis-3">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 시세</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="health">의료</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">교통</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="tour">관광</a>
+          <a class="nav-link" href="./analysis-5.html" data-nav="env">환경</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">교통</p>
+          <h1 class="page-title">교통 · 혼잡/지연</h1>
+          <p class="page-subtitle">
+            실시간 교통(지하철/버스/도로) 데이터와 이벤트(날씨/행사)를 결합해 혼잡 예측/알림에 활용하는 예시입니다.
+          </p>
+        </div>
+      </section>
+
+      <div class="container">
+        <div id="analysis-kpi" class="kpi-cards"></div>
+      </div>
+
+      <section class="panel">
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">그래프 예시</h2>
+              <p class="panel-desc">샘플 집계값으로 그린 “대시보드 형태” 예시입니다. (더미 데이터)</p>
+            </div>
+          </div>
+
+          <div class="grid">
+            <article class="card">
+              <h3>혼잡/지연 추세</h3>
+              <p>최근 기간 집계 기반 변동 추이(예시)</p>
+              <canvas class="chart-canvas" id="chart-line" role="img" aria-label="혼잡 지연 추세 라인 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>지연 Hotspot</h3>
+              <p>최근 윈도우 지연 상위 5개(예시)</p>
+              <canvas class="chart-canvas" id="chart-bar" role="img" aria-label="지연 hotspot 막대 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>원인 비중</h3>
+              <p>사고/날씨/행사/기타 비중(예시)</p>
+              <canvas class="chart-canvas chart-canvas--donut" id="chart-donut" role="img" aria-label="원인 비중 도넛 그래프"></canvas>
+            </article>
+
+            <article class="card">
+              <h3>해석 포인트</h3>
+              <p>스트림-스트림 조인으로 이벤트를 붙이면, 단순 혼잡 수치뿐 아니라 “원인 힌트”까지 제공할 수 있습니다.</p>
+              <div class="tagrow">
+                <span class="tag">join</span>
+                <span class="tag">enrichment</span>
+                <span class="tag">SLA</span>
+                <span class="tag">alert</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <h2 class="panel-title">구성 예시</h2>
+          <p class="panel-desc">스트리밍으로 들어오는 “지연/혼잡” 이벤트를 윈도우 집계로 즉시 요약합니다.</p>
+
+          <div class="grid">
+            <article class="card">
+              <h3>수집 데이터 (예시)</h3>
+              <p>노선별 지연, 정류장 혼잡도, 도로 소통, 날씨/사고/행사 이벤트</p>
+              <div class="tagrow">
+                <span class="tag">노선</span>
+                <span class="tag">정류장</span>
+                <span class="tag">이벤트</span>
+                <span class="tag">실시간</span>
+              </div>
+              <table class="table" aria-label="교통 데이터 예시 테이블">
+                <tr>
+                  <th>필드</th>
+                  <th>설명</th>
+                </tr>
+                <tr>
+                  <td>route_id</td>
+                  <td>노선/구간 ID</td>
+                </tr>
+                <tr>
+                  <td>delay_sec</td>
+                  <td>지연(초)</td>
+                </tr>
+                <tr>
+                  <td>crowd_level</td>
+                  <td>혼잡 등급(집계)</td>
+                </tr>
+                <tr>
+                  <td>timestamp</td>
+                  <td>수집 시각</td>
+                </tr>
+              </table>
+            </article>
+
+            <article class="card">
+              <h3>Spark Streaming 아이디어</h3>
+              <p>노선별로 1~3분 윈도우 집계 후, 사고/날씨 이벤트와 조인하여 원인 추정 정보를 함께 제공합니다.</p>
+              <div class="tagrow">
+                <span class="tag">stream-stream join</span>
+                <span class="tag">aggregation</span>
+                <span class="tag">enrichment</span>
+                <span class="tag">SLA</span>
+              </div>
+              <table class="table" aria-label="지표 예시">
+                <tr>
+                  <th>지표</th>
+                  <th>설명</th>
+                </tr>
+                <tr>
+                  <td>delay_hotspots</td>
+                  <td>지연 상위 구간(Top)</td>
+                </tr>
+                <tr>
+                  <td>crowd_hotspots</td>
+                  <td>혼잡 상위 정류장(Top)</td>
+                </tr>
+                <tr>
+                  <td>event_match</td>
+                  <td>동시간대 이벤트 매칭(날씨/사고/행사)</td>
+                </tr>
+              </table>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <p class="muted">교통 · 트렌드</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.js"></script>
+    <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/charts.js"></script>
+    <script src="./assets/js/analysis.js"></script>
+  </body>
+</html>

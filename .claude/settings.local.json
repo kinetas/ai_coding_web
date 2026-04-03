@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(~/.claude/skills/gstack/browse/dist/browse.exe screenshot:*)",
+      "Bash(~/.claude/skills/gstack/browse/dist/browse.exe console:*)",
+      "Bash(~/.claude/skills/gstack/browse/dist/browse.exe js:*)",
+      "Bash(curl -s http://127.0.0.1:8000/api/wordcloud?category=all)",
+      "Bash(~/.claude/skills/gstack/browse/dist/browse.exe click:*)",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"demo@et.ai\",\"password\":\"etl1234\"}')",
+      "Bash(tasklist /fi \"IMAGENAME eq python.exe\")",
+      "Bash(curl -s \"http://127.0.0.1:8000/\")",
+      "Bash(~/.claude/skills/gstack/browse/dist/browse.exe goto:*)",
+      "Bash(~/.claude/skills/gstack/browse/dist/browse.exe reload:*)",
+      "Bash(~/.claude/skills/gstack/browse/dist/browse.exe css:*)",
+      "Bash(curl -s \"http://127.0.0.1:5500/assets/css/styles.css\")"
+    ]
+  }
+}

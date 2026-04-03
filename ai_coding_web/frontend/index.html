@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 트렌드 워드클라우드</title>
+    <meta name="description" content="Et: 카테고리 기반 트렌드 워드클라우드(국내/해외)와 분석 페이지로 이동하는 데모 웹페이지" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="home">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 시세</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="health">의료</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">교통</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="tour">관광</a>
+          <a class="nav-link" href="./analysis-5.html" data-nav="env">환경</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <div class="container dashboard">
+        <div class="dashboard-grid">
+
+          <!-- 좌: 워드클라우드 패널 (60%) -->
+          <section class="wordcloud-panel" aria-label="트렌드 워드클라우드">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">트렌드 워드클라우드</h2>
+                <p class="panel-desc">카테고리로 관심 분야에 집중하세요.</p>
+              </div>
+            </div>
+
+            <div class="filters" aria-label="카테고리 필터">
+              <button class="chip is-active" type="button" data-category="all">전체</button>
+              <button class="chip" type="button" data-category="agri">농산물</button>
+              <button class="chip" type="button" data-category="health">의료</button>
+              <button class="chip" type="button" data-category="traffic">교통</button>
+              <button class="chip" type="button" data-category="tour">관광</button>
+              <button class="chip" type="button" data-category="env">환경</button>
+            </div>
+
+            <div class="wc-region-tabs" role="tablist" aria-label="지역 선택">
+              <button class="wc-tab is-active" type="button" data-region="kr" role="tab" aria-selected="true">한국</button>
+              <button class="wc-tab" type="button" data-region="global" role="tab" aria-selected="false">해외</button>
+            </div>
+
+            <div class="wc-panel is-active" id="wc-panel-kr">
+              <div class="wordcloud" id="cloud-kr" role="img" aria-label="한국 트렌드 워드클라우드"></div>
+            </div>
+            <div class="wc-panel" id="wc-panel-global">
+              <div class="wordcloud" id="cloud-global" role="img" aria-label="해외 트렌드 워드클라우드"></div>
+            </div>
+          </section>
+
+          <!-- 우: 사이드바 (40%) -->
+          <aside class="dashboard-sidebar" aria-label="트렌드 요약">
+
+            <div class="sidebar-card">
+              <p class="sidebar-title">상위 키워드</p>
+              <div id="sidebar-kpi" class="kpi-list">
+                <p class="kpi-loading">불러오는 중...</p>
+              </div>
+            </div>
+
+            <div class="sidebar-card">
+              <p class="sidebar-title">분석 페이지</p>
+              <nav class="quick-links" aria-label="분석 페이지 바로가기">
+                <a class="quick-link" href="./agri-analytics.html">
+                  <span>농산물 시세</span>
+                  <span class="quick-link__arrow">›</span>
+                </a>
+                <a class="quick-link" href="./analysis-2.html">
+                  <span>의료 · 감염</span>
+                  <span class="quick-link__arrow">›</span>
+                </a>
+                <a class="quick-link" href="./analysis-3.html">
+                  <span>교통</span>
+                  <span class="quick-link__arrow">›</span>
+                </a>
+                <a class="quick-link" href="./analysis-4.html">
+                  <span>관광</span>
+                  <span class="quick-link__arrow">›</span>
+                </a>
+                <a class="quick-link" href="./analysis-5.html">
+                  <span>환경</span>
+                  <span class="quick-link__arrow">›</span>
+                </a>
+              </nav>
+            </div>
+
+          </aside>
+
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <p class="muted">샘플 정적 페이지 · HTML/CSS/JS</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.js"></script>
+    <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/index.js"></script>
+  </body>
+</html>

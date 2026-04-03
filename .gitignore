@@ -1,0 +1,39 @@
+# Secrets & credentials — never commit
+# 붙여 넣은 토큰은 secrets/github.local 에만 두세요 (이 폴더 전체 무시).
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*_rsa
+*_ed25519
+credentials
+.netrc
+.git-credentials
+*.pfx
+secrets/
+config.local.*
+**/token.txt
+
+# OS / editor
+Thumbs.db
+Desktop.ini
+.gstack/
+
+# Python / tooling (monorepo root)
+**/.venv/
+**/venv/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.db
+
+# Playwright / local test artifacts
+.playwright-mcp/
+
+# Node
+**/node_modules/
+**/dist/
+**/.next/
