@@ -12,7 +12,16 @@
       "Bash(~/.claude/skills/gstack/browse/dist/browse.exe goto:*)",
       "Bash(~/.claude/skills/gstack/browse/dist/browse.exe reload:*)",
       "Bash(~/.claude/skills/gstack/browse/dist/browse.exe css:*)",
-      "Bash(curl -s \"http://127.0.0.1:5500/assets/css/styles.css\")"
+      "Bash(curl -s \"http://127.0.0.1:5500/assets/css/styles.css\")",
+      "Bash(bun --version)",
+      "Bash(npm --version)",
+      "Read(//c/Users/kimjh/.claude/**)",
+      "WebSearch",
+      "Bash(mkdir -p ~/.claude/skills)",
+      "Bash(git clone:*)",
+      "Bash(bash setup:*)",
+      "Bash(export BUN_INSTALL=\"$HOME/.bun\")",
+      "Bash(export PATH=\"$BUN_INSTALL/bin:$PATH\")"
     ]
   }
 }
