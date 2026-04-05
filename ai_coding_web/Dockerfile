@@ -6,7 +6,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend ./backend
-COPY etl_demo.py .
+COPY crawler ./crawler
+COPY etl.py .
 
 ENV APP_ENV=production
 ENV PORT=8000

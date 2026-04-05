@@ -1,120 +1,61 @@
+"""공공 카테고리 분석 서비스 — 로컬 DB(SQLAlchemy) 기반."""
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone
-from typing import Any
 
-import httpx
+from sqlalchemy import select
+from sqlalchemy.orm import sessionmaker
 
 from backend.app.config import Settings
+from backend.app.db import SessionLocal
+from backend.app.db_models import PublicCategoryAnalytics, PublicCategoryRaw
 from backend.app.models.public_category import PublicCategoryAnalyticsResponse, PublicCategoryRawResponse
 from backend.app.models.types import PublicCategory
 
 
 class PublicCategoryService:
-  """Supabase `public_category_*` 테이블 조회."""
+  """로컬 DB(SQLite/PostgreSQL)에서 공공 카테고리 분석 데이터 조회."""
 
-  def __init__(self, settings: Settings):
-    self._url = settings.supabase_url.rstrip("/")
-    self._rest = f"{self._url}/rest/v1"
-    self._key = settings.supabase_service_role_key.strip() or settings.supabase_anon_key.strip()
-
-  def _headers(self) -> dict[str, str]:
-    return {
-      "apikey": self._key,
-      "Authorization": f"Bearer {self._key}",
-      "Accept": "application/json",
-    }
+  def __init__(self, settings: Settings, session_factory: sessionmaker | None = None):
+    self._session_factory: sessionmaker = session_factory or SessionLocal
 
   def get_analytics(self, category_code: PublicCategory) -> PublicCategoryAnalyticsResponse | None:
-    if not self._key or not self._url:
-      return None
-    with httpx.Client(timeout=45.0) as client:
-      r = client.get(
-        f"{self._rest}/public_category_analytics",
-        headers=self._headers(),
-        params={
-          "category_code": f"eq.{category_code}",
-          "slug": "eq.latest",
-          "select": "*",
-          "limit": "1",
-        },
+    with self._session_factory() as db:
+      row = db.scalar(
+        select(PublicCategoryAnalytics)
+        .where(PublicCategoryAnalytics.category_code == category_code)
+        .where(PublicCategoryAnalytics.slug == "latest")
       )
-      r.raise_for_status()
-      rows = r.json()
-    if not rows:
+    if not row:
       return None
-    row = rows[0]
-    raw_ts = row.get("updated_at")
-    updated_at = raw_ts if isinstance(raw_ts, str) else datetime.now(timezone.utc).isoformat()
-
-    def _as_obj(v: Any) -> Any:
-      if isinstance(v, str):
-        try:
-          return json.loads(v)
-        except json.JSONDecodeError:
-          return v
-      return v
-
-    def _as_dict(v: Any) -> dict[str, Any]:
-      o = _as_obj(v)
-      return dict(o) if isinstance(o, dict) else {}
-
+    updated_at = row.updated_at.isoformat() if row.updated_at else datetime.now(timezone.utc).isoformat()
     return PublicCategoryAnalyticsResponse(
       category_code=category_code,
-      slug=str(row.get("slug", "latest")),
+      slug=row.slug,
       updated_at=updated_at,
-      source=str(row.get("source") or "data_go_kr"),
-      meta=_as_dict(row.get("meta")),
-      chart_bundle=_as_dict(row.get("chart_bundle")),
-      summary=_as_dict(row.get("summary")),
-      distribution=_as_dict(row.get("distribution")),
+      source=row.source,
+      meta=row.meta or {},
+      chart_bundle=row.chart_bundle or {},
+      summary=row.summary or {},
+      distribution=row.distribution or {},
     )
 
   def get_raw(self, category_code: PublicCategory) -> PublicCategoryRawResponse | None:
-    if not self._key or not self._url:
-      return None
-    with httpx.Client(timeout=60.0) as client:
-      r = client.get(
-        f"{self._rest}/public_category_raw",
-        headers=self._headers(),
-        params={
-          "category_code": f"eq.{category_code}",
-          "slug": "eq.latest",
-          "select": "*",
-          "limit": "1",
-        },
+    with self._session_factory() as db:
+      row = db.scalar(
+        select(PublicCategoryRaw)
+        .where(PublicCategoryRaw.category_code == category_code)
+        .where(PublicCategoryRaw.slug == "latest")
       )
-      r.raise_for_status()
-      rows = r.json()
-    if not rows:
+    if not row:
       return None
-    row = rows[0]
-    raw_ts = row.get("updated_at")
-    updated_at = raw_ts if isinstance(raw_ts, str) else datetime.now(timezone.utc).isoformat()
-
-    def _as_obj(v: Any) -> Any:
-      if isinstance(v, str):
-        try:
-          return json.loads(v)
-        except json.JSONDecodeError:
-          return v
-      return v
-
-    def _as_dict(v: Any) -> dict[str, Any]:
-      o = _as_obj(v)
-      return dict(o) if isinstance(o, dict) else {}
-
-    raw_items = row.get("items")
-    items_o = _as_obj(raw_items)
-    items = [x for x in items_o if isinstance(x, dict)] if isinstance(items_o, list) else []
-
+    updated_at = row.updated_at.isoformat() if row.updated_at else datetime.now(timezone.utc).isoformat()
     return PublicCategoryRawResponse(
       category_code=category_code,
-      slug=str(row.get("slug", "latest")),
+      slug=row.slug,
       updated_at=updated_at,
-      source=str(row.get("source") or "data_go_kr"),
-      meta=_as_dict(row.get("meta")),
-      api_meta=_as_dict(row.get("api_meta")),
-      items=items,
+      source=row.source,
+      meta=row.meta or {},
+      api_meta=row.api_meta or {},
+      items=row.items or [],
     )

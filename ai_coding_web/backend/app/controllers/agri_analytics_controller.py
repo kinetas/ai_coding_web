@@ -19,7 +19,7 @@ def build_router(service: AgriAnalyticsService) -> APIRouter:
     if not row:
       raise HTTPException(
         status_code=404,
-        detail="agri_price_analytics 에 데이터가 없습니다. ETL(공공데이터 키 설정 후 py etl_supabase.py 실행)을 먼저 실행하세요.",
+        detail="agri_price_analytics 에 데이터가 없습니다. ETL(공공데이터 키 설정 후 python etl.py --all 실행)을 먼저 실행하세요.",
       )
     return row
 
@@ -29,7 +29,7 @@ def build_router(service: AgriAnalyticsService) -> APIRouter:
     if not row:
       raise HTTPException(
         status_code=404,
-        detail="agri_price_raw 에 데이터가 없습니다. Supabase에 scripts/supabase_agri_price_analytics.sql(또는 supabase_align_etl.sql) 적용 후 ETL을 실행하세요.",
+        detail="agri_price_raw 에 데이터가 없습니다. python etl.py --all 실행 후 다시 시도하세요.",
       )
     return row
 
@@ -42,7 +42,7 @@ def build_router(service: AgriAnalyticsService) -> APIRouter:
     if row is None:
       raise HTTPException(
         status_code=503,
-        detail="Supabase 연결 불가이거나 agri_price_history 조회에 실패했습니다. 스키마 적용·ETL을 확인하세요.",
+        detail="agri_price_history 조회에 실패했습니다. ETL을 실행했는지 확인하세요.",
       )
     return row
 

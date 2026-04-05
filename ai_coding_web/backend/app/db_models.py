@@ -12,7 +12,6 @@ class User(Base):
   __tablename__ = "users"
 
   id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-  supabase_uid: Mapped[str | None] = mapped_column(String(36), unique=True, index=True, nullable=True)
   email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
   # data.md 기준: 화면 표시용 닉네임
   nickname: Mapped[str] = mapped_column(String(80))
@@ -83,3 +82,82 @@ class EtlRun(Base):
   status: Mapped[str] = mapped_column(String(20), index=True)
   details: Mapped[str] = mapped_column(Text, default="")
   created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+
+class AgriPriceAnalytics(Base):
+  """농산물 가격 분석 패키지 (slug='latest' 로 최신 1건 유지)."""
+  __tablename__ = "agri_price_analytics"
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+  slug: Mapped[str] = mapped_column(String(32), unique=True, index=True, default="latest")
+  source: Mapped[str] = mapped_column(String(80), default="data_go_kr")
+  meta: Mapped[dict] = mapped_column(JSON, default=dict)
+  region_stats: Mapped[list] = mapped_column(JSON, default=list)
+  overall: Mapped[dict] = mapped_column(JSON, default=dict)
+  forecast: Mapped[dict] = mapped_column(JSON, default=dict)
+  distribution: Mapped[dict] = mapped_column(JSON, default=dict)
+  chart_bundle: Mapped[dict] = mapped_column(JSON, default=dict)
+  updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class AgriPriceRaw(Base):
+  """농산물 가격 원본 데이터 스냅샷 (slug='latest' 로 최신 1건 유지)."""
+  __tablename__ = "agri_price_raw"
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+  slug: Mapped[str] = mapped_column(String(32), unique=True, index=True, default="latest")
+  source: Mapped[str] = mapped_column(String(80), default="data_go_kr")
+  meta: Mapped[dict] = mapped_column(JSON, default=dict)
+  api_meta: Mapped[dict] = mapped_column(JSON, default=dict)
+  items: Mapped[list] = mapped_column(JSON, default=list)
+  updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class AgriPriceHistory(Base):
+  """농산물 품목별 조사일 시계열 이력."""
+  __tablename__ = "agri_price_history"
+  __table_args__ = (
+    UniqueConstraint("item_cd", "vrty_cd", "exmn_ymd", name="uq_agri_history_key"),
+  )
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+  item_cd: Mapped[str] = mapped_column(String(32), index=True)
+  vrty_cd: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+  exmn_ymd: Mapped[str] = mapped_column(String(8), index=True)  # YYYYMMDD
+  payload: Mapped[dict] = mapped_column(JSON, default=dict)
+  created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PublicCategoryAnalytics(Base):
+  """공공 카테고리별 분석 패키지 (category_code + slug='latest' 로 최신 1건 유지)."""
+  __tablename__ = "public_category_analytics"
+  __table_args__ = (
+    UniqueConstraint("category_code", "slug", name="uq_pub_cat_analytics_key"),
+  )
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+  category_code: Mapped[str] = mapped_column(String(32), index=True)
+  slug: Mapped[str] = mapped_column(String(32), default="latest")
+  source: Mapped[str] = mapped_column(String(80), default="data_go_kr")
+  meta: Mapped[dict] = mapped_column(JSON, default=dict)
+  chart_bundle: Mapped[dict] = mapped_column(JSON, default=dict)
+  summary: Mapped[dict] = mapped_column(JSON, default=dict)
+  distribution: Mapped[dict] = mapped_column(JSON, default=dict)
+  updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class PublicCategoryRaw(Base):
+  """공공 카테고리별 원본 데이터 스냅샷."""
+  __tablename__ = "public_category_raw"
+  __table_args__ = (
+    UniqueConstraint("category_code", "slug", name="uq_pub_cat_raw_key"),
+  )
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+  category_code: Mapped[str] = mapped_column(String(32), index=True)
+  slug: Mapped[str] = mapped_column(String(32), default="latest")
+  source: Mapped[str] = mapped_column(String(80), default="data_go_kr")
+  meta: Mapped[dict] = mapped_column(JSON, default=dict)
+  api_meta: Mapped[dict] = mapped_column(JSON, default=dict)
+  items: Mapped[list] = mapped_column(JSON, default=list)
+  updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

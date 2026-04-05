@@ -21,7 +21,20 @@
       "Bash(git clone:*)",
       "Bash(bash setup:*)",
       "Bash(export BUN_INSTALL=\"$HOME/.bun\")",
-      "Bash(export PATH=\"$BUN_INSTALL/bin:$PATH\")"
+      "Bash(export PATH=\"$BUN_INSTALL/bin:$PATH\")",
+      "Bash(ls E:/web/ai_coding_web/frontend/my-*.html E:/web/ai_coding_web/frontend/mypage.html)",
+      "Bash(python -c \"from backend.app.main import app; print\\('main OK'\\)\")",
+      "Bash(python -c \"import fastapi; print\\('fastapi', fastapi.__version__\\)\")",
+      "Bash(py -3.11 -c \"import fastapi; print\\('fastapi', fastapi.__version__\\)\")",
+      "Bash(py -3.12 -c \"import fastapi; print\\('fastapi', fastapi.__version__\\)\")",
+      "Bash(py -3.10 -c \"import fastapi; print\\('fastapi', fastapi.__version__\\)\")",
+      "Read(//c/Users/kimjh/AppData/Local/Programs/Python//**)",
+      "Read(//c/Users/kimjh/**)",
+      "Bash(/c/Users/kimjh/AppData/Local/Programs/Python/Python311/python.exe:*)",
+      "Bash(/c/Users/kimjh/anaconda3/python.exe:*)",
+      "Bash(python -m py_compile backend/app/config.py backend/app/db_models.py backend/app/bootstrap.py backend/app/auth.py backend/app/scheduler.py backend/app/models/auth.py backend/app/controllers/auth_controller.py backend/app/services/auth_service.py backend/app/services/agri_analytics_service.py backend/app/services/public_category_service.py backend/app/main.py etl.py)",
+      "Bash(python -m py_compile backend/app/config.py backend/app/db_models.py backend/app/bootstrap.py backend/app/auth.py backend/app/main.py backend/app/scheduler.py backend/app/models/auth.py backend/app/controllers/auth_controller.py backend/app/controllers/agri_analytics_controller.py backend/app/services/auth_service.py backend/app/services/agri_analytics_service.py backend/app/services/public_category_service.py backend/app/repositories/auth_store.py etl.py)",
+      "Bash(ls E:/web/ai_coding_web/*.env*)"
     ]
   }
 }

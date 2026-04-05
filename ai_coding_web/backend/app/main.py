@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,7 +17,7 @@ from backend.app.controllers.wordcloud_controller import build_router as build_w
 from backend.app.db import SessionLocal
 from backend.app.repositories.builder_store import BuilderStore
 from backend.app.repositories.memory_store import ContentStore
-from backend.app.repositories.supabase_content_store import SupabaseContentStore
+from backend.app.scheduler import start_scheduler, stop_scheduler
 from backend.app.services.agri_analytics_service import AgriAnalyticsService
 from backend.app.services.public_category_service import PublicCategoryService
 from backend.app.services.analysis_service import AnalysisService
@@ -23,11 +25,18 @@ from backend.app.services.builder_service import BuilderService
 from backend.app.services.wordcloud_service import WordcloudService
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+  start_scheduler()
+  yield
+  stop_scheduler()
+
+
 def create_app() -> FastAPI:
   settings = get_settings()
   init_database()
 
-  app = FastAPI(title=settings.app_name, version=settings.app_version)
+  app = FastAPI(title=settings.app_name, version=settings.app_version, lifespan=lifespan)
 
   app.add_middleware(
     CORSMiddleware,
@@ -37,13 +46,7 @@ def create_app() -> FastAPI:
     allow_headers=["*"],
   )
 
-  if settings.content_source == "supabase":
-    if not settings.supabase_url:
-      raise RuntimeError("CONTENT_SOURCE=supabase 일 때 SUPABASE_URL 이 필요합니다.")
-    store: ContentStore | SupabaseContentStore = SupabaseContentStore(settings)
-  else:
-    store = ContentStore(SessionLocal)
-
+  store = ContentStore(SessionLocal)
   builder_store = BuilderStore(SessionLocal)
   wordcloud_service = WordcloudService(store)
   analysis_service = AnalysisService(store)
@@ -62,4 +65,3 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-

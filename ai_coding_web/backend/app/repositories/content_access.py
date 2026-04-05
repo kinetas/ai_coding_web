@@ -8,7 +8,7 @@ from backend.app.models.wordcloud import Word
 
 
 class ContentAccess(Protocol):
-  """ContentStore · SupabaseContentStore 공통 인터페이스."""
+  """ContentStore 공통 인터페이스."""
 
   def get_wordcloud(self, category: Category, region: Region) -> List[Dict[str, float]]: ...
 

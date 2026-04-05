@@ -10,7 +10,6 @@ class UserResponse(BaseModel):
   status: str = "active"
   created_at: str = ""
   updated_at: str = ""
-  supabase_uid: str | None = None
 
 
 class RegisterPayload(BaseModel):
@@ -27,23 +26,3 @@ class LoginPayload(BaseModel):
 class AuthSessionResponse(BaseModel):
   ok: bool = True
   user: UserResponse
-
-
-class SupabaseSignInPayload(BaseModel):
-  email: str = Field(min_length=3, max_length=255)
-  password: str = Field(min_length=1, max_length=120)
-
-
-class SupabaseSignUpPayload(BaseModel):
-  email: str = Field(min_length=3, max_length=255)
-  password: str = Field(min_length=8, max_length=120)
-  nickname: str = Field(default="", max_length=80)
-
-
-class SupabaseRefreshPayload(BaseModel):
-  refresh_token: str = Field(min_length=10)
-
-
-class SupabaseUserUpdatePayload(BaseModel):
-  email: str | None = Field(default=None, max_length=255)
-  nickname: str | None = Field(default=None, max_length=80)

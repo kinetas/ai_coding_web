@@ -56,22 +56,12 @@ def _parse_csv(value: str | None) -> list[str]:
   return [item.strip() for item in value.split(",") if item.strip()]
 
 
-def _normalize_content_source(raw: str | None) -> str:
-  v = (raw or "").strip().lower() or "local"
-  return v if v in {"local", "supabase"} else "local"
-
-
 @dataclass(frozen=True)
 class Settings:
   app_env: str
   app_name: str
   app_version: str
   database_url: str
-  supabase_url: str
-  supabase_anon_key: str
-  supabase_jwt_secret: str
-  supabase_jwt_issuer: str | None
-  supabase_service_role_key: str
   cors_allowed_origins: list[str]
   auth_cookie_name: str
   auth_cookie_secure: bool
@@ -81,7 +71,6 @@ class Settings:
   auth_demo_user_email: str
   auth_demo_user_password: str
   etl_shared_secret: str
-  content_source: str  # local | supabase
 
   @property
   def is_production(self) -> bool:
@@ -93,24 +82,11 @@ def get_settings() -> Settings:
   app_env = os.getenv("APP_ENV", "development").strip() or "development"
   default_origins = "http://127.0.0.1:5500,http://localhost:5500,http://127.0.0.1:3000,http://localhost:3000"
   raw_db_url = os.getenv("DATABASE_URL", "sqlite:///./et_demo.db").strip() or "sqlite:///./et_demo.db"
-  supabase_url = (os.getenv("SUPABASE_URL") or "").strip()
-  supabase_anon_key = (os.getenv("SUPABASE_ANON_KEY") or "").strip()
-  jwt_secret = (os.getenv("SUPABASE_JWT_SECRET") or "").strip()
-  jwt_issuer_env = (os.getenv("SUPABASE_JWT_ISSUER") or "").strip()
-  jwt_issuer: str | None = jwt_issuer_env or None
-  if not jwt_issuer and supabase_url:
-    base = supabase_url.rstrip("/")
-    jwt_issuer = f"{base}/auth/v1"
   return Settings(
     app_env=app_env,
     app_name=os.getenv("APP_NAME", "Et Demo API").strip() or "Et Demo API",
     app_version=os.getenv("APP_VERSION", "1.0.0").strip() or "1.0.0",
     database_url=_normalize_database_url(raw_db_url),
-    supabase_url=supabase_url,
-    supabase_anon_key=supabase_anon_key,
-    supabase_jwt_secret=jwt_secret,
-    supabase_jwt_issuer=jwt_issuer,
-    supabase_service_role_key=(os.getenv("SUPABASE_SERVICE_ROLE_KEY") or "").strip(),
     cors_allowed_origins=_parse_csv(os.getenv("CORS_ALLOWED_ORIGINS", default_origins)),
     auth_cookie_name=os.getenv("AUTH_COOKIE_NAME", "et_session").strip() or "et_session",
     auth_cookie_secure=_parse_bool(os.getenv("AUTH_COOKIE_SECURE"), app_env.lower() == "production"),
@@ -120,7 +96,6 @@ def get_settings() -> Settings:
     auth_demo_user_email=os.getenv("AUTH_DEMO_USER_EMAIL", "demo@et.ai").strip() or "demo@et.ai",
     auth_demo_user_password=os.getenv("AUTH_DEMO_USER_PASSWORD", "etl1234").strip() or "etl1234",
     etl_shared_secret=os.getenv("ETL_SHARED_SECRET", "").strip(),
-    content_source=_normalize_content_source(os.getenv("CONTENT_SOURCE", "local")),
   )
 
 
