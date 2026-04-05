@@ -1,6 +1,6 @@
 (function () {
   function getApiBase() {
-    if (window.ET_APP_CONFIG && window.ET_APP_CONFIG.apiBase) {
+    if (window.ET_APP_CONFIG && window.ET_APP_CONFIG.apiBase != null) {
       return String(window.ET_APP_CONFIG.apiBase).replace(/\/+$/, "");
     }
     if (window.ET_API_BASE) {
