@@ -72,7 +72,7 @@ class ContentStore:
   ) -> None:
     with self._session_factory() as db:
       row = db.scalar(select(AnalysisSnapshot).where(AnalysisSnapshot.page == page))
-      payload = accents.model_dump() if accents else None
+      payload = (accents.model_dump() if hasattr(accents, "model_dump") else dict(accents)) if accents else None
       if row:
         row.line = list(line)
         row.bar = list(bar)
