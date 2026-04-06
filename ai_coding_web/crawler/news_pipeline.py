@@ -6,7 +6,7 @@
 
 워드클라우드 ETL 환경변수(선택):
 - NEWS_RSS_MAX_ITEMS: 피드당 합산 최대 기사 수(기본 80, 상한 250)
-- WORDCLOUD_MIN_TERM_COUNT: 동일 카테고리·지역 코퍼스에서 토큰 출현 횟수 하한(기본 10, 미만은 DB 후보에서 제외)
+- WORDCLOUD_MIN_TERM_COUNT: 동일 카테고리·지역 코퍼스에서 토큰 출현 횟수 하한(기본 15, 미만은 DB 후보에서 제외)
 - WORDCLOUD_TOP_N: 위 조건을 통과한 단어 중 빈도 상위 개수(기본 15)
 """
 from __future__ import annotations
@@ -81,11 +81,11 @@ def news_rss_max_items() -> int:
 
 
 def _wordcloud_min_term_count() -> int:
-  raw = (os.getenv("WORDCLOUD_MIN_TERM_COUNT") or "10").strip()
+  raw = (os.getenv("WORDCLOUD_MIN_TERM_COUNT") or "15").strip()
   try:
     return max(1, int(raw))
   except ValueError:
-    return 10
+    return 15
 
 
 def _wordcloud_top_n() -> int:
@@ -263,6 +263,16 @@ def _merge_item_texts(items: Iterable[NewsItem]) -> str:
   return "\n".join(parts)
 
 
+def _category_stopwords(category: str) -> frozenset[str]:
+  """카테고리 검색어 자체(및 구성 토큰)를 워드클라우드에서 제외."""
+  terms: set[str] = set()
+  for qmap in (CATEGORY_SEARCH_KR, CATEGORY_SEARCH_GLOBAL):
+    q = qmap.get(category, "")
+    for tok in _TOKEN_RE.findall(q.lower()):
+      terms.add(tok)
+  return frozenset(terms)
+
+
 def build_word_weights(
   entries: list[NewsItem],
   *,
@@ -279,7 +289,8 @@ def build_word_weights(
   if not toks:
     return []
   counts = Counter(toks)
-  candidates = [(w, c) for w, c in counts.items() if c >= mtc]
+  cat_stop = _category_stopwords(category)
+  candidates = [(w, c) for w, c in counts.items() if c >= mtc and w not in cat_stop]
   candidates.sort(key=lambda x: (-x[1], x[0]))
   selected = candidates[:tn]
   if not selected:

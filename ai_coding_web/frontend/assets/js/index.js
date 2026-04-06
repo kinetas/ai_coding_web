@@ -68,9 +68,37 @@
 
     var palette = createPalette(regionKey);
     var placed = [];
+    var pad = 8;
 
     function intersects(a, b) {
       return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+    }
+
+    function tryPlace(ww, wh) {
+      // 나선형 탐색: 중앙에서 바깥으로 확장하며 빈 자리 탐색
+      var cx = cw / 2;
+      var cy = ch / 2;
+      var step = 6;
+      var maxR = Math.max(cw, ch);
+
+      for (var r = 0; r < maxR; r += step) {
+        var steps = Math.max(1, Math.round(2 * Math.PI * Math.max(r, 1) / step));
+        for (var s = 0; s < steps; s++) {
+          var angle = (s / steps) * Math.PI * 2;
+          var jitter = (Math.random() - 0.5) * step;
+          var x = cx + (r + jitter) * Math.cos(angle) - ww / 2;
+          var y = cy + (r + jitter) * Math.sin(angle) - wh / 2;
+          x = clamp(x, pad, cw - ww - pad);
+          y = clamp(y, pad, ch - wh - pad);
+          var cand = { left: x, top: y, right: x + ww, bottom: y + wh };
+          var hit = false;
+          for (var i = 0; i < placed.length; i++) {
+            if (intersects(cand, placed[i])) { hit = true; break; }
+          }
+          if (!hit) return cand;
+        }
+      }
+      return null;
     }
 
     words.forEach(function (w, idx) {
@@ -88,29 +116,15 @@
       container.appendChild(span);
 
       var wRect = span.getBoundingClientRect();
-      var ww = wRect.width;
-      var wh = wRect.height;
+      var ww = Math.max(1, wRect.width);
+      var wh = Math.max(1, wRect.height);
 
-      var pad = 10;
-      var tries = 30;
-      var pos = { left: pad, top: pad, right: pad + ww, bottom: pad + wh };
+      var pos = tryPlace(ww, wh);
 
-      for (var t = 0; t < tries; t++) {
-        var x = Math.random() * clamp(cw - ww - pad * 2, 0, cw) + pad;
-        var y = Math.random() * clamp(ch - wh - pad * 2, 0, ch) + pad;
-        var cand = { left: x, top: y, right: x + ww, bottom: y + wh };
-
-        var hasHit = false;
-        for (var i = 0; i < placed.length; i++) {
-          if (intersects(cand, placed[i])) {
-            hasHit = true;
-            break;
-          }
-        }
-        if (!hasHit) {
-          pos = cand;
-          break;
-        }
+      if (!pos) {
+        // 공간 없으면 컨테이너 밖으로 숨김 (겹침 방지)
+        span.style.visibility = "hidden";
+        return;
       }
 
       span.style.left = Math.round(pos.left) + "px";
