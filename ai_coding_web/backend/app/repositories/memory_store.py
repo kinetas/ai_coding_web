@@ -34,7 +34,10 @@ class ContentStore:
       ).all()
       return [{"text": row.text, "weight": float(row.weight)} for row in rows[:28]]
 
-  def set_wordcloud(self, category: Category, region: Region, words: List[Word]) -> int:
+  def set_wordcloud(self, category: Category, region: Region, words: List[Word], min_words: int = 15) -> int:
+    """새 단어 목록이 min_words 미만이면 기존 데이터를 유지하고 0을 반환합니다."""
+    if len(words) < min_words:
+      return 0
     with self._session_factory() as db:
       db.execute(delete(WordcloudTerm).where(WordcloudTerm.category == category).where(WordcloudTerm.region == region))
       for word in words:

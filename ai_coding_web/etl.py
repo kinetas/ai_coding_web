@@ -68,8 +68,11 @@ def run_wordcloud(*, dry_run: bool = False, category: str | None = None) -> None
         print(f"     ... 외 {len(words) - 5}개")
     else:
       word_objs = [Word(text=w["text"], weight=float(w["weight"])) for w in words]
-      store.set_wordcloud(cat, region, word_objs)
-      print(f"  ✓ 저장 완료")
+      saved = store.set_wordcloud(cat, region, word_objs)
+      if saved:
+        print(f"  ✓ 저장 완료 ({saved}개)")
+      else:
+        print(f"  ⚠ 수집 단어 부족({len(words)}개) — 기존 데이터 유지")
 
   if not dry_run:
     store.record_etl_run("news_rss_wordcloud", "success")

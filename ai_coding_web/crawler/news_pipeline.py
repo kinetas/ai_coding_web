@@ -81,19 +81,19 @@ def news_rss_max_items() -> int:
 
 
 def _wordcloud_min_term_count() -> int:
-  raw = (os.getenv("WORDCLOUD_MIN_TERM_COUNT") or "15").strip()
+  raw = (os.getenv("WORDCLOUD_MIN_TERM_COUNT") or "3").strip()
   try:
     return max(1, int(raw))
   except ValueError:
-    return 15
+    return 3
 
 
 def _wordcloud_top_n() -> int:
-  raw = (os.getenv("WORDCLOUD_TOP_N") or "15").strip()
+  raw = (os.getenv("WORDCLOUD_TOP_N") or "25").strip()
   try:
     return max(1, min(80, int(raw)))
   except ValueError:
-    return 15
+    return 25
 
 # HTTP: 브라우저에 가깝게(일부 서버가 비표준 UA를 거부하는 경우 완화)
 _HTTP_HEADERS = {
@@ -375,9 +375,18 @@ def build_analysis_payload(category: str, region: str, entries: list[NewsItem]) 
   return {"line": line, "bar": bar, "donut": donut, "accents": accents}
 
 
+_CRAWL_STEPS = [80, 150, 250]  # 단어 부족 시 단계적으로 더 많은 기사 수집
+_WORDCLOUD_MIN_WORDS = 20     # 카테고리당 목표 최소 단어 종류
+
+
 def pipeline_wordcloud(category: str, region: str) -> list[dict[str, float]]:
-  entries = collect_for_category(category, region)
-  return build_word_weights(entries, category=category)
+  words: list[dict[str, float]] = []
+  for max_items in _CRAWL_STEPS:
+    entries = collect_for_category(category, region, max_items=max_items)
+    words = build_word_weights(entries, category=category)
+    if len(words) >= _WORDCLOUD_MIN_WORDS:
+      break
+  return words
 
 
 def pipeline_analysis(page: str, *, region_kr: bool = True) -> dict:
