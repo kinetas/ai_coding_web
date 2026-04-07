@@ -19,7 +19,7 @@ def build_router(service: AgriAnalyticsService) -> APIRouter:
     if not row:
       raise HTTPException(
         status_code=404,
-        detail="agri_price_analytics 에 데이터가 없습니다. ETL(공공데이터 키 설정 후 python etl.py --all 실행)을 먼저 실행하세요.",
+        detail="agri_price_analytics 에 데이터가 없습니다. .env 에 DATA_GO_KR_SERVICE_KEY·AT_PRICE_API_PATH 설정 후 python etl.py --agri 또는 --all 을 실행하세요.",
       )
     return row
 
@@ -29,7 +29,7 @@ def build_router(service: AgriAnalyticsService) -> APIRouter:
     if not row:
       raise HTTPException(
         status_code=404,
-        detail="agri_price_raw 에 데이터가 없습니다. python etl.py --all 실행 후 다시 시도하세요.",
+        detail="agri_price_raw 에 데이터가 없습니다. python etl.py --agri 또는 --all 실행 후 다시 시도하세요.",
       )
     return row
 

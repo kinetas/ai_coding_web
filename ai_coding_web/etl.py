@@ -6,9 +6,12 @@
 사용법:
   python etl.py --wordcloud          # 워드클라우드만
   python etl.py --analysis           # 분석 스냅샷만
-  python etl.py --all                # 전체
+  python etl.py --agri               # 농가격(공공데이터 API → agri_price_*)
+  python etl.py --all                # 워드클라우드 + 분석 + 농가격
   python etl.py --all --dry-run      # 미리보기 (저장 안 함)
-  python etl.py --category agri      # 특정 카테고리만
+  python etl.py --category agri      # 특정 카테고리만 (워드클라우드)
+
+농가격: .env 에 DATA_GO_KR_SERVICE_KEY(또는 PUBLIC_DATA_SERVICE_KEY), AT_PRICE_API_PATH 필수.
 """
 from __future__ import annotations
 
@@ -97,18 +100,50 @@ def run_analysis(*, dry_run: bool = False) -> None:
     store.record_etl_run("news_analysis", "success")
 
 
+def run_agri_price(*, dry_run: bool = False) -> None:
+  """공공데이터포털 농가격 API → agri_price_analytics / agri_price_raw / agri_price_history."""
+  from crawler.at_price_trend import fetch_full_agri_from_env
+  from backend.app.db import SessionLocal
+  from backend.app.repositories.agri_etl import upsert_agri_price_from_full_package
+  from backend.app.repositories.memory_store import ContentStore
+
+  print("[agri] 공공데이터 농가격 API 조회 중...")
+  full = fetch_full_agri_from_env()
+  if not full:
+    print(
+      "  ⚠ 건너뜀: DATA_GO_KR_SERVICE_KEY(또는 PUBLIC_DATA_SERVICE_KEY)와 AT_PRICE_API_PATH가 "
+      "설정되어 있어야 합니다.",
+    )
+    return
+
+  raw_db_row = full.get("raw_db_row") or {}
+  items = raw_db_row.get("items") or []
+  print(f"  → {len(items)}건 item 수집")
+
+  if dry_run:
+    print("  [dry-run] DB 저장 생략")
+    return
+
+  n_ok, n_skip = upsert_agri_price_from_full_package(full, SessionLocal)
+  print(f"  ✓ agri_price 저장 완료 (이력 {n_ok}건, 스킵 {n_skip}건)")
+
+  store = ContentStore(SessionLocal)
+  store.record_etl_run("agri_price_data_go_kr", "success", f"items={len(items)},history={n_ok}")
+
+
 def main() -> None:
   _load_env()
 
   parser = argparse.ArgumentParser(description="ET 데이터 ETL 수동 실행")
   parser.add_argument("--wordcloud", action="store_true", help="워드클라우드 업데이트")
   parser.add_argument("--analysis", action="store_true", help="분석 스냅샷 업데이트")
-  parser.add_argument("--all", dest="all_", action="store_true", help="전체 실행")
+  parser.add_argument("--agri", action="store_true", help="농가격(공공데이터 API → agri_price_*)")
+  parser.add_argument("--all", dest="all_", action="store_true", help="워드클라우드+분석+농가격")
   parser.add_argument("--dry-run", action="store_true", help="저장하지 않고 미리보기만")
   parser.add_argument("--category", default=None, help="특정 카테고리만 (agri/health/traffic/tour/env)")
   args = parser.parse_args()
 
-  if not (args.wordcloud or args.analysis or args.all_):
+  if not (args.wordcloud or args.analysis or args.agri or args.all_):
     parser.print_help()
     sys.exit(1)
 
@@ -120,6 +155,9 @@ def main() -> None:
 
   if args.analysis or args.all_:
     run_analysis(dry_run=args.dry_run)
+
+  if args.agri or args.all_:
+    run_agri_price(dry_run=args.dry_run)
 
   print("\n완료.")
 

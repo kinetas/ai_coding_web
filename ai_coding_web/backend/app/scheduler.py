@@ -3,6 +3,7 @@ APScheduler 기반 자동 ETL 스케줄러.
 
 - 워드클라우드: 매일 00:00 (뉴스 RSS 크롤 → wordcloud_terms 갱신)
 - 분석 스냅샷:  매주 월요일 00:00 (뉴스 분석 데이터 → analysis_snapshots 갱신)
+- 농가격: 매일 00:30 (공공데이터 API → agri_price_* , env 미설정 시 로그만)
 
 크롤러 함수를 직접 호출하므로 HTTP 오버헤드 없음.
 """
@@ -94,11 +95,38 @@ def run_analysis_etl() -> None:
   logger.info("[ETL] 분석 스냅샷 완료 (status=%s)", status)
 
 
+def run_agri_price_etl() -> None:
+  """매일 00:30 — 공공데이터 농가격 API → agri_price_* (키·경로 없으면 건너뜀)."""
+  from crawler.at_price_trend import fetch_full_agri_from_env
+  from backend.app.db import SessionLocal
+  from backend.app.repositories.agri_etl import upsert_agri_price_from_full_package
+  from backend.app.repositories.memory_store import ContentStore
+
+  logger.info("[ETL] 농가격(공공데이터) 업데이트 시작")
+  full = fetch_full_agri_from_env()
+  if not full:
+    logger.warning("[ETL] 농가격 건너뜀: DATA_GO_KR_SERVICE_KEY·AT_PRICE_API_PATH 미설정")
+    return
+
+  raw_db_row = full.get("raw_db_row") or {}
+  items = raw_db_row.get("items") or []
+  try:
+    n_ok, n_skip = upsert_agri_price_from_full_package(full, SessionLocal)
+    store = ContentStore(SessionLocal)
+    store.record_etl_run("agri_price_data_go_kr", "success", f"items={len(items)},history={n_ok},skip={n_skip}")
+    logger.info("[ETL] 농가격 완료: item %d건, 이력 %d건 (스킵 %d)", len(items), n_ok, n_skip)
+  except Exception as exc:
+    logger.exception("[ETL] 농가격 실패: %s", exc)
+    store = ContentStore(SessionLocal)
+    store.record_etl_run("agri_price_data_go_kr", "error", str(exc)[:500])
+
+
 def start_scheduler() -> None:
   _scheduler.add_job(run_wordcloud_etl, CronTrigger(hour=0, minute=0), id="wordcloud_daily")
+  _scheduler.add_job(run_agri_price_etl, CronTrigger(hour=0, minute=30), id="agri_price_daily")
   _scheduler.add_job(run_analysis_etl, CronTrigger(day_of_week="mon", hour=0, minute=0), id="analysis_weekly")
   _scheduler.start()
-  logger.info("[Scheduler] 시작 — 워드클라우드 매일 00:00 / 분석 매주 월 00:00")
+  logger.info("[Scheduler] 시작 — 워드클라우드 매일 00:00 / 농가격 00:30 / 분석 매주 월 00:00")
 
 
 def stop_scheduler() -> None:
