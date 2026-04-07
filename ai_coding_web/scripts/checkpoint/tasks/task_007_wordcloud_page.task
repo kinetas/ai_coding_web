@@ -1,0 +1,15 @@
+[task]
+id = task_007
+name = 워드클라우드 상세 페이지
+page = page_007_wordcloud.page
+depends_on = task_001
+priority = 4
+
+[steps]
+1. /api/public/news/wordcloud?category= 파라미터 동작 확인
+2. wordcloud.html 전체 화면 캔버스 레이아웃 작성
+3. 카테고리 필터 드롭다운 구현
+4. 날짜 범위 선택 UI 구현
+5. 워드클라우드 재생성 버튼 및 로딩 스피너 구현
+6. 단어 클릭 시 관련 뉴스 목록 패널 표시
+7. 데이터 부족 안내 메시지 (15개 미만 키워드 시)

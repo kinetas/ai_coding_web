@@ -1,0 +1,76 @@
+# P09 — ETL 파이프라인 & 인제스트 API
+
+## 메타
+- id: P09
+- name: ETL 파이프라인 & 인제스트 API
+- depends_on: [P01]
+- priority: medium
+- estimated_files: 5
+
+## 목표
+ETL 안정성을 높이고, 인제스트 API가 올바르게 데이터를 저장하는지 검증한다.
+P02~P04가 소비하는 데이터의 품질과 최신성을 보장하는 백엔드 작업이다.
+
+## 대상 파일
+
+### 수정
+- `etl.py` 또는 `etl_supabase.py`        — 지수 백오프 + 타임아웃 정책
+- `crawler/news_pipeline.py`              — 불용어 처리 강화
+- `backend/app/controllers/wordcloud_controller.py` — Last Updated 필드 응답 포함
+
+### 확인
+- `backend/app/controllers/analysis_controller.py`  — 응답 스키마 검증
+- `scripts/`                              — Supabase 마이그레이션 스크립트 존재 여부
+
+## 구현 항목
+
+1. **ETL 재시도 정책 (지수 백오프)**
+   ```python
+   # 현재: 단순 재시도
+   # 목표:
+   for attempt in range(MAX_RETRIES):
+       delay = BASE_DELAY * (2 ** attempt)   # 1s, 2s, 4s, 8s
+       time.sleep(min(delay, MAX_DELAY))
+   ```
+   - 네트워크 타임아웃: `requests.get(url, timeout=10)`
+   - 레이트 리밋(429) 수신 시 `Retry-After` 헤더 준수
+
+2. **부분 실패 허용**
+   - 카테고리 A 크롤링 실패해도 카테고리 B는 계속 진행
+   - `etl_runs` 테이블에 카테고리별 성공/실패 기록
+
+3. **워드클라우드 API `Last Updated` 필드 추가**
+   - 응답에 `last_updated: ISO8601` 필드 포함
+   - `AnalysisSnapshot` 모델의 `created_at` 필드 활용
+
+4. **불용어 사전 확장**
+   - `crawler/stopwords.py` (또는 기존 위치) — 카테고리별 불용어 추가
+   - 의미 없는 뉴스 토큰 제거: `"기자"`, `"뉴스"`, `"연합뉴스"` 등
+
+5. **인제스트 엔드포인트 검증**
+   - `POST /api/ingest/wordcloud` — `X-ETL-Token` 없을 때 401 확인
+   - `POST /api/ingest/analysis`  — 중복 ingest 시 upsert 동작 확인
+   - 응답에 `etl_run_id` 포함 여부 확인
+
+6. **`etl_runs` 로그 API (내부용)**
+   - `GET /api/health/etl-runs?limit=10` — 최근 ETL 실행 로그
+   - 마이페이지(P06)의 "마지막 갱신 시간" 표시에 활용
+
+## 수락 기준
+
+- [ ] ETL 실행 시 네트워크 오류 발생해도 재시도 후 계속 진행된다
+- [ ] 카테고리 1개 실패해도 나머지 카테고리가 ingest된다
+- [ ] `/api/wordcloud` 응답에 `last_updated` 필드가 포함된다
+- [ ] `POST /api/ingest/wordcloud` — 토큰 없을 때 401 반환한다
+- [ ] `GET /api/health/etl-runs` 엔드포인트가 최근 실행 로그를 반환한다
+
+## API 의존성 (내부)
+```
+POST /api/ingest/wordcloud    X-ETL-Token 필요
+POST /api/ingest/analysis     X-ETL-Token 필요
+GET  /api/health/etl-runs     내부 모니터링
+```
+
+## 출력물
+- 수정된 ETL 스크립트, `news_pipeline.py`, `wordcloud_controller.py`
+- 결과 기록 → `hanness/tasks/p09.task`

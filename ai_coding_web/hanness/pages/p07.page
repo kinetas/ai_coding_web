@@ -1,0 +1,60 @@
+# P07 — 저장된 분석 목록
+
+## 메타
+- id: P07
+- name: 저장된 분석 목록
+- depends_on: [P01, P05, P06]
+- priority: medium
+- estimated_files: 2
+
+## 목표
+`my-analyses.html`에서 사용자가 저장한 모든 분석을 검색·정렬·삭제할 수 있게 한다.
+마이페이지(P06)의 "더 보기" 목적지이자 분석 관리 허브다.
+
+## 대상 파일
+
+### 수정
+- `frontend/my-analyses.html`
+- `frontend/assets/js/my_analyses.js`
+
+### 읽기 전용 (API 소비)
+- `GET /api/builder/saved`   — 저장된 분석 전체 목록
+
+## 구현 항목
+
+1. **미인증 진입 차단**
+   - `requireAuth('my-analyses.html')` 호출
+
+2. **분석 목록 테이블/카드 뷰**
+   - 컬럼: 제목 / 키워드 / 지표 / 저장일 / 액션
+   - 모바일: 카드 뷰로 전환
+
+3. **검색 필터**
+   - 제목 또는 키워드 기준 클라이언트사이드 필터링
+   - 입력 500ms 디바운스
+
+4. **정렬**
+   - 저장일 최신순 / 오래된순 토글
+
+5. **빈 상태**
+   - 분석 없음: `"아직 저장된 분석이 없습니다"` + `[마이페이지로 돌아가기]` 버튼
+
+6. **[보기] 버튼**
+   - `my-analysis.html?id={analysisId}` 로 이동
+
+## 수락 기준
+
+- [ ] 미인증 접근 시 리다이렉트된다
+- [ ] 저장된 분석 목록이 카드/테이블로 표시된다
+- [ ] 검색어 입력 시 목록이 필터링된다
+- [ ] 저장일 정렬이 작동한다
+- [ ] 빈 상태 메시지가 표시된다
+
+## API 의존성
+```
+GET /api/builder/saved
+```
+
+## 출력물
+- 수정된 `my-analyses.html`, `my_analyses.js`
+- 결과 기록 → `hanness/tasks/p07.task`

@@ -1,0 +1,12 @@
+[page]
+id = page_005
+name = 기본 템플릿 선택 페이지
+url_path = /templates
+template = templates.html
+components = header, template-card-grid, template-preview, apply-button, footer
+
+[acceptance_criteria]
+- 3가지 기본 템플릿 카드가 표시된다 (농산물 가격 추이, 주간 뉴스 키워드, 카테고리별 이슈)
+- 카드 클릭 시 미리보기가 표시된다
+- 적용 버튼 클릭 시 My Page에 해당 위젯이 자동 생성된다
+- 비로그인 사용자가 적용 시도 시 로그인 안내가 표시된다

@@ -1,3 +1,28 @@
+# ── 지수 백오프 재시도 데코레이터 (Hanness 자동 생성) ──────────────────
+import functools, time as _time, logging as _logging
+
+def retry_with_backoff(max_retries: int = 3, base_delay: float = 1.0):
+    """지수 백오프로 max_retries 회 재시도하는 데코레이터."""
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            last_exc = None
+            for attempt in range(max_retries):
+                try:
+                    return fn(*args, **kwargs)
+                except Exception as exc:
+                    last_exc = exc
+                    delay = base_delay * (2 ** attempt)
+                    _logging.warning(
+                        f"[retry] {fn.__name__} 실패 "
+                        f"(시도 {attempt+1}/{max_retries}), {delay:.1f}초 후 재시도: {exc}"
+                    )
+                    _time.sleep(delay)
+            _logging.error(f"[retry] {fn.__name__} {max_retries}회 모두 실패: {last_exc}")
+            raise last_exc
+        return wrapper
+    return decorator
+
 """
 수동 ETL 실행 스크립트 (자체 서버용).
 

@@ -34,7 +34,23 @@
       "Bash(/c/Users/kimjh/anaconda3/python.exe:*)",
       "Bash(python -m py_compile backend/app/config.py backend/app/db_models.py backend/app/bootstrap.py backend/app/auth.py backend/app/scheduler.py backend/app/models/auth.py backend/app/controllers/auth_controller.py backend/app/services/auth_service.py backend/app/services/agri_analytics_service.py backend/app/services/public_category_service.py backend/app/main.py etl.py)",
       "Bash(python -m py_compile backend/app/config.py backend/app/db_models.py backend/app/bootstrap.py backend/app/auth.py backend/app/main.py backend/app/scheduler.py backend/app/models/auth.py backend/app/controllers/auth_controller.py backend/app/controllers/agri_analytics_controller.py backend/app/services/auth_service.py backend/app/services/agri_analytics_service.py backend/app/services/public_category_service.py backend/app/repositories/auth_store.py etl.py)",
-      "Bash(ls E:/web/ai_coding_web/*.env*)"
+      "Bash(ls E:/web/ai_coding_web/*.env*)",
+      "Bash(python checkpoint_runner.py --list)",
+      "Bash(python hanness/runner.py --status)",
+      "Bash(python3 hanness/runner.py --status)",
+      "Bash(ls /c/Users/Administrator/web/ai_coding_web/.venv/Scripts/python*)",
+      "Bash(/c/Users/Administrator/web/ai_coding_web/.venv/Scripts/python.exe hanness/runner.py --status)",
+      "Bash(/c/Users/Administrator/AppData/Roaming/uv/python/cpython-3.14.3-windows-x86_64-none/python.exe hanness/runner.py --status)",
+      "Bash(PYTHONIOENCODING=utf-8 /c/Users/Administrator/.local/bin/python3.14.exe checkpoint_runner.py --list)",
+      "Bash(PYTHONIOENCODING=utf-8 /c/Users/Administrator/.local/bin/python3.14.exe:*)",
+      "Bash(python autonomous_agent.py --plan-only)",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(py --version)",
+      "Read(//usr/**)",
+      "Read(//usr/local/**)",
+      "Bash(/c/Users/Administrator/.local/bin/python3.14 autonomous_agent.py --plan-only)",
+      "Bash(/c/Users/Administrator/.local/bin/python3.14 autonomous_agent.py --status)",
+      "Bash(/c/Users/Administrator/.local/bin/python3.14 autonomous_agent.py --reset)"
     ]
   }
 }

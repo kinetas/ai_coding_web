@@ -1,0 +1,24 @@
+# P01.task — 공통 레이아웃 & 인프라
+
+status: pending
+started_at: null
+completed_at: null
+
+## checklist
+- [ ] CSS 변수 추출 완료
+- [ ] apiFetch 함수 구현
+- [ ] showError 함수 구현
+- [ ] formatDate 함수 구현
+- [ ] renderLastUpdated 함수 구현
+- [ ] 모바일 햄버거 메뉴 동작 확인
+
+## input
+- frontend/assets/css/styles.css (현재 상태)
+- frontend/assets/js/common.js (현재 상태)
+- frontend/assets/js/config.js (현재 상태)
+
+## output
+- []
+
+## notes
+-

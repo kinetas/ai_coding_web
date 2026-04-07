@@ -1,0 +1,12 @@
+[task]
+id = task_012
+name = 모바일 반응형 대시보드
+page = page_012_feat_mobile_responsive.page
+depends_on = 
+priority = 13
+
+[steps]
+1. styles.css에 @media (max-width: 768px) 대시보드 그리드 규칙 추가
+2. styles.css에 @media (max-width: 375px) 차트 캔버스 width: 100% 적용
+3. 헤더 햄버거 메뉴 토글 JS 로직 추가
+4. Chart.js responsive: true 옵션 활성화 확인

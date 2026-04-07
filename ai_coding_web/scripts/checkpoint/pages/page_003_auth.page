@@ -1,0 +1,13 @@
+[page]
+id = page_003
+name = 로그인 / 회원가입 페이지
+url_path = /login
+template = login.html
+components = auth-form, error-toast, redirect-handler
+
+[acceptance_criteria]
+- 개발 환경에서 세션 쿠키 기반 로그인이 동작한다
+- 프로덕션 환경에서 Supabase JWT 로그인이 동작한다
+- 잘못된 자격증명 시 에러 메시지가 표시된다
+- 로그인 성공 시 /mypage로 이동한다
+- 이미 로그인한 사용자가 접근하면 /mypage로 리다이렉트된다

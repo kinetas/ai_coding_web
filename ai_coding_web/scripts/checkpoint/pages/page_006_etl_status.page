@@ -1,0 +1,12 @@
+[page]
+id = page_006
+name = ETL 진행 상태 배너 (인라인 컴포넌트)
+url_path = /api/public/etl-status
+template = _etl_status_banner.html
+components = status-badge, progress-indicator, last-run-time
+
+[acceptance_criteria]
+- "수집 중 (10/15 단어)" 형식의 진행형 메시지가 표시된다
+- ETL 미실행 상태에서 "데이터 준비 중" 안내가 표시된다
+- ETL 실패 상태에서 "일시적 오류, 재시도 예정" 메시지가 표시된다
+- 30초마다 자동으로 상태가 갱신된다

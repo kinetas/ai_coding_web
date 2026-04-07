@@ -1,0 +1,200 @@
+[2026-04-07 17:17:07] DEBUG  [CHECKPOINT] PHASE 1 — PLAN  (gap 분석 → .task/.page 자동 생성)
+[2026-04-07 17:17:07] INFO  플래너 완료: 생성 5개 | 구현됨 1개 | 기존 task 0개
+[2026-04-07 17:17:07] INFO  --plan-only 옵션: plan 단계만 실행하고 종료합니다.
+[2026-04-07 17:17:17] DEBUG  [CHECKPOINT] PHASE 2 — BUILD  (Step 핸들러 등록)
+[2026-04-07 17:17:17] INFO  핸들러 등록 완료. 자율 실행 모드 활성화.
+[2026-04-07 17:18:01] DEBUG  [CHECKPOINT] PHASE 1 — PLAN  (gap 분석 → .task/.page 자동 생성)
+[2026-04-07 17:18:01] INFO  플래너 완료: 생성 5개 | 구현됨 1개 | 기존 task 0개
+[2026-04-07 17:18:01] DEBUG  [CHECKPOINT] PHASE 2 — BUILD  (Step 핸들러 등록)
+[2026-04-07 17:18:01] INFO  핸들러 등록 완료. 자율 실행 모드 활성화.
+[2026-04-07 17:18:01] INFO  자율 모드: 핸들러 미등록 step 자동 건너뜀 활성화
+[2026-04-07 17:18:01] DEBUG  [CHECKPOINT] PHASE 3 — RUN  (자율 직렬 실행)
+[2026-04-07 17:18:01] INFO  체크포인트 상태를 초기화했습니다.
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] PHASE 1 — PLAN  (gap 분석 → .task/.page 자동 생성)
+[2026-04-07 17:18:35] INFO  플래너 완료: 생성 0개 | 구현됨 1개 | 기존 task 5개
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] PHASE 2 — BUILD  (Step 핸들러 등록)
+[2026-04-07 17:18:35] INFO  핸들러 등록 완료. 자율 실행 모드 활성화.
+[2026-04-07 17:18:35] INFO  자율 모드: 핸들러 미등록 step 자동 건너뜀 활성화
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] PHASE 3 — RUN  (자율 직렬 실행)
+[2026-04-07 17:18:35] INFO  체크포인트 상태를 초기화했습니다.
+[2026-04-07 17:18:35] INFO  총 13개 task 직렬 실행 시작
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_001 시작  [공개 메인 페이지]  →  공개 메인 페이지 (/)
+[2026-04-07 17:18:35] INFO    페이지: 공개 메인 페이지  |  URL: /
+[2026-04-07 17:18:35] INFO    컴포넌트: header, hero-banner, price-trend-chart, news-wordcloud, last-updated-bar, footer
+[2026-04-07 17:18:35] INFO    수용 기준: 5개
+[2026-04-07 17:18:35] INFO    → Step 1: /api/public/price 엔드포인트 응답 확인
+[2026-04-07 17:18:35] INFO    ✓ Step 1 완료
+[2026-04-07 17:18:35] INFO    → Step 2: /api/public/news/wordcloud 엔드포인트 응답 확인
+[2026-04-07 17:18:35] INFO    ✓ Step 2 완료
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 3: index.html 레이아웃 구조 작성 (header, hero, charts, footer)  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 4: 가격 추이 차트 Chart.js 바인딩  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 5: 뉴스 워드클라우드 캔버스 렌더링  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 6: Last Updated 시각 표시 컴포넌트 추가  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 7: 모바일 반응형 CSS 검증  (핸들러 미등록)
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_001 완료  [공개 메인 페이지]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 1개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_002 시작  [카테고리별 분석 페이지]  →  카테고리별 분석 페이지 (/category)
+[2026-04-07 17:18:35] INFO    페이지: 카테고리별 분석 페이지  |  URL: /category
+[2026-04-07 17:18:35] INFO    컴포넌트: header, category-tab-bar, price-filter-chart, anomaly-highlight, empty-state-banner, footer
+[2026-04-07 17:18:35] INFO    수용 기준: 4개
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 1: /api/public/category 목록 엔드포인트 확인  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 2: /api/public/price?category= 필터 파라미터 동작 확인  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 3: category.html 레이아웃 작성  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 4: 카테고리 탭 UI 컴포넌트 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 5: 카테고리 선택 시 차트 동적 갱신 로직 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 6: 이상치(급등/급락) 구간 하이라이트 표시  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 7: 빈 데이터 상태 안내 메시지 처리  (핸들러 미등록)
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_002 완료  [카테고리별 분석 페이지]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 2개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_003 시작  [로그인 / 회원가입 페이지]  →  로그인 / 회원가입 페이지 (/login)
+[2026-04-07 17:18:35] INFO    페이지: 로그인 / 회원가입 페이지  |  URL: /login
+[2026-04-07 17:18:35] INFO    컴포넌트: auth-form, error-toast, redirect-handler
+[2026-04-07 17:18:35] INFO    수용 기준: 5개
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 1: 개발 환경(SQLite 세션) 로그인 API 확인  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 2: 프로덕션 환경(Supabase JWT) 로그인 플로우 확인  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 3: login.html 폼 레이아웃 작성  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 4: 로그인 요청 JS 및 세션 쿠키/토큰 저장 처리  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 5: 로그인 실패 에러 메시지 표시  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 6: 로그인 성공 시 My Page 리다이렉트  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 7: 회원가입 폼 및 유효성 검사 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_003 완료  [로그인 / 회원가입 페이지]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 3개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_004 시작  [My Page – 개인화 대시보드]  →  My Page – 개인화 대시보드 (/mypage)
+[2026-04-07 17:18:35] INFO    페이지: My Page – 개인화 대시보드  |  URL: /mypage
+[2026-04-07 17:18:35] INFO    컴포넌트: header, dashboard-grid, widget-chart, widget-wordcloud, widget-toolbar, save-button, footer
+[2026-04-07 17:18:35] INFO    수용 기준: 5개
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 1: /api/builder/dashboard GET 엔드포인트 확인 (인증 포함)  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 2: /api/builder/dashboard POST/PUT 저장 엔드포인트 확인  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 3: mypage.html 대시보드 그리드 레이아웃 작성  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 4: 차트 위젯 추가/삭제 UI 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 5: 워드클라우드 위젯 추가/삭제 UI 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 6: 대시보드 설정 저장 및 복원 로직 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 7: 비로그인 접근 시 로그인 페이지 리다이렉트 처리  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 8: 모바일 그리드 레이아웃 반응형 검증  (핸들러 미등록)
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_004 완료  [My Page – 개인화 대시보드]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 4개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_006 시작  [ETL 진행 상태 API 및 UI]  →  ETL 진행 상태 배너 (인라인 컴포넌트) (/api/public/etl-status)
+[2026-04-07 17:18:35] INFO    페이지: ETL 진행 상태 배너 (인라인 컴포넌트)  |  URL: /api/public/etl-status
+[2026-04-07 17:18:35] INFO    컴포넌트: status-badge, progress-indicator, last-run-time
+[2026-04-07 17:18:35] INFO    수용 기준: 4개
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 1: /api/ingest/status 엔드포인트 구현 확인 (X-ETL-Token 인증)  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 2: ETL 진행률 모델 정의 (total, completed, failed, last_run)  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 3: 상태 응답 JSON 스키마 결정  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 4: 공개 요약 엔드포인트 /api/public/etl-status 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 5: 프론트 상태 배너 컴포넌트 구현 (수집 중 10/15 단어 형식)  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 6: 폴링 주기 설정 (30초 기본) 및 auto-refresh 처리  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 7: ETL 미실행 / 실패 상태 안내 메시지 처리  (핸들러 미등록)
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_006 완료  [ETL 진행 상태 API 및 UI]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 5개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_005 시작  [기본 템플릿 선택 페이지]  →  기본 템플릿 선택 페이지 (/templates)
+[2026-04-07 17:18:35] INFO    페이지: 기본 템플릿 선택 페이지  |  URL: /templates
+[2026-04-07 17:18:35] INFO    컴포넌트: header, template-card-grid, template-preview, apply-button, footer
+[2026-04-07 17:18:35] INFO    수용 기준: 4개
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 1: 농산물 가격 추이 템플릿 데이터 구조 정의  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 2: 주간 뉴스 키워드 템플릿 데이터 구조 정의  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 3: 카테고리별 이슈 변화 템플릿 데이터 구조 정의  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 4: template.html 카드 UI 레이아웃 작성  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 5: 템플릿 선택 시 My Page에 자동 위젯 생성 로직 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 6: 템플릿 미리보기 썸네일 표시  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 7: 템플릿 적용 완료 후 My Page 이동 처리  (핸들러 미등록)
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_005 완료  [기본 템플릿 선택 페이지]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 6개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_007 시작  [워드클라우드 상세 페이지]  →  워드클라우드 상세 페이지 (/wordcloud)
+[2026-04-07 17:18:35] INFO    페이지: 워드클라우드 상세 페이지  |  URL: /wordcloud
+[2026-04-07 17:18:35] INFO    컴포넌트: header, category-filter, date-range-picker, wordcloud-canvas, keyword-news-panel, regenerate-button, footer
+[2026-04-07 17:18:35] INFO    수용 기준: 5개
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 1: /api/public/news/wordcloud?category= 파라미터 동작 확인  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 2: wordcloud.html 전체 화면 캔버스 레이아웃 작성  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 3: 카테고리 필터 드롭다운 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 4: 날짜 범위 선택 UI 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 5: 워드클라우드 재생성 버튼 및 로딩 스피너 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 6: 단어 클릭 시 관련 뉴스 목록 패널 표시  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 7: 데이터 부족 안내 메시지 (15개 미만 키워드 시)  (핸들러 미등록)
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_007 완료  [워드클라우드 상세 페이지]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 7개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_008 시작  [ETL 관리 페이지 (내부 운영용)]  →  ETL 관리 페이지 (운영 내부용) (/admin/etl)
+[2026-04-07 17:18:35] INFO    페이지: ETL 관리 페이지 (운영 내부용)  |  URL: /admin/etl
+[2026-04-07 17:18:35] INFO    컴포넌트: auth-gate, etl-trigger-button, run-log-table, retry-button, summary-cards
+[2026-04-07 17:18:35] INFO    수용 기준: 5개
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 1: /api/ingest/trigger 수동 ETL 실행 엔드포인트 확인  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 2: /api/ingest/logs 실행 이력 엔드포인트 확인  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 3: admin.html 접근 제어 (X-ETL-Token 헤더 확인)  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 4: ETL 실행 트리거 버튼 UI 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 5: 실행 로그 테이블 (시각, 소스, 성공/실패, 수집 건수) 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 6: 실패 항목 재시도 버튼 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 7: ETL 실행 시간 및 실패율 요약 카드 구현  (핸들러 미등록)
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_008 완료  [ETL 관리 페이지 (내부 운영용)]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 8개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_009 시작  [Last Updated 갱신 시각 표시]  →  Last Updated 갱신 시각 표시 (/)
+[2026-04-07 17:18:35] INFO    페이지: Last Updated 갱신 시각 표시  |  URL: /
+[2026-04-07 17:18:35] INFO    컴포넌트: last-updated-bar
+[2026-04-07 17:18:35] INFO    수용 기준: 3개
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 1: backend API 응답에 last_updated 필드 포함 여부 확인  (핸들러 미등록)
+[2026-04-07 17:18:35] INFO    → Step 2: index.html에 #last-updated-bar 요소 추가
+[2026-04-07 17:18:35] INFO    ✓ Step 2 완료
+[2026-04-07 17:18:35] INFO    → Step 3: index.js에 fetchLastUpdated() 함수 구현 및 KST 변환 로직 작성
+[2026-04-07 17:18:35] INFO    ✓ Step 3 완료
+[2026-04-07 17:18:35] INFO    → Step 4: CSS에 .last-updated-bar 스타일(작은 회색 텍스트) 추가
+[2026-04-07 17:18:35] INFO    ✓ Step 4 완료
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_009 완료  [Last Updated 갱신 시각 표시]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 9개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_010 시작  [데이터 수집 진행 상태 메시지]  →  데이터 수집 진행 상태 메시지 (/)
+[2026-04-07 17:18:35] INFO    페이지: 데이터 수집 진행 상태 메시지  |  URL: /
+[2026-04-07 17:18:35] INFO    컴포넌트: data-status-banner
+[2026-04-07 17:18:35] INFO    수용 기준: 3개
+[2026-04-07 17:18:35] INFO    → Step 1: backend /api/public/news/wordcloud 응답의 word_count 필드 확인
+[2026-04-07 17:18:35] INFO    ✓ Step 1 완료
+[2026-04-07 17:18:35] INFO    → Step 2: index.html에 #data-status-msg 요소 추가
+[2026-04-07 17:18:35] INFO    ✓ Step 2 완료
+[2026-04-07 17:18:35] INFO    → Step 3: word_count < 5 조건 분기: 진행 중 vs 완료 메시지 렌더링 로직 구현
+[2026-04-07 17:18:35] INFO    ✓ Step 3 완료
+[2026-04-07 17:18:35] INFO    → Step 4: CSS에 .data-status-msg 스타일(노란 배너) 추가
+[2026-04-07 17:18:35] INFO    ✓ Step 4 완료
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_010 완료  [데이터 수집 진행 상태 메시지]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 10개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_011 시작  [My Page 기본 템플릿 프리셋]  →  My Page 기본 템플릿 프리셋 (/mypage)
+[2026-04-07 17:18:35] INFO    페이지: My Page 기본 템플릿 프리셋  |  URL: /mypage
+[2026-04-07 17:18:35] INFO    컴포넌트: template-preset-bar, preset-card
+[2026-04-07 17:18:35] INFO    수용 기준: 3개
+[2026-04-07 17:18:35] INFO    → Step 1: PRESET_TEMPLATES 상수 정의 (농산물 가격 추이 / 주간 뉴스 키워드 / 카테고리별 이슈)
+[2026-04-07 17:18:35] INFO    ✓ Step 1 완료
+[2026-04-07 17:18:35] INFO    → Step 2: mypage.html에 #preset-bar 섹션 추가 (카드 3개)
+[2026-04-07 17:18:35] INFO    ✓ Step 2 완료
+[2026-04-07 17:18:35] INFO    → Step 3: mypage.js에 applyPreset(presetId) 함수 구현
+[2026-04-07 17:18:35] INFO    ✓ Step 3 완료
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 4: 프리셋 적용 시 /api/builder/widget POST 호출 로직 연결  (핸들러 미등록)
+[2026-04-07 17:18:35] INFO    → Step 5: CSS에 .preset-card hover 애니메이션 추가
+[2026-04-07 17:18:35] INFO    ✓ Step 5 완료
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_011 완료  [My Page 기본 템플릿 프리셋]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 11개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_012 시작  [모바일 반응형 대시보드]  →  모바일 반응형 대시보드 (/mypage)
+[2026-04-07 17:18:35] INFO    페이지: 모바일 반응형 대시보드  |  URL: /mypage
+[2026-04-07 17:18:35] INFO    컴포넌트: responsive-grid
+[2026-04-07 17:18:35] INFO    수용 기준: 3개
+[2026-04-07 17:18:35] INFO    → Step 1: styles.css에 @media (max-width: 768px) 대시보드 그리드 규칙 추가
+[2026-04-07 17:18:35] INFO    ✓ Step 1 완료
+[2026-04-07 17:18:35] WARNING    [자동 건너뜀] Step 2: styles.css에 @media (max-width: 375px) 차트 캔버스 width: 100% 적용  (핸들러 미등록)
+[2026-04-07 17:18:35] INFO    → Step 3: 헤더 햄버거 메뉴 토글 JS 로직 추가
+[2026-04-07 17:18:35] INFO    ✓ Step 3 완료
+[2026-04-07 17:18:35] INFO    → Step 4: Chart.js responsive: true 옵션 활성화 확인
+[2026-04-07 17:18:35] INFO    ✓ Step 4 완료
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_012 완료  [모바일 반응형 대시보드]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 12개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_013 시작  [ETL 지수 백오프 재시도]  →  ETL 지수 백오프 재시도 (/admin/etl)
+[2026-04-07 17:18:35] INFO    페이지: ETL 지수 백오프 재시도  |  URL: /admin/etl
+[2026-04-07 17:18:35] INFO    컴포넌트: etl-retry-log
+[2026-04-07 17:18:35] INFO    수용 기준: 3개
+[2026-04-07 17:18:35] INFO    → Step 1: etl.py에 retry_with_backoff(fn, max_retries=3) 데코레이터 함수 구현
+[2026-04-07 17:18:35] INFO    ✓ Step 1 완료
+[2026-04-07 17:18:35] INFO    → Step 2: crawler/news_pipeline.py의 fetch 함수에 @retry_with_backoff 적용
+[2026-04-07 17:18:35] INFO    ✓ Step 2 완료
+[2026-04-07 17:18:35] INFO    → Step 3: crawler/at_price_trend.py의 fetch 함수에 @retry_with_backoff 적용
+[2026-04-07 17:18:35] INFO    ✓ Step 3 완료
+[2026-04-07 17:18:35] INFO    → Step 4: 실패 후 기존 캐시 데이터 반환 fallback 로직 추가
+[2026-04-07 17:18:35] INFO    ✓ Step 4 완료
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] TASK task_013 완료  [ETL 지수 백오프 재시도]
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 13개 | 실패 0개 | 건너뜀 0개 | 상태: running
+[2026-04-07 17:18:35] DEBUG  [CHECKPOINT] 전체 실행 완료
+[2026-04-07 17:18:35] INFO  [체크포인트] 전체 13개 | 완료 13개 | 실패 0개 | 건너뜀 0개 | 상태: done
+[2026-04-07 17:18:45] DEBUG  [CHECKPOINT] PHASE 2 — BUILD  (Step 핸들러 등록)
+[2026-04-07 17:18:45] INFO  핸들러 등록 완료. 자율 실행 모드 활성화.

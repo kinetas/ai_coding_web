@@ -1,0 +1,52 @@
+# P01 — 공통 레이아웃 & 인프라
+
+## 메타
+- id: P01
+- name: 공통 레이아웃 & 인프라
+- depends_on: []
+- priority: critical
+- estimated_files: 4
+
+## 목표
+모든 페이지가 공유하는 CSS 변수 시스템, 공통 JS 유틸리티, 헤더/푸터 구조를
+정리하여 이후 페이지 단위(P02~P09)의 구현 기반을 만든다.
+
+## 대상 파일
+
+### 수정
+- `frontend/assets/css/styles.css`       — CSS 변수화 (`--color-*`, `--space-*`, `--font-*`)
+- `frontend/assets/js/common.js`         — API 호출 래퍼, 에러 핸들러, 날짜 포맷 유틸
+- `frontend/assets/js/config.js`         — `API_BASE_URL` 환경 분기 명확화
+
+### 확인 (변경 없이 검증)
+- `frontend/index.html`                  — 헤더 구조가 표준 패턴인지 확인
+- `backend/app/controllers/health_controller.py` — `/api/health` 엔드포인트 존재 확인
+
+## 구현 항목
+
+1. **CSS 변수 추출**
+   - 하드코딩된 색상·간격·폰트 사이즈를 `:root` 변수로 교체
+   - 다크모드 대비 변수 네이밍 예약 (`--color-bg`, `--color-text`, `--color-accent`)
+
+2. **공통 API 래퍼 (`common.js`)**
+   - `apiFetch(path, options)` — fetch + 기본 에러 처리 + JSON 파싱
+   - `showError(container, message)` — 에러 UI 표시 표준화
+   - `formatDate(isoString)` — `YYYY-MM-DD HH:mm` 한국어 형식
+
+3. **`Last Updated` 배지 컴포넌트**
+   - `renderLastUpdated(el, isoString)` 함수 — 모든 페이지에서 재사용
+   - 데이터 없을 때 `"갱신 정보 없음"` 표시
+
+4. **모바일 헤더 햄버거 메뉴 동작 검증**
+   - 480px 이하에서 nav 토글 작동 확인
+
+## 수락 기준 (Acceptance Criteria)
+
+- [ ] `styles.css`에 `:root { --color-* }` 블록이 존재하고 하드코딩 색상이 없다
+- [ ] `apiFetch`, `showError`, `formatDate`, `renderLastUpdated` 함수가 `common.js`에 export 된다
+- [ ] `/api/health` 에 GET 요청 시 200 응답이 온다
+- [ ] 모바일 480px에서 햄버거 메뉴가 열리고 닫힌다
+
+## 출력물 (Artifacts)
+- 수정된 `styles.css`, `common.js`, `config.js`
+- 검증 결과 메모 → `hanness/tasks/p01.task`의 `output` 필드에 기록

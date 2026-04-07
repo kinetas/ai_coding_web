@@ -1,0 +1,15 @@
+[task]
+id = task_008
+name = ETL 관리 페이지 (내부 운영용)
+page = page_008_admin.page
+depends_on = task_006
+priority = 5
+
+[steps]
+1. /api/ingest/trigger 수동 ETL 실행 엔드포인트 확인
+2. /api/ingest/logs 실행 이력 엔드포인트 확인
+3. admin.html 접근 제어 (X-ETL-Token 헤더 확인)
+4. ETL 실행 트리거 버튼 UI 구현
+5. 실행 로그 테이블 (시각, 소스, 성공/실패, 수집 건수) 구현
+6. 실패 항목 재시도 버튼 구현
+7. ETL 실행 시간 및 실패율 요약 카드 구현

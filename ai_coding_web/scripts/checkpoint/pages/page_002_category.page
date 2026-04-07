@@ -1,0 +1,12 @@
+[page]
+id = page_002
+name = 카테고리별 분석 페이지
+url_path = /category
+template = category.html
+components = header, category-tab-bar, price-filter-chart, anomaly-highlight, empty-state-banner, footer
+
+[acceptance_criteria]
+- 카테고리 탭 클릭 시 해당 데이터로 차트가 갱신된다
+- 급등/급락 구간이 시각적으로 강조 표시된다
+- 데이터 없는 카테고리에서 안내 메시지가 표시된다
+- URL 쿼리 파라미터(?category=채소)로 직접 접근 가능하다

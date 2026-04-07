@@ -1,0 +1,11 @@
+[page]
+id = page_010
+name = 데이터 수집 진행 상태 메시지
+url_path = /
+template = index.html
+components = data-status-banner
+
+[acceptance_criteria]
+- 데이터가 없을 때 '수집 중' 진행형 메시지가 표시된다
+- 워드클라우드 단어 수가 임계치 미달이면 '수집 중 (N/15 단어)' 표시
+- '데이터 없음' 대신 맥락을 설명하는 메시지를 제공한다

@@ -1,0 +1,20 @@
+# P06.task — 마이페이지 대시보드
+
+status: pending
+started_at: null
+completed_at: null
+
+## checklist
+- [ ] 구현 시작 전 .page 명세 확인
+- [ ] 대상 파일 읽기 완료
+- [ ] 구현 항목 완료
+- [ ] 수락 기준 검증 완료
+
+## input
+- hanness/pages/p06.page
+
+## output
+- []
+
+## notes
+-

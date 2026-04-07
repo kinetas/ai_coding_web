@@ -1,0 +1,20 @@
+# P05.task — 로그인/인증 UX
+
+status: pending
+started_at: null
+completed_at: null
+
+## checklist
+- [ ] 구현 시작 전 .page 명세 확인
+- [ ] 대상 파일 읽기 완료
+- [ ] 구현 항목 완료
+- [ ] 수락 기준 검증 완료
+
+## input
+- hanness/pages/p05.page
+
+## output
+- []
+
+## notes
+-

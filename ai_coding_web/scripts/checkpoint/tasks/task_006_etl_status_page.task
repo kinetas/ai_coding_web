@@ -1,0 +1,15 @@
+[task]
+id = task_006
+name = ETL 진행 상태 API 및 UI
+page = page_006_etl_status.page
+depends_on =
+priority = 3
+
+[steps]
+1. /api/ingest/status 엔드포인트 구현 확인 (X-ETL-Token 인증)
+2. ETL 진행률 모델 정의 (total, completed, failed, last_run)
+3. 상태 응답 JSON 스키마 결정
+4. 공개 요약 엔드포인트 /api/public/etl-status 구현
+5. 프론트 상태 배너 컴포넌트 구현 (수집 중 10/15 단어 형식)
+6. 폴링 주기 설정 (30초 기본) 및 auto-refresh 처리
+7. ETL 미실행 / 실패 상태 안내 메시지 처리

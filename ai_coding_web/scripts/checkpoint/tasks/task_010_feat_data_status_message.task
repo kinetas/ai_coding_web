@@ -1,0 +1,12 @@
+[task]
+id = task_010
+name = 데이터 수집 진행 상태 메시지
+page = page_010_feat_data_status_message.page
+depends_on = 
+priority = 11
+
+[steps]
+1. backend /api/public/news/wordcloud 응답의 word_count 필드 확인
+2. index.html에 #data-status-msg 요소 추가
+3. word_count < 5 조건 분기: 진행 중 vs 완료 메시지 렌더링 로직 구현
+4. CSS에 .data-status-msg 스타일(노란 배너) 추가

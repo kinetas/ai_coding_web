@@ -1,0 +1,13 @@
+[page]
+id = page_008
+name = ETL 관리 페이지 (운영 내부용)
+url_path = /admin/etl
+template = admin_etl.html
+components = auth-gate, etl-trigger-button, run-log-table, retry-button, summary-cards
+
+[acceptance_criteria]
+- X-ETL-Token 없이 접근 시 401 응답 또는 접근 거부 화면이 표시된다
+- ETL 트리거 버튼 클릭 시 수동 실행이 시작된다
+- 실행 이력 테이블에 시각, 소스, 성공/실패, 수집 건수가 표시된다
+- 실패 행에 재시도 버튼이 표시된다
+- 요약 카드에 평균 실행 시간과 최근 7일 실패율이 표시된다

@@ -1,0 +1,13 @@
+[page]
+id = page_004
+name = My Page – 개인화 대시보드
+url_path = /mypage
+template = mypage.html
+components = header, dashboard-grid, widget-chart, widget-wordcloud, widget-toolbar, save-button, footer
+
+[acceptance_criteria]
+- 로그인하지 않은 사용자는 /login으로 리다이렉트된다
+- 저장된 대시보드 구성이 로드 시 복원된다
+- 차트/워드클라우드 위젯을 추가·삭제할 수 있다
+- 대시보드 저장 버튼 클릭 시 구성이 서버에 저장된다
+- 모바일에서 위젯이 세로 1열로 재배치된다

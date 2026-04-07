@@ -1,0 +1,61 @@
+# P02 — 홈 / 워드클라우드 메인
+
+## 메타
+- id: P02
+- name: 홈 / 워드클라우드 메인
+- depends_on: [P01]
+- priority: high
+- estimated_files: 3
+
+## 목표
+`index.html`을 서비스의 "첫인상" 페이지로 완성한다.
+키워드 티커, 카테고리 워드클라우드, 데이터 상태 메시지, Last Updated 배지를 구현한다.
+
+## 대상 파일
+
+### 수정
+- `frontend/index.html`
+- `frontend/assets/js/index.js`
+- `frontend/assets/css/styles.css`  (index 전용 스타일 추가 시)
+
+### 읽기 전용 (API 소비)
+- `GET /api/wordcloud?category={cat}`  — 워드클라우드 데이터
+- `GET /api/wordcloud/categories`       — 카테고리 목록
+
+## 구현 항목
+
+1. **키워드 티커 (헤더 하단)**
+   - `GET /api/wordcloud` 결과 상위 15개 키워드를 CSS `@keyframes` 횡스크롤로 표시
+   - API 실패 시 티커 숨김 (레이아웃 무너짐 없이)
+
+2. **카테고리 필터 — URL 해시 방식으로 전환**
+   - 기존 `?category=` → `#category=` 해시 파라미터
+   - `hashchange` 이벤트로 필터 동적 전환
+   - 하위 호환: `?category=` 파라미터도 읽어서 해시로 리다이렉트
+
+3. **데이터 상태 메시지 개선**
+   - 데이터 없음: `"수집 중 (N/15 키워드)"` 형태 진행형 메시지
+   - 데이터 있음: 워드클라우드 렌더링 + `Last Updated` 배지 (P01 컴포넌트 사용)
+
+4. **2컬럼 레이아웃**
+   - 좌: 국내 워드클라우드 / 우: 해외 워드클라우드
+   - 모바일에서 1컬럼으로 전환 (640px 브레이크포인트)
+
+## 수락 기준
+
+- [ ] 헤더 하단에 키워드 티커가 좌→우 스크롤로 표시된다
+- [ ] `#category=agri` URL로 직접 접근 시 농산물 카테고리가 선택된다
+- [ ] 워드클라우드 데이터 없을 때 `"수집 중"` 메시지가 표시된다
+- [ ] `Last Updated` 배지가 워드클라우드 하단에 표시된다
+- [ ] 640px 이하에서 2컬럼 → 1컬럼으로 전환된다
+
+## API 의존성
+```
+GET /api/wordcloud?category=all&type=domestic
+GET /api/wordcloud?category=all&type=global
+GET /api/wordcloud/categories
+```
+
+## 출력물
+- 수정된 `index.html`, `index.js`
+- 스크린샷 (데스크톱 + 모바일) → `hanness/tasks/p02.task`의 `output`

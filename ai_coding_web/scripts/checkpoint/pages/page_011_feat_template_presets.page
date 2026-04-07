@@ -1,0 +1,11 @@
+[page]
+id = page_011
+name = My Page 기본 템플릿 프리셋
+url_path = /mypage
+template = mypage.html
+components = template-preset-bar, preset-card
+
+[acceptance_criteria]
+- My Page 상단에 '빠른 시작' 템플릿 프리셋 3종이 표시된다
+- 프리셋 클릭 시 해당 위젯(차트/워드클라우드)이 즉시 추가된다
+- 비로그인 상태에서 프리셋 클릭 시 로그인 안내 모달이 표시된다

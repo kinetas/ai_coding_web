@@ -1,0 +1,15 @@
+[task]
+id = task_001
+name = 공개 메인 페이지
+page = page_001_main.page
+depends_on =
+priority = 1
+
+[steps]
+1. /api/public/price 엔드포인트 응답 확인
+2. /api/public/news/wordcloud 엔드포인트 응답 확인
+3. index.html 레이아웃 구조 작성 (header, hero, charts, footer)
+4. 가격 추이 차트 Chart.js 바인딩
+5. 뉴스 워드클라우드 캔버스 렌더링
+6. Last Updated 시각 표시 컴포넌트 추가
+7. 모바일 반응형 CSS 검증

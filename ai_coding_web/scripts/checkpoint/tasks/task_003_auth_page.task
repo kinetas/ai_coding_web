@@ -1,0 +1,15 @@
+[task]
+id = task_003
+name = 로그인 / 회원가입 페이지
+page = page_003_auth.page
+depends_on =
+priority = 2
+
+[steps]
+1. 개발 환경(SQLite 세션) 로그인 API 확인
+2. 프로덕션 환경(Supabase JWT) 로그인 플로우 확인
+3. login.html 폼 레이아웃 작성
+4. 로그인 요청 JS 및 세션 쿠키/토큰 저장 처리
+5. 로그인 실패 에러 메시지 표시
+6. 로그인 성공 시 My Page 리다이렉트
+7. 회원가입 폼 및 유효성 검사 구현

@@ -250,3 +250,48 @@
     renderAllClouds();
   });
 })();
+
+
+// ── Last Updated 갱신 시각 표시 ──────────────────────────────────────
+async function fetchLastUpdated() {
+  const el = document.getElementById('last-updated-bar');
+  if (!el) return;
+  try {
+    const res = await fetch('/api/public/price?limit=1');
+    const data = await res.json();
+    const raw = data?.last_updated || data?.items?.[0]?.updated_at || null;
+    if (!raw) { el.textContent = '갱신 시각: 알 수 없음'; return; }
+    const dt = new Date(raw);
+    el.textContent = '마지막 갱신: ' + dt.toLocaleString('ko-KR', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    });
+  } catch (e) {
+    el.textContent = '갱신 시각: 알 수 없음';
+  }
+}
+document.addEventListener('DOMContentLoaded', fetchLastUpdated);
+
+
+// ── 데이터 수집 진행 상태 메시지 ────────────────────────────────────
+async function fetchDataStatus() {
+  const el = document.getElementById('data-status-msg');
+  if (!el) return;
+  try {
+    const res = await fetch('/api/public/news/wordcloud');
+    const data = await res.json();
+    const count = data?.word_count ?? (data?.words?.length ?? 0);
+    const MIN_WORDS = 5;
+    if (count < MIN_WORDS) {
+      el.style.display = 'block';
+      el.textContent = `데이터를 수집하고 있습니다 (${count}/15 단어 확보됨). 잠시 후 다시 확인해 주세요.`;
+      el.className = 'data-status-msg collecting';
+    } else {
+      el.style.display = 'none';
+    }
+  } catch (e) {
+    // API 호출 실패 시 무시
+  }
+}
+document.addEventListener('DOMContentLoaded', fetchDataStatus);

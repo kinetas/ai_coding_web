@@ -1,0 +1,65 @@
+# P03 — 농산물 시세 분석
+
+## 메타
+- id: P03
+- name: 농산물 시세 분석
+- depends_on: [P01]
+- priority: high
+- estimated_files: 3
+
+## 목표
+`agri-analytics.html`에서 농산물 가격 추이를 직관적으로 확인할 수 있게 완성한다.
+품목 선택, 가격 추이 차트, 데이터 최신성 표시, 빈 데이터 안내를 포함한다.
+
+## 대상 파일
+
+### 수정
+- `frontend/agri-analytics.html`
+- `frontend/assets/js/agri-analytics.js`
+
+### 읽기 전용 (API 소비)
+- `GET /api/agri-analytics/items`          — 품목 목록
+- `GET /api/agri-analytics/price-trend`    — 가격 추이 시계열
+- `GET /api/agri-analytics/summary`        — 최신 가격 요약
+
+## 구현 항목
+
+1. **품목 선택 UI**
+   - 드롭다운 또는 칩(chip) 방식으로 품목 선택
+   - URL 해시 `#item=사과` 로 상태 공유 가능
+   - 기본값: 첫 번째 품목 자동 선택
+
+2. **가격 추이 차트 (Chart.js)**
+   - 기간 선택: 1주 / 1달 / 3달
+   - 데이터 포인트에 hover 시 날짜·가격 툴팁 표시
+   - 급등·급락 기준선(±15%) 표시
+
+3. **가격 요약 카드**
+   - 현재가, 전일 대비 변동(%), 주간 최고/최저
+
+4. **데이터 상태 처리**
+   - 데이터 없음: `"해당 품목의 가격 데이터가 아직 수집되지 않았습니다"` 안내
+   - `Last Updated` 배지 (P01 컴포넌트)
+
+5. **뉴스 연관 섹션 (옵션)**
+   - 해당 품목 관련 최신 뉴스 키워드 3~5개 표시
+   - 데이터 없으면 섹션 숨김
+
+## 수락 기준
+
+- [ ] 품목 드롭다운/칩 선택 시 차트가 업데이트된다
+- [ ] 기간 탭(1주/1달/3달) 전환이 작동한다
+- [ ] 가격 요약 카드(현재가, 변동률)가 표시된다
+- [ ] `#item=사과` URL로 직접 접근 시 사과 품목이 선택된다
+- [ ] 데이터 없을 때 적절한 안내 메시지가 표시된다
+
+## API 의존성
+```
+GET /api/agri-analytics/items
+GET /api/agri-analytics/price-trend?item={name}&period={1w|1m|3m}
+GET /api/agri-analytics/summary?item={name}
+```
+
+## 출력물
+- 수정된 `agri-analytics.html`, `agri-analytics.js`
+- 결과 기록 → `hanness/tasks/p03.task`

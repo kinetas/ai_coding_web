@@ -1,0 +1,13 @@
+[page]
+id = page_001
+name = 공개 메인 페이지
+url_path = /
+template = index.html
+components = header, hero-banner, price-trend-chart, news-wordcloud, last-updated-bar, footer
+
+[acceptance_criteria]
+- 페이지 로드 시 최신 가격 추이 차트가 표시된다
+- 뉴스 워드클라우드가 캔버스에 렌더링된다
+- Last Updated 시각이 한국 표준시(KST)로 표시된다
+- 모바일(375px) 환경에서 레이아웃이 깨지지 않는다
+- 데이터 로딩 중 스켈레톤 또는 스피너가 표시된다

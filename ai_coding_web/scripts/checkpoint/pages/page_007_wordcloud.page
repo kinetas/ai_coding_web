@@ -1,0 +1,13 @@
+[page]
+id = page_007
+name = 워드클라우드 상세 페이지
+url_path = /wordcloud
+template = wordcloud.html
+components = header, category-filter, date-range-picker, wordcloud-canvas, keyword-news-panel, regenerate-button, footer
+
+[acceptance_criteria]
+- 카테고리 필터 변경 시 워드클라우드가 재렌더링된다
+- 날짜 범위 선택 후 조회 시 해당 기간 워드클라우드가 표시된다
+- 단어 클릭 시 관련 뉴스 목록 패널이 슬라이드로 표시된다
+- 키워드 15개 미만 시 "데이터 수집 중" 안내 메시지가 표시된다
+- 재생성 버튼 클릭 시 로딩 스피너 후 새 결과가 표시된다

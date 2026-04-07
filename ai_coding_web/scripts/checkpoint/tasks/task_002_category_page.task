@@ -1,0 +1,15 @@
+[task]
+id = task_002
+name = 카테고리별 분석 페이지
+page = page_002_category.page
+depends_on = task_001
+priority = 2
+
+[steps]
+1. /api/public/category 목록 엔드포인트 확인
+2. /api/public/price?category= 필터 파라미터 동작 확인
+3. category.html 레이아웃 작성
+4. 카테고리 탭 UI 컴포넌트 구현
+5. 카테고리 선택 시 차트 동적 갱신 로직 구현
+6. 이상치(급등/급락) 구간 하이라이트 표시
+7. 빈 데이터 상태 안내 메시지 처리

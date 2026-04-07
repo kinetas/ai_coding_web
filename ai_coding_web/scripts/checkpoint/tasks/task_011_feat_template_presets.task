@@ -1,0 +1,13 @@
+[task]
+id = task_011
+name = My Page 기본 템플릿 프리셋
+page = page_011_feat_template_presets.page
+depends_on = task_004
+priority = 12
+
+[steps]
+1. PRESET_TEMPLATES 상수 정의 (농산물 가격 추이 / 주간 뉴스 키워드 / 카테고리별 이슈)
+2. mypage.html에 #preset-bar 섹션 추가 (카드 3개)
+3. mypage.js에 applyPreset(presetId) 함수 구현
+4. 프리셋 적용 시 /api/builder/widget POST 호출 로직 연결
+5. CSS에 .preset-card hover 애니메이션 추가

@@ -1,0 +1,12 @@
+[task]
+id = task_013
+name = ETL 지수 백오프 재시도
+page = page_013_feat_etl_backoff.page
+depends_on = 
+priority = 20
+
+[steps]
+1. etl.py에 retry_with_backoff(fn, max_retries=3) 데코레이터 함수 구현
+2. crawler/news_pipeline.py의 fetch 함수에 @retry_with_backoff 적용
+3. crawler/at_price_trend.py의 fetch 함수에 @retry_with_backoff 적용
+4. 실패 후 기존 캐시 데이터 반환 fallback 로직 추가

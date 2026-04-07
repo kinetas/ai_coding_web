@@ -1,0 +1,11 @@
+[page]
+id = page_009
+name = Last Updated 갱신 시각 표시
+url_path = /
+template = index.html
+components = last-updated-bar
+
+[acceptance_criteria]
+- 메인 페이지에 데이터 최신 갱신 시각(KST)이 표시된다
+- 갱신 시각은 ISO 문자열을 toLocaleString으로 변환해 출력한다
+- 데이터 fetch 실패 시 '알 수 없음'으로 fallback 표시한다

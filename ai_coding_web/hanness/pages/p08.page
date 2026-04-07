@@ -1,0 +1,79 @@
+# P08 — 분석 빌더 / 상세 보기
+
+## 메타
+- id: P08
+- name: 분석 빌더 / 상세 보기
+- depends_on: [P01, P05, P06]
+- priority: high
+- estimated_files: 3
+
+## 목표
+`my-analysis.html`에서 사용자가 키워드를 선택하고 지표(차트/워드클라우드)를
+구성해 저장하는 핵심 UX를 완성한다. 템플릿 파라미터(`?template=`) 진입도 지원한다.
+
+## 대상 파일
+
+### 수정
+- `frontend/my-analysis.html`
+- `frontend/assets/js/my_analysis.js`
+- `frontend/assets/js/charts.js`
+
+### 읽기 전용 (API 소비)
+- `GET /api/builder/suggestions`  — 키워드 자동완성
+- `GET /api/builder/metric`       — 지표 데이터
+- `POST /api/builder/save`        — 분석 저장
+- `GET /api/builder/saved`        — 저장된 분석 불러오기 (id 파라미터)
+
+## 구현 항목
+
+1. **미인증 진입 차단**
+   - `requireAuth('my-analysis.html')` 호출
+
+2. **템플릿 파라미터 처리 (`?template=`)**
+   ```
+   template=agri_price_trend   → keyword="쌀", metric="price_trend" 자동 세팅
+   template=weekly_news        → keyword="전체", metric="news_keyword" 자동 세팅
+   template=category_issue     → keyword="환경", metric="category_trend" 자동 세팅
+   ```
+   - 템플릿 세팅 후 즉시 차트 렌더링 (사용자가 "결과를 먼저" 보도록)
+
+3. **키워드 입력 + 자동완성**
+   - `GET /api/builder/suggestions?keyword=` — 디바운스 300ms
+   - 드롭다운 최대 8개 제안
+
+4. **지표 선택 탭**
+   - 가격 추이 / 뉴스 키워드 빈도 / 카테고리 트렌드
+   - 탭 전환 시 해당 지표 API 호출 + Chart.js 렌더링
+
+5. **차트 렌더링 (`charts.js`)**
+   - Line chart (가격 추이)
+   - Bar chart (키워드 빈도)
+   - 데이터 없음 → 차트 영역에 안내 메시지
+
+6. **분석 저장**
+   - 제목 입력 (기본값: `"{keyword} — {metric_label}"`)
+   - `POST /api/builder/save` 호출
+   - 저장 성공: 토스트 알림 + `my-analyses.html` 이동 옵션
+
+7. **불러오기 (`?id=`)**
+   - 기존 저장된 분석을 URL `?id={analysisId}`로 불러와 표시
+
+## 수락 기준
+
+- [ ] `?template=agri_price_trend` 진입 시 농산물 차트가 즉시 표시된다
+- [ ] 키워드 입력 시 자동완성 드롭다운이 표시된다
+- [ ] 지표 탭 전환 시 차트가 업데이트된다
+- [ ] 분석 저장 후 토스트 알림이 표시된다
+- [ ] `?id=` 파라미터로 기존 분석을 불러올 수 있다
+
+## API 의존성
+```
+GET  /api/builder/suggestions?keyword={q}
+GET  /api/builder/metric?keyword={kw}&metric={m}
+POST /api/builder/save        { title, keyword, metric, metric_label }
+GET  /api/builder/saved       (id 기반 단일 조회)
+```
+
+## 출력물
+- 수정된 `my-analysis.html`, `my_analysis.js`, `charts.js`
+- 결과 기록 → `hanness/tasks/p08.task`

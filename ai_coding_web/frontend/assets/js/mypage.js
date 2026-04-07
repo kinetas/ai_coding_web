@@ -110,3 +110,72 @@
     });
   });
 })();
+
+
+// ── 기본 템플릿 프리셋 상수 ──────────────────────────────────────────
+const PRESET_TEMPLATES = [
+  {
+    id: 'agri_price',
+    label: '농산물 가격 추이',
+    icon: '🥬',
+    desc: '주요 농산물 가격 변동을 한눈에',
+    widget: { type: 'chart', endpoint: '/api/public/price', chart_type: 'line' }
+  },
+  {
+    id: 'weekly_news',
+    label: '주간 뉴스 키워드',
+    icon: '📰',
+    desc: '이번 주 주목받은 키워드 워드클라우드',
+    widget: { type: 'wordcloud', endpoint: '/api/public/news/wordcloud' }
+  },
+  {
+    id: 'category_issue',
+    label: '카테고리별 이슈 변화',
+    icon: '📊',
+    desc: '카테고리별 뉴스 빈도 추이',
+    widget: { type: 'chart', endpoint: '/api/public/category', chart_type: 'bar' }
+  }
+];
+
+
+// ── 프리셋 카드 렌더링 ────────────────────────────────────────────────
+function renderPresetCards() {
+  const grid = document.getElementById('preset-card-grid');
+  if (!grid || typeof PRESET_TEMPLATES === 'undefined') return;
+  grid.innerHTML = PRESET_TEMPLATES.map(t => `
+    <div class="preset-card" onclick="applyPreset('${t.id}')">
+      <span class="preset-card__icon">${t.icon}</span>
+      <strong class="preset-card__label">${t.label}</strong>
+      <p class="preset-card__desc">${t.desc}</p>
+    </div>
+  `).join('');
+}
+
+async function applyPreset(presetId) {
+  const preset = (PRESET_TEMPLATES || []).find(t => t.id === presetId);
+  if (!preset) return;
+  // 비로그인 체크
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    alert('로그인 후 이용할 수 있습니다.');
+    window.location.href = '/login.html';
+    return;
+  }
+  try {
+    const res = await fetch('/api/builder/widget', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ name: preset.label, config: preset.widget })
+    });
+    if (res.ok) {
+      alert(`'${preset.label}' 위젯이 추가됐습니다.`);
+      location.reload();
+    } else {
+      alert('위젯 추가에 실패했습니다. 다시 시도해 주세요.');
+    }
+  } catch (e) {
+    alert('네트워크 오류가 발생했습니다.');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', renderPresetCards);

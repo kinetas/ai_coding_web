@@ -1,0 +1,12 @@
+[task]
+id = task_009
+name = Last Updated 갱신 시각 표시
+page = page_009_feat_last_updated.page
+depends_on = 
+priority = 10
+
+[steps]
+1. backend API 응답에 last_updated 필드 포함 여부 확인
+2. index.html에 #last-updated-bar 요소 추가
+3. index.js에 fetchLastUpdated() 함수 구현 및 KST 변환 로직 작성
+4. CSS에 .last-updated-bar 스타일(작은 회색 텍스트) 추가

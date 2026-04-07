@@ -225,3 +225,13 @@
     ensureAuthNav();
   });
 })();
+
+
+// ── 햄버거 메뉴 (모바일) ─────────────────────────────────────────────
+function initHamburger() {
+  const toggle = document.querySelector('.nav-toggle');
+  const navUl = document.querySelector('nav ul');
+  if (!toggle || !navUl) return;
+  toggle.addEventListener('click', () => navUl.classList.toggle('open'));
+}
+document.addEventListener('DOMContentLoaded', initHamburger);

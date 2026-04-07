@@ -1,0 +1,11 @@
+[page]
+id = page_013
+name = ETL 지수 백오프 재시도
+url_path = /admin/etl
+template = admin-etl.html
+components = etl-retry-log
+
+[acceptance_criteria]
+- ETL 실패 시 1초 → 2초 → 4초 지수 백오프로 최대 3회 재시도한다
+- 재시도 횟수와 대기 시간이 로그에 기록된다
+- 외부 소스 전체 실패 시 기존 캐시 데이터를 유지한다
