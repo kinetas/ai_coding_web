@@ -42,3 +42,42 @@ class AgriItemSeriesResponse(BaseModel):
   vrty_cd: str | None = None
   points: list[AgriItemSeriesPoint] = Field(default_factory=list)
   meta: dict[str, Any] = Field(default_factory=dict)
+
+
+# ── 카테고리별 통계 ──────────────────────────────────────────────────────────
+
+class AgriCategoryItem(BaseModel):
+  """카테고리 내 최저/최고 품목 요약."""
+  item_nm: str
+  price: float | None = None
+
+
+class AgriCategoryStats(BaseModel):
+  ctgry_nm: str
+  count: int
+  min_price: float | None = None
+  max_price: float | None = None
+  avg_price: float | None = None
+  cheapest: AgriCategoryItem | None = None
+  most_expensive: AgriCategoryItem | None = None
+
+
+class AgriCategoryStatsResponse(BaseModel):
+  updated_at: str
+  categories: list[AgriCategoryStats] = Field(default_factory=list)
+  meta: dict[str, Any] = Field(default_factory=dict)
+
+
+# ── 쌀 주차별 시계열 + 예측 ──────────────────────────────────────────────────
+
+class AgriWeeklyPoint(BaseModel):
+  week_label: str   # "YYYY-WNN"
+  avg_price: float
+
+
+class AgriRiceSeriesResponse(BaseModel):
+  item_nm: str = "쌀"
+  item_cd: str | None = None
+  weekly_series: list[AgriWeeklyPoint] = Field(default_factory=list)
+  forecast: dict[str, Any] = Field(default_factory=dict)
+  meta: dict[str, Any] = Field(default_factory=dict)

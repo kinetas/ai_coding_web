@@ -9,9 +9,110 @@
     return String(v);
   }
 
+  function fmtPrice(v) {
+    if (v === null || v === undefined || v === "") return "—";
+    var n = Number(v);
+    if (!isFinite(n)) return String(v);
+    return n.toLocaleString("ko-KR") + "원";
+  }
+
   function setText(id, text) {
     var el = byId(id);
     if (el) el.textContent = text;
+  }
+
+  // ── 카테고리별 통계 렌더링 ──────────────────────────────────────────────
+
+  function renderCategoryStats(data) {
+    var tabsEl = byId("cat-tabs");
+    var panelsEl = byId("cat-panels");
+    var errEl = byId("cat-error");
+    if (!tabsEl || !panelsEl) return;
+
+    var cats = (data && Array.isArray(data.categories)) ? data.categories : [];
+    if (!cats.length) {
+      if (errEl) { errEl.hidden = false; errEl.textContent = "카테고리 데이터가 없습니다."; }
+      return;
+    }
+    if (errEl) errEl.hidden = true;
+
+    tabsEl.innerHTML = "";
+    panelsEl.innerHTML = "";
+
+    cats.forEach(function (cat, idx) {
+      // 탭 버튼
+      var btn = document.createElement("button");
+      btn.className = "cat-tab" + (idx === 0 ? " is-active" : "");
+      btn.type = "button";
+      btn.textContent = cat.ctgry_nm;
+      btn.dataset.target = "cat-panel-" + idx;
+      tabsEl.appendChild(btn);
+
+      // 패널
+      var panel = document.createElement("div");
+      panel.id = "cat-panel-" + idx;
+      panel.className = "cat-panel" + (idx === 0 ? " is-active" : "");
+
+      var cheapestTxt = cat.cheapest ? cat.cheapest.item_nm + " " + fmtPrice(cat.cheapest.price) : "—";
+      var expTxt = cat.most_expensive ? cat.most_expensive.item_nm + " " + fmtPrice(cat.most_expensive.price) : "—";
+
+      panel.innerHTML =
+        '<div class="cat-stat-grid">' +
+        statCard("표본 수", fmt(cat.count) + "건", "") +
+        statCard("평균가", fmtPrice(cat.avg_price), "") +
+        statCard("최저가", fmtPrice(cat.min_price), cheapestTxt) +
+        statCard("최고가", fmtPrice(cat.max_price), expTxt) +
+        "</div>";
+      panelsEl.appendChild(panel);
+    });
+
+    // 탭 클릭
+    tabsEl.addEventListener("click", function (e) {
+      var btn = e.target.closest(".cat-tab");
+      if (!btn) return;
+      tabsEl.querySelectorAll(".cat-tab").forEach(function (b) { b.classList.remove("is-active"); });
+      panelsEl.querySelectorAll(".cat-panel").forEach(function (p) { p.classList.remove("is-active"); });
+      btn.classList.add("is-active");
+      var target = byId(btn.dataset.target);
+      if (target) target.classList.add("is-active");
+    });
+  }
+
+  function statCard(label, value, sub) {
+    return (
+      '<div class="cat-stat-card">' +
+      '<p class="cat-stat-card__label">' + label + "</p>" +
+      '<p class="cat-stat-card__value">' + value + "</p>" +
+      (sub ? '<p class="cat-stat-card__sub">' + sub + "</p>" : "") +
+      "</div>"
+    );
+  }
+
+  // ── 쌀 주차별 시계열 렌더링 ───────────────────────────────────────────────
+
+  function renderRiceSeries(data) {
+    var errEl = byId("rice-error");
+    if (!data) {
+      if (errEl) { errEl.hidden = false; errEl.textContent = "쌀 가격 데이터를 불러오지 못했습니다."; }
+      return;
+    }
+    if (errEl) errEl.hidden = true;
+
+    setText("rice-item-nm", data.item_nm || "쌀");
+
+    var fc = data.forecast || {};
+    setText("rice-fc-note", fc.note || "");
+    setText("rice-fc-next", fc.next_step_estimate != null ? fmtPrice(fc.next_step_estimate) : "—");
+    setText("rice-fc-wow", fc.week_over_week_pct != null ? fmt(fc.week_over_week_pct) + "%" : "—");
+    setText("rice-fc-slope", fc.slope_per_week != null ? fmt(fc.slope_per_week) + "원/주" : "—");
+
+    var series = Array.isArray(data.weekly_series) ? data.weekly_series : [];
+    setText("rice-week-count", series.length ? series.length + "구간" : "—");
+
+    if (window.EtCharts && byId("chart-rice-series") && series.length > 1) {
+      var chartData = series.map(function (pt) { return pt.avg_price; });
+      window.EtCharts.lineChart(byId("chart-rice-series"), chartData, { accent: "#9AF7D0" });
+    }
   }
 
   function renderRegions(rows) {
@@ -88,6 +189,8 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     var err = byId("agri-error");
+
+    // 1) 전체 분석 데이터
     window.EtApi.fetchJson("/api/agri-analytics", { method: "GET" })
       .then(function (data) {
         if (err) {
@@ -122,6 +225,30 @@
         if (!err) return;
         err.hidden = false;
         err.textContent = reason && reason.message ? reason.message : "분석 데이터를 불러오지 못했습니다.";
+      });
+
+    // 2) 카테고리별 통계
+    window.EtApi.fetchJson("/api/agri-analytics/category-stats", { method: "GET" })
+      .then(function (data) {
+        renderCategoryStats(data);
+      })
+      .catch(function (reason) {
+        var errEl = byId("cat-error");
+        if (!errEl) return;
+        errEl.hidden = false;
+        errEl.textContent = reason && reason.message ? reason.message : "카테고리 통계를 불러오지 못했습니다.";
+      });
+
+    // 3) 쌀 주차별 시계열
+    window.EtApi.fetchJson("/api/agri-analytics/rice-series", { method: "GET" })
+      .then(function (data) {
+        renderRiceSeries(data);
+      })
+      .catch(function (reason) {
+        var errEl = byId("rice-error");
+        if (!errEl) return;
+        errEl.hidden = false;
+        errEl.textContent = reason && reason.message ? reason.message : "쌀 가격 시계열을 불러오지 못했습니다.";
       });
   });
 })();
