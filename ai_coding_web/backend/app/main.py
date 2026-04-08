@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from backend.app.bootstrap import init_database
 from backend.app.config import get_settings
@@ -61,6 +63,12 @@ def create_app() -> FastAPI:
   app.include_router(build_builder_router(builder_service), prefix="/api")
   app.include_router(build_agri_analytics_router(agri_analytics_service), prefix="/api")
   app.include_router(build_public_category_router(public_category_service), prefix="/api")
+
+  # 프론트엔드 정적 파일 서빙 (API 라우터 등록 후 마지막에)
+  frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
+  if frontend_dir.is_dir():
+    app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
+
   return app
 
 

@@ -64,6 +64,16 @@ class AuthStore:
       db.execute(delete(AuthSession).where(AuthSession.expires_at <= now))
       db.commit()
 
+  def update_nickname(self, user_id: int, nickname: str) -> dict | None:
+    with self._session_factory() as db:
+      user = db.get(User, user_id)
+      if not user:
+        return None
+      user.nickname = nickname
+      db.commit()
+      db.refresh(user)
+      return self._to_user(user)
+
   def delete_local_user_by_id(self, user_id: int) -> bool:
     from backend.app.db_models import SavedBuilderAnalysis
     with self._session_factory() as db:

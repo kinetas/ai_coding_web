@@ -45,6 +45,17 @@ class AuthService:
     self._store.delete_expired_sessions()
     return self._store.get_user_by_session_token(token)
 
+  def update_nickname(self, user_id: int, nickname: str) -> dict:
+    user = self._store.update_nickname(user_id, nickname.strip())
+    if not user:
+      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="사용자를 찾을 수 없습니다.")
+    return user
+
+  def delete_account(self, user_id: int, token: str | None) -> None:
+    if token:
+      self._store.delete_session(token)
+    self._store.delete_local_user_by_id(user_id)
+
   def logout(self, token: str | None) -> None:
     if token:
       self._store.delete_session(token)

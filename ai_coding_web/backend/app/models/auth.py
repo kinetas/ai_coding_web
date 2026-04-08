@@ -26,3 +26,7 @@ class LoginPayload(BaseModel):
 class AuthSessionResponse(BaseModel):
   ok: bool = True
   user: UserResponse
+
+
+class UpdateProfilePayload(BaseModel):
+  nickname: str = Field(min_length=1, max_length=80)

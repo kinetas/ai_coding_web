@@ -63,7 +63,7 @@
 
             <article class="card card--form">
               <h2 class="panel-title">회원 정보 수정</h2>
-              <p class="panel-desc">이메일 변경 시 Supabase에서 확인 메일을 보낼 수 있습니다. 닉네임은 화면 표시에 쓰입니다.</p>
+              <p class="panel-desc">닉네임은 화면 표시에 쓰입니다. 이메일은 로그인 아이디로 변경할 수 없습니다.</p>
 
               <div class="alert alert--error" id="profile-error" role="alert" aria-live="polite" hidden></div>
               <div class="alert alert--success" id="profile-success" role="status" aria-live="polite" hidden></div>
@@ -75,7 +75,7 @@
                 </label>
                 <label class="field">
                   <span class="field__label">이메일</span>
-                  <input class="input" type="email" name="email" id="field-email" autocomplete="email" required />
+                  <input class="input" type="email" name="email" id="field-email" autocomplete="email" readonly style="opacity:0.6;cursor:default" />
                 </label>
                 <button class="btn" type="submit">저장</button>
               </form>

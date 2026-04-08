@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
+aiofiles
 sqlalchemy
 psycopg[binary]
 pyjwt>=2.8.0

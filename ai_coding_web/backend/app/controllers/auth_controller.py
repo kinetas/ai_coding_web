@@ -8,6 +8,7 @@ from backend.app.models.auth import (
   AuthSessionResponse,
   LoginPayload,
   RegisterPayload,
+  UpdateProfilePayload,
   UserResponse,
 )
 from backend.app.services.auth_service import AuthService
@@ -55,3 +56,26 @@ def logout(
 @router.get("/auth/me", response_model=UserResponse)
 def me(current_user: dict = Depends(get_current_user)):
   return current_user
+
+
+@router.patch("/auth/profile", response_model=UserResponse)
+def update_profile(
+  payload: UpdateProfilePayload,
+  current_user: dict = Depends(get_current_user),
+  auth_service: AuthService = Depends(get_auth_service),
+):
+  updated = auth_service.update_nickname(current_user["id"], payload.nickname)
+  return updated
+
+
+@router.delete("/auth/account")
+def delete_account(
+  response: Response,
+  current_user: dict = Depends(get_current_user),
+  token: str | None = Depends(get_session_token),
+  settings: Settings = Depends(get_settings),
+  auth_service: AuthService = Depends(get_auth_service),
+):
+  auth_service.delete_account(current_user["id"], token)
+  clear_auth_cookie(response, settings)
+  return {"ok": True}
