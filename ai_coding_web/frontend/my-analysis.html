@@ -37,7 +37,7 @@
         <div class="container">
           <p class="badge">내 분석</p>
           <h1 class="page-title">키워드로 분석 만들기</h1>
-          <p class="page-subtitle">키워드를 입력하면, 서버가 자주 쓰는 분석 카테고리를 추천하고 바로 지표를 그려줍니다.</p>
+          <p class="page-subtitle">먼저 <strong>분류</strong>를 고릅니다. 서버에 등록된 목록(<code>keyword_key</code>·<code>keyword_value</code>)이 분류별로 보이며, 필요하면 검색어로 좁힌 뒤 저장할 수 있습니다.</p>
         </div>
       </section>
 
@@ -45,15 +45,40 @@
         <div class="container">
           <div class="panel-head">
             <div>
-              <h2 class="panel-title">키워드 입력</h2>
-              <p class="panel-desc">예시: <code>게임</code>, <code>여행</code>, <code>미세먼지</code></p>
+              <h2 class="panel-title">1. 분류 선택</h2>
+              <p class="panel-desc">관리자가 DB에 등록한 분류만 표시됩니다.</p>
+            </div>
+          </div>
+          <div class="filters" id="category-pick" role="group" aria-label="분석 분류"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="saved-in-category-panel" hidden>
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">이 분류에 저장한 분석</h2>
+              <p class="panel-desc" id="saved-in-category-desc">선택한 분류로 저장한 항목만 표시됩니다.</p>
+            </div>
+          </div>
+          <p class="hint" id="saved-in-category-empty" hidden>아직 이 분류로 저장한 분석이 없습니다. 아래에서 키워드로 새 분석을 만든 뒤 저장해 보세요.</p>
+          <ul class="builder-saved-list" id="saved-in-category-list" hidden></ul>
+        </div>
+      </section>
+
+      <section class="panel" id="keyword-step" hidden>
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">2. 키워드 입력 (선택)</h2>
+              <p class="panel-desc">비워 두면 해당 분류의 등록 항목이 모두 표시됩니다. 좁히려면 예: <code>가격</code>, <code>유통</code></p>
             </div>
           </div>
 
           <form class="form" id="builder-form">
             <label class="field">
               <span class="field__label">키워드</span>
-              <input class="input" name="keyword" id="keyword" placeholder="키워드를 입력하세요 (예: 게임)" required />
+              <input class="input" name="keyword" id="keyword" placeholder="비우면 분류 전체 목록 (선택)" />
             </label>
             <button class="btn" type="submit">추천 받기</button>
             <a class="btn btn--ghost" href="./my-analyses.html">저장된 내 분석 보기</a>

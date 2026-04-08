@@ -7,6 +7,7 @@ from backend.app.config import get_settings
 from backend.app.core.security import hash_password
 from backend.app.db import Base, SessionLocal, engine
 from backend.app.db_models import User
+from backend.app.repositories.builder_store import BuilderStore
 from backend.app.repositories.memory_store import ContentStore
 
 
@@ -15,6 +16,7 @@ def init_database() -> None:
   _migrate_schema()
 
   ContentStore(SessionLocal).seed_defaults()
+  BuilderStore(SessionLocal).seed_catalog_if_empty()
 
   settings = get_settings()
   if not settings.auth_seed_demo_user:
@@ -77,6 +79,17 @@ def _migrate_sqlite() -> None:
       except Exception:
         pass
 
+    exists_saved = conn.execute(
+      text("SELECT name FROM sqlite_master WHERE type='table' AND name='saved_builder_analyses'")
+    ).fetchone()
+    if exists_saved:
+      sb_cols = conn.execute(text("PRAGMA table_info(saved_builder_analyses)")).fetchall()
+      sb_names = {row[1] for row in sb_cols}
+      if "category_label" not in sb_names:
+        conn.exec_driver_sql(
+          "ALTER TABLE saved_builder_analyses ADD COLUMN category_label VARCHAR(40) NOT NULL DEFAULT ''"
+        )
+
 
 def _migrate_postgres() -> None:
   """PostgreSQL 운영 환경 마이그레이션."""
@@ -87,3 +100,23 @@ def _migrate_postgres() -> None:
     ))
     if result.fetchone():
       conn.execute(text("ALTER TABLE users DROP COLUMN supabase_uid"))
+
+    r_cat = conn.execute(
+      text(
+        "SELECT column_name FROM information_schema.columns "
+        "WHERE table_schema='public' AND table_name='saved_builder_analyses' "
+        "AND column_name='category_label'"
+      )
+    )
+    if not r_cat.fetchone():
+      conn.execute(
+        text(
+          "ALTER TABLE saved_builder_analyses ADD COLUMN category_label VARCHAR(40) NOT NULL DEFAULT ''"
+        )
+      )
+      conn.execute(
+        text(
+          "CREATE INDEX IF NOT EXISTS ix_saved_builder_analyses_category_label "
+          "ON saved_builder_analyses (category_label)"
+        )
+      )

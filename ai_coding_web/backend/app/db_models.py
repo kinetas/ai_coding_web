@@ -65,6 +65,8 @@ class SavedBuilderAnalysis(Base):
 
   id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
   user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+  # 공개 페이지 카테고리와 동일한 분류명 (예: 농산물 시세, 의료)
+  category_label: Mapped[str] = mapped_column(String(80), server_default="", index=True)
   title: Mapped[str] = mapped_column(String(80))
   keyword: Mapped[str] = mapped_column(String(80), index=True)
   metric: Mapped[str] = mapped_column(String(40))
@@ -72,6 +74,20 @@ class SavedBuilderAnalysis(Base):
   created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
 
   user: Mapped[User] = relationship()
+
+
+class BuilderKeywordCatalog(Base):
+  """빌더 선택용 목록. DB 컬럼 `분류`(id 직후), keyword_key, keyword_value."""
+
+  __tablename__ = "builder_keyword_catalog"
+  __table_args__ = (
+    UniqueConstraint("classification", "keyword_key", name="uq_builder_keyword_catalog_class_key"),
+  )
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+  classification: Mapped[str] = mapped_column("분류", String(80), nullable=False, index=True)
+  keyword_key: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+  keyword_value: Mapped[str] = mapped_column(String(200), nullable=False)
 
 
 class EtlRun(Base):

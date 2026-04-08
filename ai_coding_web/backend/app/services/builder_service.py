@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import List
 
+from fastapi import HTTPException, status
+
 from backend.app.models.builder import BuilderSuggestion
 from backend.app.repositories.builder_store import BuilderStore
 
@@ -10,12 +12,70 @@ class BuilderService:
   def __init__(self, store: BuilderStore):
     self._store = store
 
-  def suggestions(self, keyword: str):
-    kw = (keyword or "").strip()
-    if not kw:
-      return {"keyword": "", "suggestions": []}
+  @staticmethod
+  def _normalize_category(label: str) -> str:
+    return (label or "").strip()
 
-    # 데모 규칙: 특정 키워드는 더 풍부한 추천 제공
+  def _require_valid_category(self, category_label: str) -> str:
+    cat = self._normalize_category(category_label)
+    allowed = self._store.list_distinct_classifications()
+    if not allowed:
+      raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="키워드 분류 목록이 아직 준비되지 않았습니다. 관리자에게 문의하세요.",
+      )
+    if cat not in allowed:
+      raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="등록되지 않은 분류입니다. 목록에 있는 분류만 선택할 수 있습니다.",
+      )
+    return cat
+
+  def list_classifications(self) -> dict:
+    return {"classifications": self._store.list_distinct_classifications()}
+
+  def list_catalog_entries(self, classification: str | None) -> dict:
+    raw = self._normalize_category(classification or "")
+    if raw:
+      self._require_valid_category(classification or "")
+    items = self._store.list_catalog(classification=raw if raw else None)
+    return {"items": items}
+
+  def suggestions(self, keyword: str, category_label: str | None = None):
+    if category_label is not None and self._normalize_category(category_label):
+      self._require_valid_category(category_label)
+
+    kw = (keyword or "").strip()
+    cat_raw = self._normalize_category(category_label or "")
+
+    if cat_raw:
+      cat = self._require_valid_category(category_label or "")
+      rows = self._store.list_catalog(classification=cat)
+      out: List[BuilderSuggestion] = []
+      for r in rows:
+        if kw:
+          blob = f"{r['keyword_value']} {r['keyword_key']}"
+          if kw.lower() not in blob.lower():
+            continue
+        label = r["keyword_value"]
+        if len(label) > 40:
+          label = label[:37] + "..."
+        out.append(
+          BuilderSuggestion(
+            id=r["keyword_key"],
+            label=label,
+            description="",
+          )
+        )
+      return {
+        "keyword": kw,
+        "category_label": cat,
+        "suggestions": [s.model_dump() for s in out],
+      }
+
+    if not kw:
+      return {"keyword": "", "category_label": "", "suggestions": []}
+
     lowered = kw.lower()
     rich = ("게임" in kw) or ("game" in lowered)
 
@@ -31,7 +91,6 @@ class BuilderService:
         ]
       )
 
-    # 중복 제거
     seen = set()
     out: List[BuilderSuggestion] = []
     for s in base:
@@ -40,10 +99,16 @@ class BuilderService:
       seen.add(s.id)
       out.append(s)
 
-    return {"keyword": kw, "suggestions": [s.model_dump() for s in out]}
+    return {
+      "keyword": kw,
+      "category_label": "",
+      "suggestions": [s.model_dump() for s in out],
+    }
 
   def metric(self, keyword: str, metric: str):
     kw = (keyword or "").strip()
+    if not kw:
+      kw = "일반"
     m = (metric or "").strip()
     metric_label = m
     if m == "user_count":
@@ -65,22 +130,28 @@ class BuilderService:
       "accents": data.get("accents") or {},
     }
 
-  def save(self, user: dict, title: str, keyword: str, metric: str, metric_label: str):
+  def save(self, user: dict, title: str, keyword: str, metric: str, metric_label: str, category_label: str):
+    cat = self._require_valid_category(category_label)
     item = self._store.save(
       user_id=int(user["id"]),
       title=title,
       keyword=keyword,
       metric=metric,
       metric_label=metric_label,
+      category_label=cat,
     )
     return item
 
-  def list_saved(self, user: dict):
-    items = self._store.list_saved(int(user["id"]))
+  def list_saved(self, user: dict, category_label: str | None = None):
+    cat: str | None = None
+    if category_label is not None:
+      raw = self._normalize_category(category_label)
+      if raw:
+        cat = self._require_valid_category(raw)
+    items = self._store.list_saved(int(user["id"]), category_label=cat)
     return {"user": user["email"], "items": items}
 
   def chat(self, user: dict, keyword: str, question: str):
-    # 데모 응답: 실제 구현 시 LLM + metric 매핑/쿼리 생성으로 교체
     kw = (keyword or "").strip()
     q = (question or "").strip()
     if not kw:
@@ -89,4 +160,3 @@ class BuilderService:
       name = user.get("nickname") or user.get("email") or "사용자"
       answer = f"{name}님의 질문을 받았습니다. '{kw}' 관련 '{q}' 요청은 현재 데모 응답으로 제공되며, 추천 지표를 선택하면 바로 그래프를 확인할 수 있습니다."
     return {"answer": answer}
-

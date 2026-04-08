@@ -13,6 +13,7 @@
 
       var empty = byId("list-empty");
       var table = byId("list-table");
+      var tbody = byId("saved-list-body");
 
       fetchJson("/api/builder/saved")
         .then(function (json) {
@@ -24,15 +25,27 @@
           }
           if (empty) empty.hidden = true;
           if (table) table.hidden = false;
+          if (tbody) tbody.innerHTML = "";
 
           items.forEach(function (it) {
             var tr = document.createElement("tr");
             var a = document.createElement("a");
-            a.href = "./my-analysis.html?keyword=" + encodeURIComponent(it.keyword) + "&metric=" + encodeURIComponent(it.metric) + "&label=" + encodeURIComponent(it.metric_label || "");
+            var cat = it.category_label || "";
+            a.href =
+              "./my-analysis.html?category=" +
+              encodeURIComponent(cat) +
+              "&keyword=" +
+              encodeURIComponent(it.keyword) +
+              "&metric=" +
+              encodeURIComponent(it.metric) +
+              "&label=" +
+              encodeURIComponent(it.metric_label || "");
             a.textContent = it.title || "(제목 없음)";
 
             var td1 = document.createElement("td");
             td1.appendChild(a);
+            var tdCat = document.createElement("td");
+            tdCat.textContent = cat || "—";
             var td2 = document.createElement("td");
             td2.textContent = it.keyword || "";
             var td3 = document.createElement("td");
@@ -41,10 +54,11 @@
             td4.textContent = it.saved_at || "";
 
             tr.appendChild(td1);
+            tr.appendChild(tdCat);
             tr.appendChild(td2);
             tr.appendChild(td3);
             tr.appendChild(td4);
-            table.appendChild(tr);
+            if (tbody) tbody.appendChild(tr);
           });
         })
         .catch(function (reason) {

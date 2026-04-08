@@ -13,6 +13,7 @@ class BuilderSuggestion(BaseModel):
 
 class BuilderSuggestionsResponse(BaseModel):
   keyword: str
+  category_label: str = ""
   suggestions: List[BuilderSuggestion]
 
 
@@ -39,11 +40,28 @@ class SaveBuilderAnalysisPayload(BaseModel):
   keyword: str = Field(min_length=1, max_length=80)
   metric: str = Field(min_length=1, max_length=40)
   metric_label: str = Field(default="")
+  category_label: str = Field(min_length=1, max_length=80)
+
+
+class BuilderCatalogRow(BaseModel):
+  id: int
+  classification: str
+  keyword_key: str
+  keyword_value: str
+
+
+class BuilderCatalogListResponse(BaseModel):
+  items: List[BuilderCatalogRow]
+
+
+class ClassificationsResponse(BaseModel):
+  classifications: List[str]
 
 
 class SavedBuilderAnalysis(BaseModel):
   id: str
   user: str
+  category_label: str = ""
   title: str
   keyword: str
   metric: str

@@ -320,6 +320,33 @@ a{color:inherit}
 .hint-title{margin:0 0 6px; font-weight:800; letter-spacing:-.02em}
 .hint-list{margin:0; padding-left:18px; color:var(--muted)}
 
+.builder-saved-list{
+  list-style:none;
+  margin:12px 0 0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.builder-saved-list a{
+  display:block;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04);
+  text-decoration:none;
+  color:var(--text);
+}
+.builder-saved-list a:hover{
+  border-color: rgba(0,212,255,.35);
+}
+.builder-saved-list .saved-meta{
+  display:block;
+  margin-top:4px;
+  font-size:13px;
+  color:var(--muted);
+}
+
 .site-footer{
   border-top:1px solid var(--line);
   background: rgba(6,9,20,.75);

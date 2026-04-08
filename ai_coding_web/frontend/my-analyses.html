@@ -52,12 +52,16 @@
 
           <div class="alert" id="list-empty" hidden>아직 저장된 분석이 없습니다.</div>
           <table class="table" id="list-table" aria-label="저장된 내 분석 목록" hidden>
-            <tr>
-              <th>이름</th>
-              <th>키워드</th>
-              <th>카테고리</th>
-              <th>저장 시각</th>
-            </tr>
+            <thead>
+              <tr>
+                <th>이름</th>
+                <th>분류</th>
+                <th>키워드</th>
+                <th>지표</th>
+                <th>저장 시각</th>
+              </tr>
+            </thead>
+            <tbody id="saved-list-body"></tbody>
           </table>
 
           <div class="filters" style="margin-top:14px">
