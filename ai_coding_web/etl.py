@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # ── 지수 백오프 재시도 데코레이터 (Hanness 자동 생성) ──────────────────
 import functools, time as _time, logging as _logging
 
@@ -38,7 +40,6 @@ def retry_with_backoff(max_retries: int = 3, base_delay: float = 1.0):
 
 농가격: .env 에 DATA_GO_KR_SERVICE_KEY(또는 PUBLIC_DATA_SERVICE_KEY), AT_PRICE_API_PATH 필수.
 """
-from __future__ import annotations
 
 import argparse
 import sys
