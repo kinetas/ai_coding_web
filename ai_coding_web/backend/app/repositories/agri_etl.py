@@ -94,6 +94,8 @@ def upsert_agri_price_from_full_package(full: dict[str, Any], session_factory: s
         existing.payload = payload
       else:
         db.add(AgriPriceHistory(item_cd=item_cd, vrty_cd=vrty_cd, exmn_ymd=exmn, payload=payload))
+      # 동일 배치에 같은 (item_cd, vrty_cd, exmn_ymd)가 있으면 아직 flush 전에는 select가 못 찾아 UniqueViolation 남.
+      db.flush()
       n_ok += 1
 
     db.commit()
