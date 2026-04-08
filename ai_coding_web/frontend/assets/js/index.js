@@ -75,7 +75,7 @@
     }
 
     function tryPlace(ww, wh) {
-      // 나선형 탐색: 중앙에서 바깥으로 확장하며 빈 자리 탐색
+      // Spiral placement from center outward
       var cx = cw / 2;
       var cy = ch / 2;
       var step = 6;
@@ -122,7 +122,7 @@
       var pos = tryPlace(ww, wh);
 
       if (!pos) {
-        // 공간 없으면 컨테이너 밖으로 숨김 (겹침 방지)
+        // Hide if no space (avoid overlap)
         span.style.visibility = "hidden";
         return;
       }
@@ -161,7 +161,7 @@
         renderSidebarKpi(results[0]);
       })
       .catch(function (reason) {
-        var msg = reason && reason.message ? reason.message : "워드클라우드 데이터를 불러오지 못했습니다.";
+        var msg = reason && reason.message ? reason.message : "Could not load wordcloud data.";
         renderCloudError(kr, msg);
         renderCloudError(gl, msg);
       });
@@ -172,7 +172,7 @@
     if (!kpiEl) return;
     var top = (words || []).slice(0, 5);
     if (!top.length) {
-      kpiEl.innerHTML = '<p class="kpi-error">데이터 없음</p>';
+      kpiEl.innerHTML = '<p class="kpi-error">No data</p>';
       return;
     }
     var maxW = top[0].weight || 1;
@@ -252,7 +252,7 @@
 })();
 
 
-// ── Last Updated 갱신 시각 표시 ──────────────────────────────────────
+// Last updated bar
 async function fetchLastUpdated() {
   const el = document.getElementById('last-updated-bar');
   if (!el) return;
@@ -260,15 +260,15 @@ async function fetchLastUpdated() {
     const res = await fetch('/api/public/price?limit=1');
     const data = await res.json();
     const raw = data?.last_updated || data?.items?.[0]?.updated_at || null;
-    if (!raw) { el.textContent = '갱신 시각: 알 수 없음'; return; }
+    if (!raw) { el.textContent = 'Last updated: unknown'; return; }
     const dt = new Date(raw);
-    el.textContent = '마지막 갱신: ' + dt.toLocaleString('ko-KR', {
+    el.textContent = 'Last updated: ' + dt.toLocaleString('en-US', {
       timeZone: 'Asia/Seoul',
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit'
     });
   } catch (e) {
-    el.textContent = '갱신 시각: 알 수 없음';
+    el.textContent = 'Last updated: unknown';
   }
 }
 document.addEventListener('DOMContentLoaded', fetchLastUpdated);

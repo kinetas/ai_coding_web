@@ -36,7 +36,7 @@
         window.EtCharts.donutChart(byId("chart-donut"), donut, {});
       })
       .catch(function (reason) {
-        showChartError(reason && reason.message ? reason.message : "그래프 데이터를 불러오지 못했습니다.");
+        showChartError(reason && reason.message ? reason.message : "Could not load chart data.");
       });
   }
 
@@ -75,7 +75,7 @@
           return '<div class="kpi-card">' +
             '<p class="kpi-card__label">TOP ' + (i + 1) + '</p>' +
             '<p class="kpi-card__value">' + w.text + '</p>' +
-            '<p class="kpi-card__sub">점수 ' + pct + '</p>' +
+            '<p class="kpi-card__sub">Score ' + pct + '</p>' +
             '</div>';
         }).join("");
       })

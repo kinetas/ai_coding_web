@@ -25,14 +25,14 @@ def build_router(service: BuilderService) -> APIRouter:
 
   @router.get("/builder/catalog", response_model=BuilderCatalogListResponse)
   def catalog(
-    classification: str | None = Query(default=None, description="비우면 전체 행"),
+    classification: str | None = Query(default=None, description="Omit for all rows"),
   ):
     return service.list_catalog_entries(classification)
 
   @router.get("/builder/suggestions", response_model=BuilderSuggestionsResponse)
   def suggestions(
     keyword: str = Query(default=""),
-    category: str | None = Query(default=None, description="농산물 시세·의료·교통·관광·환경"),
+    category: str | None = Query(default=None, description="Classification slug from catalog"),
   ):
     return service.suggestions(keyword, category_label=category)
 
@@ -43,7 +43,7 @@ def build_router(service: BuilderService) -> APIRouter:
   @router.get("/builder/saved", response_model=SavedBuilderAnalysesResponse)
   def saved(
     current_user: dict = Depends(get_current_user),
-    category: str | None = Query(default=None, description="지정 시 해당 분류만 조회"),
+    category: str | None = Query(default=None, description="Filter by classification"),
   ):
     return service.list_saved(current_user, category_label=category)
 

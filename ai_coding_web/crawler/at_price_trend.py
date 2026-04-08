@@ -208,7 +208,7 @@ def _item_name(it: dict[str, Any]) -> str:
     v = it.get(k)
     if v:
       return str(v).strip()[:40]
-  return "항목"
+  return "item"
 
 
 def _item_category(it: dict[str, Any]) -> str:
@@ -216,7 +216,7 @@ def _item_category(it: dict[str, Any]) -> str:
     v = it.get(k)
     if v:
       return str(v).strip()[:24]
-  return "기타"
+  return "other"
 
 
 def _item_region(it: dict[str, Any]) -> str:
@@ -224,7 +224,7 @@ def _item_region(it: dict[str, Any]) -> str:
     v = it.get(k)
     if v:
       return str(v).strip()[:80]
-  return "미상"
+  return "unknown"
 
 
 def _current_price(it: dict[str, Any]) -> float | None:
@@ -240,18 +240,18 @@ def _linear_forecast_next(y: list[float]) -> tuple[float, float, str]:
   """주차 인덱스 0..n-1 선형회귀 후 다음 시점(t=n) 추정."""
   n = len(y)
   if n < 2:
-    return (float(y[-1]) if y else 0.0), 0.0, "시계열 2점 미만"
+    return (float(y[-1]) if y else 0.0), 0.0, "fewer than 2 points"
   sx = sum(range(n))
   sxx = sum(i * i for i in range(n))
   sy = sum(y)
   sxy = sum(i * y[i] for i in range(n))
   denom = n * sxx - sx * sx
   if denom == 0:
-    return float(y[-1]), 0.0, "기울기 산출 불가"
+    return float(y[-1]), 0.0, "cannot compute slope"
   b = (n * sxy - sx * sy) / denom
   a = (sy - b * sx) / n
   nxt = a + b * n
-  return round(max(0.0, nxt), 4), round(b, 6), "주차 평균 시계열 선형 1스텝 외삽"
+  return round(max(0.0, nxt), 4), round(b, 6), "linear one-step extrapolation on weekly means"
 
 
 def _expand_5_to_12(series: list[float]) -> list[float]:
@@ -378,7 +378,7 @@ def build_deep_analytics(items: list[dict[str, Any]], *, charts: dict[str, Any])
     )
   region_stats.sort(key=lambda x: (-x["count"], x["region"]))
 
-  distribution: dict[str, Any] = {"bins": [], "unit_hint": "원(명세 기준, kg환산·평균가 등)"}
+  distribution: dict[str, Any] = {"bins": [], "unit_hint": "KRW per spec (kg-converted avg, etc.)"}
   if prices_all:
     srt = sorted(prices_all)
     n = len(srt)
@@ -412,7 +412,7 @@ def build_deep_analytics(items: list[dict[str, Any]], *, charts: dict[str, Any])
 
   forecast: dict[str, Any] = {
     "method": "linear_extrapolation",
-    "note": "단기 선형 외삽·참고용이며 실제 거래가와 다를 수 있습니다.",
+    "note": "Short-term linear extrapolation for reference; may differ from actual trades.",
   }
   if len(mean_series) >= 2:
     nxt, slope, _txt = _linear_forecast_next(mean_series)
@@ -421,7 +421,7 @@ def build_deep_analytics(items: list[dict[str, Any]], *, charts: dict[str, Any])
     forecast.update(
       {
         "mean_series_weeks": [round(x, 2) for x in mean_series],
-        "labels_weeks": ["4주전", "3주전", "2주전", "1주전", "조사일"],
+        "labels_weeks": ["W-4", "W-3", "W-2", "W-1", "survey day"],
         "next_step_estimate": nxt,
         "slope_per_week": slope,
         "week_over_week_pct": wow,
@@ -472,7 +472,7 @@ def build_extended_history_analytics(items: list[dict[str, Any]]) -> dict[str, A
     "item_key_count": len(by_key),
   }
   if len(distinct_dates) < 2:
-    out["note"] = "저장된 조사일이 2개 미만이면 조사일 간 전수 비교는 제한됩니다."
+    out["note"] = "Fewer than two survey dates: pairwise survey-date comparison is limited."
     return out
 
   d_prev, d_last = distinct_dates[-2], distinct_dates[-1]

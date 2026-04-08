@@ -20,6 +20,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
     environment:
       APP_ENV: production
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-etuser}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-etapp}
@@ -44,7 +56,8 @@ services:
     image: nginx:1.27-alpine
     restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "${HTTP_PORT:-3000}:80"
     volumes:

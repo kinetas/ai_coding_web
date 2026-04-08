@@ -35,7 +35,7 @@ class ContentStore:
       return [{"text": row.text, "weight": float(row.weight)} for row in rows[:28]]
 
   def set_wordcloud(self, category: Category, region: Region, words: List[Word], min_words: int = 15) -> int:
-    """새 단어 목록이 min_words 미만이면 기존 데이터를 유지하고 0을 반환합니다."""
+    """If fewer than min_words, keep existing data and return 0."""
     if len(words) < min_words:
       return 0
     with self._session_factory() as db:
@@ -135,15 +135,15 @@ def default_wordcloud_store() -> Dict[str, Dict[str, List[Dict[str, float]]]]:
   return {
     "agri": {
       "kr": [
-        {"text": "사과", "weight": 86},
-        {"text": "배추", "weight": 72},
-        {"text": "양파", "weight": 66},
-        {"text": "쌀값", "weight": 64},
-        {"text": "도매가격", "weight": 58},
-        {"text": "기상", "weight": 52},
-        {"text": "산지", "weight": 50},
-        {"text": "수급", "weight": 46},
-        {"text": "물가", "weight": 44},
+        {"text": "apple", "weight": 86},
+        {"text": "cabbage", "weight": 72},
+        {"text": "onion", "weight": 66},
+        {"text": "rice price", "weight": 64},
+        {"text": "wholesale", "weight": 58},
+        {"text": "weather", "weight": 52},
+        {"text": "farm gate", "weight": 50},
+        {"text": "supply", "weight": 46},
+        {"text": "inflation", "weight": 44},
       ],
       "global": [
         {"text": "food prices", "weight": 80},
@@ -157,13 +157,13 @@ def default_wordcloud_store() -> Dict[str, Dict[str, List[Dict[str, float]]]]:
     },
     "health": {
       "kr": [
-        {"text": "독감", "weight": 82},
-        {"text": "응급실", "weight": 60},
-        {"text": "진료예약", "weight": 58},
-        {"text": "비대면", "weight": 54},
-        {"text": "건강검진", "weight": 52},
-        {"text": "약국", "weight": 48},
-        {"text": "감염", "weight": 46},
+        {"text": "flu", "weight": 82},
+        {"text": "ER", "weight": 60},
+        {"text": "appointments", "weight": 58},
+        {"text": "telemedicine", "weight": 54},
+        {"text": "checkup", "weight": 52},
+        {"text": "pharmacy", "weight": 48},
+        {"text": "infection", "weight": 46},
       ],
       "global": [
         {"text": "flu", "weight": 70},
@@ -176,13 +176,13 @@ def default_wordcloud_store() -> Dict[str, Dict[str, List[Dict[str, float]]]]:
     },
     "traffic": {
       "kr": [
-        {"text": "지하철 지연", "weight": 74},
-        {"text": "버스", "weight": 58},
-        {"text": "출근길", "weight": 56},
-        {"text": "택시", "weight": 50},
-        {"text": "전기차 충전", "weight": 48},
-        {"text": "혼잡", "weight": 46},
-        {"text": "사고", "weight": 44},
+        {"text": "metro delay", "weight": 74},
+        {"text": "bus", "weight": 58},
+        {"text": "commute", "weight": 56},
+        {"text": "taxi", "weight": 50},
+        {"text": "EV charging", "weight": 48},
+        {"text": "congestion", "weight": 46},
+        {"text": "accident", "weight": 44},
       ],
       "global": [
         {"text": "EV charging", "weight": 66},
@@ -194,12 +194,12 @@ def default_wordcloud_store() -> Dict[str, Dict[str, List[Dict[str, float]]]]:
     },
     "tour": {
       "kr": [
-        {"text": "벚꽃", "weight": 78},
-        {"text": "축제", "weight": 62},
-        {"text": "맛집", "weight": 60},
-        {"text": "여행코스", "weight": 54},
-        {"text": "숙박", "weight": 50},
-        {"text": "항공권", "weight": 48},
+        {"text": "cherry blossom", "weight": 78},
+        {"text": "festival", "weight": 62},
+        {"text": "food tour", "weight": 60},
+        {"text": "itinerary", "weight": 54},
+        {"text": "hotel", "weight": 50},
+        {"text": "flights", "weight": 48},
       ],
       "global": [
         {"text": "cherry blossom", "weight": 64},
@@ -211,12 +211,12 @@ def default_wordcloud_store() -> Dict[str, Dict[str, List[Dict[str, float]]]]:
     },
     "env": {
       "kr": [
-        {"text": "미세먼지", "weight": 84},
-        {"text": "폭염", "weight": 60},
-        {"text": "탄소중립", "weight": 56},
-        {"text": "재활용", "weight": 52},
-        {"text": "기후", "weight": 48},
-        {"text": "홍수", "weight": 44},
+        {"text": "fine dust", "weight": 84},
+        {"text": "heat wave", "weight": 60},
+        {"text": "net zero", "weight": 56},
+        {"text": "recycling", "weight": 52},
+        {"text": "climate", "weight": 48},
+        {"text": "flood", "weight": 44},
       ],
       "global": [
         {"text": "climate", "weight": 70},

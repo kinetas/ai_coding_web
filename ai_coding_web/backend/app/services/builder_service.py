@@ -22,12 +22,12 @@ class BuilderService:
     if not allowed:
       raise HTTPException(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-        detail="키워드 분류 목록이 아직 준비되지 않았습니다. 관리자에게 문의하세요.",
+        detail="Keyword catalog is empty. Ask an admin to insert rows into builder_keyword_catalog.",
       )
     if cat not in allowed:
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="등록되지 않은 분류입니다. 목록에 있는 분류만 선택할 수 있습니다.",
+        detail="Unknown classification. Pick one from GET /api/builder/classifications.",
       )
     return cat
 
@@ -77,17 +77,17 @@ class BuilderService:
       return {"keyword": "", "category_label": "", "suggestions": []}
 
     lowered = kw.lower()
-    rich = ("게임" in kw) or ("game" in lowered)
+    rich = "game" in lowered
 
     base: List[BuilderSuggestion] = [
-      BuilderSuggestion(id="user_count", label="유저 수", description="기간별 유저 수(또는 관심도) 추이"),
-      BuilderSuggestion(id="price_avg", label="가격 평균", description="기간별 평균 가격 추이"),
+      BuilderSuggestion(id="user_count", label="Active users", description="Trend of active users or interest"),
+      BuilderSuggestion(id="price_avg", label="Average price", description="Average price over time"),
     ]
     if rich:
       base.extend(
         [
-          BuilderSuggestion(id="revenue", label="매출(추정)", description="기간별 매출(또는 소비) 추이"),
-          BuilderSuggestion(id="sentiment", label="긍/부정", description="키워드 관련 긍·부정 비중(예시)"),
+          BuilderSuggestion(id="revenue", label="Revenue (est.)", description="Revenue or spend trend"),
+          BuilderSuggestion(id="sentiment", label="Sentiment", description="Positive / negative share (demo)"),
         ]
       )
 
@@ -108,17 +108,17 @@ class BuilderService:
   def metric(self, keyword: str, metric: str):
     kw = (keyword or "").strip()
     if not kw:
-      kw = "일반"
+      kw = "general"
     m = (metric or "").strip()
     metric_label = m
     if m == "user_count":
-      metric_label = "유저 수"
+      metric_label = "Active users"
     elif m == "price_avg":
-      metric_label = "가격 평균"
+      metric_label = "Average price"
     elif m == "revenue":
-      metric_label = "매출(추정)"
+      metric_label = "Revenue (est.)"
     elif m == "sentiment":
-      metric_label = "긍/부정"
+      metric_label = "Sentiment"
 
     data = self._store.build_metric(kw, m)
     return {
@@ -155,8 +155,11 @@ class BuilderService:
     kw = (keyword or "").strip()
     q = (question or "").strip()
     if not kw:
-      answer = "키워드를 먼저 입력해 주세요. (예: 게임)"
+      answer = "Enter a keyword first (e.g. game)."
     else:
-      name = user.get("nickname") or user.get("email") or "사용자"
-      answer = f"{name}님의 질문을 받았습니다. '{kw}' 관련 '{q}' 요청은 현재 데모 응답으로 제공되며, 추천 지표를 선택하면 바로 그래프를 확인할 수 있습니다."
+      name = user.get("nickname") or user.get("email") or "User"
+      answer = (
+        f"{name}, received your question about '{kw}' — '{q}'. "
+        "This is a demo reply; pick a metric below to see a chart."
+      )
     return {"answer": answer}

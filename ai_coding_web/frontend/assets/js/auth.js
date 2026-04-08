@@ -39,7 +39,7 @@
     return !!state.user;
   }
 
-  // 쿠키 기반이라 토큰 불필요 — credentials: "include" 로 자동 전송
+  // Cookie session: no bearer token; credentials: "include" sends cookies
   function getAccessToken() {
     return Promise.resolve(null);
   }

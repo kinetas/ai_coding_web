@@ -21,7 +21,7 @@
       return res.json()
         .catch(function () { return {}; })
         .then(function (json) {
-          var err = new Error((json && (json.detail || json.message)) || "요청에 실패했습니다.");
+          var err = new Error((json && (json.detail || json.message)) || "Request failed.");
           err.status = res.status;
           throw err;
         });
@@ -49,7 +49,7 @@
     });
   }
 
-  /** 본문 data-page(API용 analysis-2 등) → 상단 네비 data-nav(health 등) */
+  /** body data-page (e.g. analysis-2) → nav data-nav (e.g. health) */
   var PAGE_TO_NAV_KEY = {
     home: "home",
     "agri-analytics": "agri-analytics",
@@ -60,12 +60,12 @@
   };
 
   var PRIMARY_NAV_LABELS = {
-    home: "메인",
-    "agri-analytics": "농산물 시세",
-    health: "의료",
-    traffic: "교통",
-    tour: "관광",
-    env: "환경"
+    home: "Home",
+    "agri-analytics": "Agri prices",
+    health: "Health",
+    traffic: "Traffic",
+    tour: "Tourism",
+    env: "Environment"
   };
 
   function applyPrimaryNavLabels() {
@@ -141,17 +141,17 @@
     var myCreate = document.createElement("a");
     myCreate.className = "nav-link nav-link--btn";
     myCreate.href = "./my-analysis.html";
-    myCreate.textContent = "내 분석 만들기";
+    myCreate.textContent = "Build analysis";
 
     var mySaved = document.createElement("a");
     mySaved.className = "nav-link nav-link--btn";
     mySaved.href = "./my-analyses.html";
-    mySaved.textContent = "내 분석 보기";
+    mySaved.textContent = "Saved analyses";
 
     var myPage = document.createElement("a");
     myPage.className = "nav-link nav-link--btn";
     myPage.href = "./mypage.html";
-    myPage.textContent = "마이페이지";
+    myPage.textContent = "My page";
 
     var userPill = document.createElement("span");
     userPill.className = "user-pill";
@@ -159,12 +159,12 @@
     var loginLink = document.createElement("a");
     loginLink.className = "nav-link nav-link--btn";
     loginLink.href = "./login.html";
-    loginLink.textContent = "로그인";
+    loginLink.textContent = "Log in";
 
     var logoutBtn = document.createElement("button");
     logoutBtn.className = "nav-link nav-link--btn";
     logoutBtn.type = "button";
-    logoutBtn.textContent = "로그아웃";
+    logoutBtn.textContent = "Log out";
 
     slot.appendChild(myCreate);
     slot.appendChild(mySaved);
@@ -227,7 +227,7 @@
 })();
 
 
-// ── 햄버거 메뉴 (모바일) ─────────────────────────────────────────────
+// Mobile hamburger (legacy pages with nav ul)
 function initHamburger() {
   const toggle = document.querySelector('.nav-toggle');
   const navUl = document.querySelector('nav ul');

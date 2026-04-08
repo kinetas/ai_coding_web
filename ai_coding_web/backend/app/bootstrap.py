@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy import text
 from sqlalchemy import select
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from backend.app.config import get_settings
 from backend.app.core.security import hash_password
@@ -46,7 +47,7 @@ def _migrate_schema() -> None:
 
 
 def _migrate_sqlite() -> None:
-  """SQLite 개발 환경 경량 마이그레이션."""
+  """SQLite lightweight migrations."""
   with engine.begin() as conn:
     exists = conn.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")).fetchone()
     if not exists:
@@ -55,23 +56,23 @@ def _migrate_sqlite() -> None:
     cols = conn.execute(text("PRAGMA table_info(users)")).fetchall()
     col_names = {row[1] for row in cols}
 
-    # name → nickname
+    # name -> nickname
     if "name" in col_names and "nickname" not in col_names:
       conn.exec_driver_sql("ALTER TABLE users RENAME COLUMN name TO nickname")
       col_names.discard("name")
       col_names.add("nickname")
 
-    # status 추가
+    # add status
     if "status" not in col_names:
       conn.exec_driver_sql("ALTER TABLE users ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'")
       col_names.add("status")
 
-    # updated_at 추가
+    # add updated_at
     if "updated_at" not in col_names:
       conn.exec_driver_sql("ALTER TABLE users ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP")
       col_names.add("updated_at")
 
-    # supabase_uid 제거 (있으면, SQLite 3.35.0+ 지원)
+    # drop supabase_uid if present (SQLite 3.35+)
     if "supabase_uid" in col_names:
       try:
         conn.exec_driver_sql("ALTER TABLE users DROP COLUMN supabase_uid")
@@ -90,9 +91,20 @@ def _migrate_sqlite() -> None:
           "ALTER TABLE saved_builder_analyses ADD COLUMN category_label VARCHAR(40) NOT NULL DEFAULT ''"
         )
 
+    exists_bc = conn.execute(
+      text("SELECT name FROM sqlite_master WHERE type='table' AND name='builder_keyword_catalog'")
+    ).fetchone()
+    if exists_bc:
+      bc_cols = conn.execute(text("PRAGMA table_info(builder_keyword_catalog)")).fetchall()
+      bc_names = {row[1] for row in bc_cols}
+      if "분류" in bc_names:
+        conn.exec_driver_sql('ALTER TABLE builder_keyword_catalog RENAME COLUMN "분류" TO classification')
+
+    _migrate_legacy_korean_labels(conn)
+
 
 def _migrate_postgres() -> None:
-  """PostgreSQL 운영 환경 마이그레이션."""
+  """PostgreSQL production migrations."""
   with engine.begin() as conn:
     result = conn.execute(text(
       "SELECT column_name FROM information_schema.columns "
@@ -120,3 +132,46 @@ def _migrate_postgres() -> None:
           "ON saved_builder_analyses (category_label)"
         )
       )
+
+    has_bc = conn.execute(
+      text(
+        "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
+        "WHERE table_schema='public' AND table_name='builder_keyword_catalog')"
+      )
+    ).scalar()
+    if has_bc:
+      cols = conn.execute(
+        text(
+          "SELECT column_name FROM information_schema.columns "
+          "WHERE table_schema='public' AND table_name='builder_keyword_catalog'"
+        )
+      ).fetchall()
+      colset = {row[0] for row in cols}
+      if "분류" in colset:
+        conn.execute(text('ALTER TABLE builder_keyword_catalog RENAME COLUMN "분류" TO classification'))
+
+    _migrate_legacy_korean_labels(conn)
+
+
+def _migrate_legacy_korean_labels(conn) -> None:
+  """Map legacy Korean labels to English slugs (saved analyses + keyword catalog)."""
+  mapping = {
+    "농산물 시세": "agri_prices",
+    "의료": "health",
+    "교통": "traffic",
+    "관광": "tourism",
+    "환경": "environment",
+  }
+  for old, new in mapping.items():
+    conn.execute(
+      text("UPDATE saved_builder_analyses SET category_label = :new WHERE category_label = :old"),
+      {"new": new, "old": old},
+    )
+  try:
+    for old, new in mapping.items():
+      conn.execute(
+        text("UPDATE builder_keyword_catalog SET classification = :new WHERE classification = :old"),
+        {"new": new, "old": old},
+      )
+  except (ProgrammingError, OperationalError):
+    pass

@@ -96,7 +96,7 @@
         encodeURIComponent(it.metric_label || "");
       a.innerHTML =
         "<strong>" +
-        escapeHtml(it.title || "(제목 없음)") +
+        escapeHtml(it.title || "(Untitled)") +
         "</strong>" +
         '<span class="saved-meta">' +
         escapeHtml(it.keyword || "") +
@@ -172,7 +172,7 @@
             if (chatForm) chatForm.hidden = has;
           })
           .catch(function (reason) {
-            setAlert(error, reason && reason.message ? reason.message : "추천 목록을 불러오지 못했습니다.");
+            setAlert(error, reason && reason.message ? reason.message : "Could not load suggestions.");
           });
       }
 
@@ -203,7 +203,7 @@
         }
 
         if (resultTitle) resultTitle.textContent = state.keyword + " · " + state.metricLabel;
-        if (metricDesc) metricDesc.textContent = state.metricDesc || "선택한 지표 추세";
+        if (metricDesc) metricDesc.textContent = state.metricDesc || "Selected metric trend";
 
         fetchJson(
           "/api/builder/metric?keyword=" +
@@ -230,7 +230,7 @@
             }
           })
           .catch(function (reason) {
-            setAlert(error, reason && reason.message ? reason.message : "지표 데이터를 불러오지 못했습니다.");
+            setAlert(error, reason && reason.message ? reason.message : "Could not load metric data.");
           });
       }
 
@@ -240,7 +240,7 @@
           state.classifications = cats;
           renderCategoryButtons(cats);
           if (!cats.length) {
-            setAlert(error, "등록된 분류가 없습니다. DB의 builder_keyword_catalog에 행을 추가하세요.");
+            setAlert(error, "No classifications registered. Add rows to builder_keyword_catalog.");
           }
 
           var categoryRoot = byId("category-pick");
@@ -293,7 +293,7 @@
           }
         })
         .catch(function (reason) {
-          setAlert(error, reason && reason.message ? reason.message : "분류 목록을 불러오지 못했습니다.");
+          setAlert(error, reason && reason.message ? reason.message : "Could not load classifications.");
         });
 
       if (form) {
@@ -305,7 +305,7 @@
           if (saveErr) saveErr.hidden = true;
 
           if (!state.categoryLabel) {
-            setAlert(error, "먼저 위에서 분류를 선택해 주세요.");
+            setAlert(error, "Select a classification above first.");
             return;
           }
 
@@ -325,7 +325,7 @@
               if (chatForm) chatForm.hidden = has;
             })
             .catch(function (reason) {
-              setAlert(error, reason && reason.message ? reason.message : "추천 카테고리를 불러오지 못했습니다.");
+              setAlert(error, reason && reason.message ? reason.message : "Could not load recommended categories.");
             });
         });
       }
@@ -348,7 +348,7 @@
           setAlert(chatAnswer, "");
           var q = String(byId("question") && byId("question").value ? byId("question").value : "").trim();
           if (!q) {
-            setAlert(chatAnswer, "질문을 입력해 주세요.");
+            setAlert(chatAnswer, "Enter a question.");
             return;
           }
           var payload = { keyword: state.keyword, question: q };
@@ -358,10 +358,10 @@
             body: JSON.stringify(payload)
           })
             .then(function (json) {
-              setAlert(chatAnswer, (json && json.answer) || "응답을 받지 못했습니다.");
+              setAlert(chatAnswer, (json && json.answer) || "No response received.");
             })
             .catch(function (reason) {
-              setAlert(chatAnswer, reason && reason.message ? reason.message : "챗봇 요청에 실패했습니다.");
+              setAlert(chatAnswer, reason && reason.message ? reason.message : "Chat request failed.");
             });
         });
       }
@@ -373,16 +373,16 @@
           if (saveErr) saveErr.hidden = true;
 
           if (!state.categoryLabel) {
-            setAlert(saveErr, "분류가 선택되지 않았습니다.");
+            setAlert(saveErr, "No classification selected.");
             return;
           }
           if (!state.keyword || !state.metric) {
-            setAlert(saveErr, "먼저 추천 카테고리에서 지표를 선택해 주세요.");
+            setAlert(saveErr, "Select a metric from suggestions first.");
             return;
           }
           var title = String(saveTitle && saveTitle.value ? saveTitle.value : "").trim();
           if (!title) {
-            setAlert(saveErr, "저장 이름을 입력해 주세요.");
+            setAlert(saveErr, "Enter a save name.");
             return;
           }
 
@@ -399,11 +399,11 @@
             body: JSON.stringify(payload)
           })
             .then(function () {
-              setAlert(saveOk, "저장 완료! ‘내 분석 보기’에서 확인할 수 있어요.");
+              setAlert(saveOk, "Saved. Open Saved analyses to view it.");
               loadSavedInCategory();
             })
             .catch(function (reason) {
-              setAlert(saveErr, reason && reason.message ? reason.message : "저장에 실패했습니다.");
+              setAlert(saveErr, reason && reason.message ? reason.message : "Save failed.");
             });
         });
       }

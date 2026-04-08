@@ -9,16 +9,16 @@ from sqlalchemy.orm import sessionmaker
 from backend.app.db_models import BuilderKeywordCatalog, SavedBuilderAnalysis, User
 
 _CATALOG_SEED: list[tuple[str, str, str]] = [
-  ("농산물 시세", "price_avg", "가격 평균"),
-  ("농산물 시세", "user_count", "유통·관심도"),
-  ("의료", "price_avg", "의료비 추세"),
-  ("의료", "user_count", "이용 건수"),
-  ("교통", "price_avg", "통행·요금 지표"),
-  ("교통", "user_count", "이용량"),
-  ("관광", "revenue", "소비·매출 추정"),
-  ("관광", "user_count", "방문 관심도"),
-  ("환경", "sentiment", "이슈 긍·부정"),
-  ("환경", "price_avg", "지표 평균"),
+  ("agri_prices", "price_avg", "Average price"),
+  ("agri_prices", "user_count", "Trade / interest"),
+  ("health", "price_avg", "Medical cost trend"),
+  ("health", "user_count", "Visit count"),
+  ("traffic", "price_avg", "Toll / fee index"),
+  ("traffic", "user_count", "Volume"),
+  ("tourism", "revenue", "Spend / revenue (est.)"),
+  ("tourism", "user_count", "Visit interest"),
+  ("environment", "sentiment", "Positive / negative"),
+  ("environment", "price_avg", "Metric average"),
 ]
 
 
@@ -130,4 +130,3 @@ class BuilderStore:
       "metric_label": row.metric_label,
       "saved_at": row.created_at.isoformat() if row.created_at else "",
     }
-

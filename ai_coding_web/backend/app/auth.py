@@ -55,8 +55,8 @@ def get_current_user(
   user = auth_service.get_user_by_session(token)
   if not user:
     if settings.app_env.lower() == "development":
-      logger.warning("인증 실패: 유효한 세션 쿠키 없음 | path=%s", request.url.path)
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="로그인이 필요합니다.")
+      logger.warning("Auth failed: no valid session cookie | path=%s", request.url.path)
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sign in required.")
   return user
 
 
@@ -66,4 +66,4 @@ def require_etl_token(
 ) -> None:
   if settings.etl_shared_secret and x_etl_token == settings.etl_shared_secret:
     return
-  raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="유효한 ETL 토큰이 필요합니다.")
+  raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Valid ETL token required.")

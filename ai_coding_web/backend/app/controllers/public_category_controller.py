@@ -19,7 +19,7 @@ def build_router(service: PublicCategoryService) -> APIRouter:
     if not row:
       raise HTTPException(
         status_code=404,
-        detail="public_category_analytics 에 해당 카테고리 데이터가 없습니다. .env PD_*_API_PATH 설정 후 ETL(crawl)을 실행하세요.",
+        detail="No public_category_analytics row for this category. Set PD_*_API_PATH in .env and run ETL.",
       )
     return row
 
@@ -29,7 +29,7 @@ def build_router(service: PublicCategoryService) -> APIRouter:
     if not row:
       raise HTTPException(
         status_code=404,
-        detail="public_category_raw 에 해당 카테고리 데이터가 없습니다. .env PD_*_API_PATH 설정 후 ETL(crawl)을 실행하세요.",
+        detail="No public_category_raw row for this category. Set PD_*_API_PATH in .env and run ETL.",
       )
     return row
 

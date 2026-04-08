@@ -1,33 +1,33 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Et | 환경</title>
-    <meta name="description" content="Et 환경 카테고리 · 공공 API·뉴스 집계" />
+    <title>Et | Environment</title>
+    <meta name="description" content="Et environment category · public API and news aggregates" />
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
   <body data-page="analysis-5">
-    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+    <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <a class="brand" href="./index.html" aria-label="Et home">Et</a>
 
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-          <span class="sr-only">메뉴 열기</span>
+          <span class="sr-only">Open menu</span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
         </button>
 
-        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
-          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
-          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 시세</a>
-          <a class="nav-link" href="./analysis-2.html" data-nav="health">의료</a>
-          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">교통</a>
-          <a class="nav-link" href="./analysis-4.html" data-nav="tour">관광</a>
-          <a class="nav-link" href="./analysis-5.html" data-nav="env">환경</a>
+        <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a class="nav-link" href="./index.html" data-nav="home">Home</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">Agri prices</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="health">Health</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">Traffic</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="tour">Tourism</a>
+          <a class="nav-link" href="./analysis-5.html" data-nav="env">Environment</a>
         </nav>
       </div>
     </header>
@@ -35,8 +35,8 @@
     <main id="main" class="site-main">
       <section class="hero">
         <div class="container">
-          <p class="badge">환경</p>
-          <h1 class="page-title">환경 · 공공 데이터</h1>
+          <p class="badge">Environment</p>
+          <h1 class="page-title">Environment · public data</h1>
         </div>
       </section>
 
@@ -48,26 +48,26 @@
         <div class="container">
           <div class="panel-head">
             <div>
-              <h2 class="panel-title">그래프</h2>
+              <h2 class="panel-title">Charts</h2>
             </div>
           </div>
 
           <div class="grid">
             <article class="card">
-              <h3>추세 (12 구간)</h3>
-              <canvas class="chart-canvas" id="chart-line" role="img" aria-label="추세 라인 그래프"></canvas>
+              <h3>Trend (12 buckets)</h3>
+              <canvas class="chart-canvas" id="chart-line" role="img" aria-label="Trend line chart"></canvas>
             </article>
 
             <article class="card">
-              <h3>수치 컬럼 Top</h3>
-              <p>평균 기준 상대 스케일(최대 5개)</p>
-              <canvas class="chart-canvas" id="chart-bar" role="img" aria-label="막대 그래프"></canvas>
+              <h3>Numeric columns Top</h3>
+              <p>Relative scale vs mean (max 5)</p>
+              <canvas class="chart-canvas" id="chart-bar" role="img" aria-label="Bar chart"></canvas>
             </article>
 
             <article class="card">
-              <h3>구성비</h3>
-              <p>범주 컬럼 또는 기본 분포</p>
-              <canvas class="chart-canvas chart-canvas--donut" id="chart-donut" role="img" aria-label="도넛 그래프"></canvas>
+              <h3>Mix</h3>
+              <p>Categorical column or default distribution</p>
+              <canvas class="chart-canvas chart-canvas--donut" id="chart-donut" role="img" aria-label="Donut chart"></canvas>
             </article>
 
           </div>
@@ -77,8 +77,8 @@
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
-        <p class="muted">환경 · 트렌드</p>
+        <a class="brand brand--sm" href="./index.html" aria-label="Et home">Et</a>
+        <p class="muted">Environment · trends</p>
       </div>
     </footer>
 

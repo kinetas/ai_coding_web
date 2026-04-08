@@ -124,7 +124,7 @@ class AgriAnalyticsService:
     # ctgry_nm → [(item_nm, price), ...]
     groups: dict[str, list[tuple[str, float]]] = defaultdict(list)
     for it in items:
-      ctgry = str(it.get("ctgry_nm") or it.get("category") or "기타").strip() or "기타"
+      ctgry = str(it.get("ctgry_nm") or it.get("category") or "other").strip() or "other"
       nm = str(it.get("item_nm") or it.get("품목명") or "").strip()
       price, _ = _survey_prices_from_payload(it)
       if price is not None and price > 0:
@@ -204,7 +204,7 @@ class AgriAnalyticsService:
         item_nm=rice_item_nm,
         item_cd=rice_item_cd,
         weekly_series=[],
-        forecast={"note": "데이터 없음"},
+        forecast={"note": "No data"},
         meta={"row_count": 0},
       )
 
@@ -250,11 +250,11 @@ class AgriAnalyticsService:
           "next_step_estimate": next_est,
           "slope_per_week": round(slope, 2),
           "week_over_week_pct": wow_pct,
-          "note": f"주차별 평균가 {len(weekly_series)}개 구간 선형 외삽",
+          "note": f"Linear extrapolation over {len(weekly_series)} weekly buckets",
         }
       )
     else:
-      forecast["note"] = "데이터 부족 (2구간 미만)"
+      forecast["note"] = "Insufficient data (fewer than 2 periods)"
 
     return AgriRiceSeriesResponse(
       item_nm=rice_item_nm,

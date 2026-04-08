@@ -32,7 +32,7 @@
     window.EtAuth.requireAuth({ redirect: true }).then(function (allowed) {
       if (!allowed) return;
 
-      // 현재 로그인 사용자 정보로 폼 채우기
+      // Fill form from current user
       var user = window.EtAuth.getUser();
       if (user) {
         if (nick) nick.value = user.nickname || "";
@@ -49,7 +49,7 @@
           var nickname = String(fd.get("nickname") || "").trim();
 
           if (!nickname) {
-            setAlert(err, "닉네임을 입력해 주세요.");
+            setAlert(err, "Enter a nickname.");
             return;
           }
 
@@ -59,10 +59,10 @@
             body: JSON.stringify({ nickname: nickname })
           })
             .then(function () {
-              setAlert(ok, "닉네임이 저장되었습니다.");
+              setAlert(ok, "Nickname saved.");
             })
             .catch(function (error) {
-              setAlert(err, error && error.message ? error.message : "저장에 실패했습니다.");
+              setAlert(err, error && error.message ? error.message : "Save failed.");
             });
         });
       }
@@ -70,11 +70,11 @@
       if (delBtn) {
         delBtn.addEventListener("click", function () {
           setAlert(delErr, "");
-          if (!delInput || String(delInput.value || "").trim() !== "탈퇴") {
-            setAlert(delErr, "확인 문구를 정확히 입력해 주세요.");
+          if (!delInput || String(delInput.value || "").trim().toUpperCase() !== "DELETE") {
+            setAlert(delErr, "Type DELETE exactly to confirm.");
             return;
           }
-          if (!window.confirm("정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+          if (!window.confirm("Delete your account? This cannot be undone.")) {
             return;
           }
 
@@ -86,7 +86,7 @@
               window.location.href = "./login.html";
             })
             .catch(function (error) {
-              setAlert(delErr, error && error.message ? error.message : "탈퇴 처리에 실패했습니다.");
+              setAlert(delErr, error && error.message ? error.message : "Account deletion failed.");
             });
         });
       }
@@ -95,33 +95,30 @@
 })();
 
 
-// ── 기본 템플릿 프리셋 상수 ──────────────────────────────────────────
 const PRESET_TEMPLATES = [
   {
     id: 'agri_price',
-    label: '농산물 가격 추이',
+    label: 'Agri price trend',
     icon: '🥬',
-    desc: '주요 농산물 가격 변동을 한눈에',
+    desc: 'Spot major crop price moves at a glance',
     widget: { type: 'chart', endpoint: '/api/public/price', chart_type: 'line' }
   },
   {
     id: 'weekly_news',
-    label: '주간 뉴스 키워드',
+    label: 'Weekly news keywords',
     icon: '📰',
-    desc: '이번 주 주목받은 키워드 워드클라우드',
+    desc: 'Word cloud of this week’s top keywords',
     widget: { type: 'wordcloud', endpoint: '/api/public/news/wordcloud' }
   },
   {
     id: 'category_issue',
-    label: '카테고리별 이슈 변화',
+    label: 'Category issue trends',
     icon: '📊',
-    desc: '카테고리별 뉴스 빈도 추이',
+    desc: 'News frequency trends by category',
     widget: { type: 'chart', endpoint: '/api/public/category', chart_type: 'bar' }
   }
 ];
 
-
-// ── 프리셋 카드 렌더링 ────────────────────────────────────────────────
 function renderPresetCards() {
   const grid = document.getElementById('preset-card-grid');
   if (!grid || typeof PRESET_TEMPLATES === 'undefined') return;
@@ -137,9 +134,8 @@ function renderPresetCards() {
 async function applyPreset(presetId) {
   const preset = (PRESET_TEMPLATES || []).find(t => t.id === presetId);
   if (!preset) return;
-  // 비로그인 체크
   if (!window.EtAuth || !window.EtAuth.isAuthed()) {
-    alert('로그인 후 이용할 수 있습니다.');
+    alert('Please sign in to use this.');
     window.location.href = './login.html';
     return;
   }
@@ -149,10 +145,10 @@ async function applyPreset(presetId) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: preset.label, config: preset.widget })
     });
-    alert(`'${preset.label}' 위젯이 추가됐습니다.`);
+    alert(`Widget '${preset.label}' was added.`);
     location.reload();
   } catch (e) {
-    alert(e && e.message ? e.message : '위젯 추가에 실패했습니다. 다시 시도해 주세요.');
+    alert(e && e.message ? e.message : 'Could not add widget. Try again.');
   }
 }
 

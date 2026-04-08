@@ -21,7 +21,7 @@ def build_router(service: AgriAnalyticsService) -> APIRouter:
     if not row:
       raise HTTPException(
         status_code=404,
-        detail="agri_price_analytics 에 데이터가 없습니다. .env 에 DATA_GO_KR_SERVICE_KEY·AT_PRICE_API_PATH 설정 후 python etl.py --agri 또는 --all 을 실행하세요.",
+        detail="No agri_price_analytics data. Set DATA_GO_KR_SERVICE_KEY and AT_PRICE_API_PATH in .env, then run: python etl.py --agri or --all",
       )
     return row
 
@@ -31,7 +31,7 @@ def build_router(service: AgriAnalyticsService) -> APIRouter:
     if not row:
       raise HTTPException(
         status_code=404,
-        detail="agri_price_raw 에 데이터가 없습니다. python etl.py --agri 또는 --all 실행 후 다시 시도하세요.",
+        detail="No agri_price_raw data. Run: python etl.py --agri or --all, then retry.",
       )
     return row
 
@@ -41,7 +41,7 @@ def build_router(service: AgriAnalyticsService) -> APIRouter:
     if not row:
       raise HTTPException(
         status_code=404,
-        detail="agri_price_raw 에 데이터가 없습니다. python etl.py --agri 또는 --all 을 실행하세요.",
+        detail="No agri_price_raw data. Run: python etl.py --agri or --all.",
       )
     return row
 
@@ -49,19 +49,19 @@ def build_router(service: AgriAnalyticsService) -> APIRouter:
   def get_agri_rice_series() -> AgriRiceSeriesResponse:
     row = service.get_rice_weekly_series()
     if row is None:
-      raise HTTPException(status_code=503, detail="쌀 가격 시계열 조회에 실패했습니다.")
+      raise HTTPException(status_code=503, detail="Failed to load rice price time series.")
     return row
 
   @router.get("/agri-analytics/item-series", response_model=AgriItemSeriesResponse)
   def get_agri_item_series(
-    item_cd: str = Query(..., min_length=1, description="품목코드 (agri_price_history.item_cd)"),
-    vrty_cd: str | None = Query(default=None, description="선택: 품종코드로 좁히기"),
+    item_cd: str = Query(..., min_length=1, description="Item code (agri_price_history.item_cd)"),
+    vrty_cd: str | None = Query(default=None, description="Optional variety code filter"),
   ) -> AgriItemSeriesResponse:
     row = service.get_item_price_series(item_cd, vrty_cd)
     if row is None:
       raise HTTPException(
         status_code=503,
-        detail="agri_price_history 조회에 실패했습니다. ETL을 실행했는지 확인하세요.",
+        detail="agri_price_history query failed. Ensure ETL has run.",
       )
     return row
 

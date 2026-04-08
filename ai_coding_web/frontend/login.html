@@ -1,33 +1,33 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Et | 로그인</title>
-    <meta name="description" content="Et 데모 로그인 페이지" />
+    <title>Et | Sign in</title>
+    <meta name="description" content="Et demo sign-in" />
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
   <body data-page="login">
-    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+    <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <a class="brand" href="./index.html" aria-label="Et home">Et</a>
 
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-          <span class="sr-only">메뉴 열기</span>
+          <span class="sr-only">Open menu</span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
         </button>
 
-        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
-          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
-          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 시세</a>
-          <a class="nav-link" href="./analysis-2.html" data-nav="health">의료</a>
-          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">교통</a>
-          <a class="nav-link" href="./analysis-4.html" data-nav="tour">관광</a>
-          <a class="nav-link" href="./analysis-5.html" data-nav="env">환경</a>
+        <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a class="nav-link" href="./index.html" data-nav="home">Home</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">Agri prices</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="health">Health</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">Traffic</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="tour">Tourism</a>
+          <a class="nav-link" href="./analysis-5.html" data-nav="env">Environment</a>
         </nav>
       </div>
     </header>
@@ -35,9 +35,9 @@
     <main id="main" class="site-main">
       <section class="hero">
         <div class="container">
-          <p class="badge">로그인</p>
-          <h1 class="page-title">내 분석 기능을 위해 로그인하세요</h1>
-          <p class="page-subtitle">로그인 후 내 분석 만들기·보기를 사용할 수 있습니다.</p>
+          <p class="badge">Sign in</p>
+          <h1 class="page-title">Sign in for My analysis</h1>
+          <p class="page-subtitle">After signing in you can use Build analysis and Saved analyses.</p>
         </div>
       </section>
 
@@ -45,51 +45,51 @@
         <div class="container">
           <div class="grid">
             <article class="card card--form">
-              <h2 class="panel-title">로그인</h2>
-              <p class="panel-desc">이메일/아이디와 비밀번호를 입력해 주세요.</p>
+              <h2 class="panel-title">Sign in</h2>
+              <p class="panel-desc">Enter email and password.</p>
 
               <div class="alert alert--error" id="login-error" role="alert" aria-live="polite" hidden></div>
               <div class="alert alert--success" id="login-success" role="status" aria-live="polite" hidden></div>
 
               <form class="form" id="login-form" novalidate>
                 <label class="field">
-                  <span class="field__label">이메일/아이디</span>
-                  <input class="input" type="email" name="email" autocomplete="username" placeholder="예: demo@et.ai" required />
+                  <span class="field__label">Email</span>
+                  <input class="input" type="email" name="email" autocomplete="username" placeholder="e.g. demo@et.ai" required />
                 </label>
 
                 <label class="field">
-                  <span class="field__label">비밀번호</span>
-                  <input class="input" type="password" name="password" autocomplete="current-password" placeholder="4자 이상" required />
+                  <span class="field__label">Password</span>
+                  <input class="input" type="password" name="password" autocomplete="current-password" placeholder="4+ characters" required />
                 </label>
 
-                <button class="btn" type="submit">로그인</button>
-                <a class="btn btn--ghost" href="./index.html">메인으로</a>
+                <button class="btn" type="submit">Sign in</button>
+                <a class="btn btn--ghost" href="./index.html">Home</a>
               </form>
             </article>
 
             <article class="card">
-              <h3>회원가입 또는 데모 계정</h3>
-              <p>새 계정을 바로 만들거나, 미리 준비된 데모 계정으로 확인할 수 있습니다.</p>
+              <h3>Register or demo</h3>
+              <p>Create an account or use a prepared demo account.</p>
               <div class="alert alert--error" id="register-error" role="alert" aria-live="polite" hidden></div>
               <div class="alert alert--success" id="register-success" role="status" aria-live="polite" hidden></div>
 
               <form class="form" id="register-form" novalidate style="margin-bottom: 20px;">
                 <label class="field">
-                  <span class="field__label">닉네임</span>
-                  <input class="input" type="text" name="name" autocomplete="nickname" placeholder="예: 홍길동" required />
+                  <span class="field__label">Nickname</span>
+                  <input class="input" type="text" name="name" autocomplete="nickname" placeholder="e.g. Demo User" required />
                 </label>
 
                 <label class="field">
-                  <span class="field__label">이메일</span>
-                  <input class="input" type="email" name="email" autocomplete="email" placeholder="예: hello@example.com" required />
+                  <span class="field__label">Email</span>
+                  <input class="input" type="email" name="email" autocomplete="email" placeholder="e.g. hello@example.com" required />
                 </label>
 
                 <label class="field">
-                  <span class="field__label">비밀번호</span>
-                  <input class="input" type="password" name="password" autocomplete="new-password" placeholder="8자 이상" required />
+                  <span class="field__label">Password</span>
+                  <input class="input" type="password" name="password" autocomplete="new-password" placeholder="8+ characters" required />
                 </label>
 
-                <button class="btn btn--ghost" type="submit">회원가입</button>
+                <button class="btn btn--ghost" type="submit">Register</button>
               </form>
 
             </article>
@@ -100,8 +100,8 @@
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
-        <p class="muted">로그인</p>
+        <a class="brand brand--sm" href="./index.html" aria-label="Et home">Et</a>
+        <p class="muted">Sign in</p>
       </div>
     </footer>
 

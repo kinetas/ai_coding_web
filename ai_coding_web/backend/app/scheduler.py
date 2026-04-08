@@ -1,11 +1,11 @@
 """
-APScheduler 기반 자동 ETL 스케줄러.
+APScheduler ETL jobs.
 
-- 워드클라우드: 매일 00:00 (뉴스 RSS 크롤 → wordcloud_terms 갱신)
-- 분석 스냅샷:  매주 월요일 00:00 (뉴스 분석 데이터 → analysis_snapshots 갱신)
-- 농가격: 매일 00:30 (공공데이터 API → agri_price_* , env 미설정 시 로그만)
+- Wordcloud: daily 00:00 Asia/Seoul (news RSS -> wordcloud_terms)
+- Analysis snapshots: Monday 00:00 (news pipeline -> analysis_snapshots)
+- Agri prices: daily 00:30 (public API -> agri_price_*; skips if env keys missing)
 
-크롤러 함수를 직접 호출하므로 HTTP 오버헤드 없음.
+Calls crawler functions in-process (no HTTP).
 """
 from __future__ import annotations
 
@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 _scheduler = BackgroundScheduler(timezone="Asia/Seoul")
 
-# 카테고리 × 지역 조합
 _WORDCLOUD_TARGETS: list[tuple[str, str]] = [
   ("agri", "kr"),
   ("health", "kr"),
@@ -27,7 +26,6 @@ _WORDCLOUD_TARGETS: list[tuple[str, str]] = [
   ("env", "kr"),
 ]
 
-# 분석 페이지 목록
 _ANALYSIS_PAGES: list[str] = [
   "analysis-1",
   "analysis-2",
@@ -38,12 +36,12 @@ _ANALYSIS_PAGES: list[str] = [
 
 
 def run_wordcloud_etl() -> None:
-  """매일 00:00 — 뉴스 RSS 크롤 후 wordcloud_terms 갱신."""
+  """Daily 00:00 — RSS crawl -> wordcloud_terms."""
   from crawler.news_pipeline import pipeline_wordcloud
   from backend.app.db import SessionLocal
   from backend.app.repositories.memory_store import ContentStore
 
-  logger.info("[ETL] 워드클라우드 업데이트 시작")
+  logger.info("[ETL] Wordcloud update started")
   store = ContentStore(SessionLocal)
   errors: list[str] = []
 
@@ -53,24 +51,24 @@ def run_wordcloud_etl() -> None:
       from backend.app.models.wordcloud import Word
       word_objs = [Word(text=w["text"], weight=float(w["weight"])) for w in words]
       store.set_wordcloud(category, region, word_objs)
-      logger.info("[ETL] 워드클라우드 완료: %s/%s (%d개)", category, region, len(word_objs))
+      logger.info("[ETL] Wordcloud OK: %s/%s (%d terms)", category, region, len(word_objs))
     except Exception as exc:
-      logger.error("[ETL] 워드클라우드 실패: %s/%s — %s", category, region, exc)
+      logger.error("[ETL] Wordcloud failed: %s/%s — %s", category, region, exc)
       errors.append(f"{category}/{region}: {exc}")
 
   status = "success" if not errors else "partial_error"
   details = "; ".join(errors) if errors else ""
   store.record_etl_run("news_rss_wordcloud", status, details)
-  logger.info("[ETL] 워드클라우드 완료 (status=%s)", status)
+  logger.info("[ETL] Wordcloud finished (status=%s)", status)
 
 
 def run_analysis_etl() -> None:
-  """매주 월요일 00:00 — 뉴스 분석 데이터로 analysis_snapshots 갱신."""
+  """Monday 00:00 — analysis snapshots."""
   from crawler.news_pipeline import pipeline_analysis
   from backend.app.db import SessionLocal
   from backend.app.repositories.memory_store import ContentStore
 
-  logger.info("[ETL] 분석 스냅샷 업데이트 시작")
+  logger.info("[ETL] Analysis snapshots update started")
   store = ContentStore(SessionLocal)
   errors: list[str] = []
 
@@ -84,28 +82,28 @@ def run_analysis_etl() -> None:
         donut=payload.get("donut", []),
         accents=payload.get("accents"),
       )
-      logger.info("[ETL] 분석 완료: %s", page)
+      logger.info("[ETL] Analysis OK: %s", page)
     except Exception as exc:
-      logger.error("[ETL] 분석 실패: %s — %s", page, exc)
+      logger.error("[ETL] Analysis failed: %s — %s", page, exc)
       errors.append(f"{page}: {exc}")
 
   status = "success" if not errors else "partial_error"
   details = "; ".join(errors) if errors else ""
   store.record_etl_run("news_analysis", status, details)
-  logger.info("[ETL] 분석 스냅샷 완료 (status=%s)", status)
+  logger.info("[ETL] Analysis snapshots finished (status=%s)", status)
 
 
 def run_agri_price_etl() -> None:
-  """매일 00:30 — 공공데이터 농가격 API → agri_price_* (키·경로 없으면 건너뜀)."""
+  """Daily 00:30 — agri public API -> agri_price_* (no-op if env unset)."""
   from crawler.at_price_trend import fetch_full_agri_from_env
   from backend.app.db import SessionLocal
   from backend.app.repositories.agri_etl import upsert_agri_price_from_full_package
   from backend.app.repositories.memory_store import ContentStore
 
-  logger.info("[ETL] 농가격(공공데이터) 업데이트 시작")
+  logger.info("[ETL] Agri price update started")
   full = fetch_full_agri_from_env()
   if not full:
-    logger.warning("[ETL] 농가격 건너뜀: DATA_GO_KR_SERVICE_KEY·AT_PRICE_API_PATH 미설정")
+    logger.warning("[ETL] Agri price skipped: DATA_GO_KR_SERVICE_KEY / AT_PRICE_API_PATH not set")
     return
 
   raw_db_row = full.get("raw_db_row") or {}
@@ -114,9 +112,9 @@ def run_agri_price_etl() -> None:
     n_ok, n_skip = upsert_agri_price_from_full_package(full, SessionLocal)
     store = ContentStore(SessionLocal)
     store.record_etl_run("agri_price_data_go_kr", "success", f"items={len(items)},history={n_ok},skip={n_skip}")
-    logger.info("[ETL] 농가격 완료: item %d건, 이력 %d건 (스킵 %d)", len(items), n_ok, n_skip)
+    logger.info("[ETL] Agri price OK: items=%d, history_rows=%d, skipped=%d", len(items), n_ok, n_skip)
   except Exception as exc:
-    logger.exception("[ETL] 농가격 실패: %s", exc)
+    logger.exception("[ETL] Agri price failed: %s", exc)
     store = ContentStore(SessionLocal)
     store.record_etl_run("agri_price_data_go_kr", "error", str(exc)[:500])
 
@@ -126,10 +124,10 @@ def start_scheduler() -> None:
   _scheduler.add_job(run_agri_price_etl, CronTrigger(hour=0, minute=30), id="agri_price_daily")
   _scheduler.add_job(run_analysis_etl, CronTrigger(day_of_week="mon", hour=0, minute=0), id="analysis_weekly")
   _scheduler.start()
-  logger.info("[Scheduler] 시작 — 워드클라우드 매일 00:00 / 농가격 00:30 / 분석 매주 월 00:00")
+  logger.info("[Scheduler] Started — wordcloud 00:00 / agri 00:30 / analysis Mon 00:00 (Asia/Seoul)")
 
 
 def stop_scheduler() -> None:
   if _scheduler.running:
     _scheduler.shutdown(wait=False)
-    logger.info("[Scheduler] 종료")
+    logger.info("[Scheduler] Stopped")

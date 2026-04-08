@@ -1,51 +1,49 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Et | 마이페이지</title>
-    <meta name="description" content="회원 정보 및 내 분석 바로가기" />
+    <title>Et | My page</title>
+    <meta name="description" content="Profile and saved analyses" />
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
   <body data-page="mypage">
-    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+    <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
+        <a class="brand" href="./index.html" aria-label="Et home">Et</a>
 
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-          <span class="sr-only">메뉴 열기</span>
+          <span class="sr-only">Open menu</span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
         </button>
 
-        <nav id="site-nav" class="site-nav" aria-label="주요 메뉴">
-          <a class="nav-link" href="./index.html" data-nav="home">메인</a>
-          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 시세</a>
-          <a class="nav-link" href="./analysis-2.html" data-nav="health">의료</a>
-          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">교통</a>
-          <a class="nav-link" href="./analysis-4.html" data-nav="tour">관광</a>
-          <a class="nav-link" href="./analysis-5.html" data-nav="env">환경</a>
+        <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a class="nav-link" href="./index.html" data-nav="home">Home</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">Agri prices</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="health">Health</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">Traffic</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="tour">Tourism</a>
+          <a class="nav-link" href="./analysis-5.html" data-nav="env">Environment</a>
         </nav>
       </div>
     </header>
 
     <main id="main" class="site-main">
-<!-- ── 빠른 시작 템플릿 프리셋 ── -->
 <section id="preset-bar" class="preset-bar">
-  <h3 class="preset-bar__title">빠른 시작</h3>
+  <h3 class="preset-bar__title">Quick start</h3>
   <div class="preset-card-grid" id="preset-card-grid">
-    <!-- JS로 렌더링 -->
   </div>
 </section>
 
       <section class="hero">
         <div class="container">
-          <p class="badge">마이페이지</p>
-          <h1 class="page-title">회원 정보 · 내 분석</h1>
-          <p class="page-subtitle">프로필을 수정하거나 저장된 분석으로 이동할 수 있습니다.</p>
+          <p class="badge">My page</p>
+          <h1 class="page-title">Profile · My analysis</h1>
+          <p class="page-subtitle">Update your profile or go to saved analyses.</p>
         </div>
       </section>
 
@@ -53,44 +51,44 @@
         <div class="container">
           <div class="grid">
             <article class="card">
-              <h2 class="panel-title">바로가기</h2>
-              <p class="panel-desc">저장해 둔 분석 목록을 확인하세요.</p>
+              <h2 class="panel-title">Shortcuts</h2>
+              <p class="panel-desc">Open your saved list.</p>
               <div class="filters">
-                <a class="btn" href="./my-analyses.html">내 분석 보기</a>
-                <a class="btn btn--ghost" href="./my-analysis.html">내 분석 만들기</a>
+                <a class="btn" href="./my-analyses.html">Saved analyses</a>
+                <a class="btn btn--ghost" href="./my-analysis.html">Build analysis</a>
               </div>
             </article>
 
             <article class="card card--form">
-              <h2 class="panel-title">회원 정보 수정</h2>
-              <p class="panel-desc">닉네임은 화면 표시에 쓰입니다. 이메일은 로그인 아이디로 변경할 수 없습니다.</p>
+              <h2 class="panel-title">Profile</h2>
+              <p class="panel-desc">Nickname is shown in the UI. Email is your login and cannot be changed here.</p>
 
               <div class="alert alert--error" id="profile-error" role="alert" aria-live="polite" hidden></div>
               <div class="alert alert--success" id="profile-success" role="status" aria-live="polite" hidden></div>
 
               <form class="form" id="profile-form" novalidate>
                 <label class="field">
-                  <span class="field__label">닉네임</span>
+                  <span class="field__label">Nickname</span>
                   <input class="input" type="text" name="nickname" id="field-nickname" autocomplete="nickname" maxlength="80" />
                 </label>
                 <label class="field">
-                  <span class="field__label">이메일</span>
+                  <span class="field__label">Email</span>
                   <input class="input" type="email" name="email" id="field-email" autocomplete="email" readonly style="opacity:0.6;cursor:default" />
                 </label>
-                <button class="btn" type="submit">저장</button>
+                <button class="btn" type="submit">Save</button>
               </form>
             </article>
 
             <article class="card card--form">
-              <h2 class="panel-title">회원 탈퇴</h2>
-              <p class="panel-desc">계정을 삭제하면 서버에 저장된 계정 정보와 내 분석 데이터가 함께 삭제됩니다. 되돌릴 수 없습니다.</p>
+              <h2 class="panel-title">Delete account</h2>
+              <p class="panel-desc">Deleting your account removes your profile and saved analyses. This cannot be undone.</p>
               <div class="alert alert--error" id="delete-error" role="alert" aria-live="polite" hidden></div>
               <label class="field">
-                <span class="field__label">확인을 위해 <strong>탈퇴</strong>를 입력하세요</span>
-                <input class="input" type="text" id="delete-confirm" autocomplete="off" placeholder="탈퇴" />
+                <span class="field__label">Type <strong>DELETE</strong> to confirm</span>
+                <input class="input" type="text" id="delete-confirm" autocomplete="off" placeholder="DELETE" />
               </label>
               <button class="btn btn--ghost" type="button" id="delete-account-btn" style="color: var(--danger, #e85d6f)">
-                회원 탈퇴
+                Delete account
               </button>
             </article>
           </div>
@@ -100,8 +98,8 @@
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈으로 이동">Et</a>
-        <p class="muted">마이페이지</p>
+        <a class="brand brand--sm" href="./index.html" aria-label="Et home">Et</a>
+        <p class="muted">My page</p>
       </div>
     </footer>
 
