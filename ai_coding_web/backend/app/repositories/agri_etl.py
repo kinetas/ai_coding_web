@@ -21,7 +21,7 @@ def _norm_item_cd(hr: dict[str, Any]) -> str:
 
 def upsert_agri_price_from_full_package(full: dict[str, Any], session_factory: sessionmaker) -> tuple[int, int]:
   """
-  `fetch_full_agri_from_env()` / `build_agri_supabase_rows_from_items()` 결과를 DB에 반영.
+  `fetch_full_agri_from_env()` / `build_agri_price_rows_from_items()` 결과를 로컬 DB에 반영.
   반환: (history_저장_건수, history_스킵_건수)
   """
   db_row = full["db_row"]

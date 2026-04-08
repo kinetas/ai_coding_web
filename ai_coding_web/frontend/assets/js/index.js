@@ -274,24 +274,3 @@ async function fetchLastUpdated() {
 document.addEventListener('DOMContentLoaded', fetchLastUpdated);
 
 
-// ── 데이터 수집 진행 상태 메시지 ────────────────────────────────────
-async function fetchDataStatus() {
-  const el = document.getElementById('data-status-msg');
-  if (!el) return;
-  try {
-    const res = await fetch('/api/public/news/wordcloud');
-    const data = await res.json();
-    const count = data?.word_count ?? (data?.words?.length ?? 0);
-    const MIN_WORDS = 5;
-    if (count < MIN_WORDS) {
-      el.style.display = 'block';
-      el.textContent = `데이터를 수집하고 있습니다 (${count}/15 단어 확보됨). 잠시 후 다시 확인해 주세요.`;
-      el.className = 'data-status-msg collecting';
-    } else {
-      el.style.display = 'none';
-    }
-  } catch (e) {
-    // API 호출 실패 시 무시
-  }
-}
-document.addEventListener('DOMContentLoaded', fetchDataStatus);

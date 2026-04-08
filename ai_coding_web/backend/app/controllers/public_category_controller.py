@@ -29,7 +29,7 @@ def build_router(service: PublicCategoryService) -> APIRouter:
     if not row:
       raise HTTPException(
         status_code=404,
-        detail="public_category_raw 에 해당 카테고리 데이터가 없습니다. Supabase 스크립트 적용·ETL 확인.",
+        detail="public_category_raw 에 해당 카테고리 데이터가 없습니다. .env PD_*_API_PATH 설정 후 ETL(crawl)을 실행하세요.",
       )
     return row
 

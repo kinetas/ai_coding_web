@@ -93,7 +93,7 @@ def log_jwt_verify_failure(
   if (settings_app_env or "").lower() != "development":
     return
   logger.warning(
-    "JWT 설정 힌트(개발) | SUPABASE_JWT_ISSUER(기대)=%s | JWKS=%s",
+    "JWT 설정 힌트(개발) | 기대 issuer=%s | JWKS=%s",
     expected_jwt_issuer or "(없음)",
     jwks_url or "(HS256 경로에서는 미사용)",
   )

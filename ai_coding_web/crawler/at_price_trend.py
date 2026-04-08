@@ -718,7 +718,7 @@ def fetch_price_items_history_merged(
   return merged, api_meta
 
 
-def build_agri_supabase_rows_from_items(
+def build_agri_price_rows_from_items(
   items: list[dict[str, Any]],
   *,
   api_meta: dict[str, Any] | None = None,
@@ -837,7 +837,7 @@ def fetch_full_agri_from_env() -> dict[str, Any] | None:
     items, api_meta = fetch_price_items_history_merged(service_key=key, api_path=path)
   except Exception:
     return None
-  return build_agri_supabase_rows_from_items(items, api_meta=api_meta, source="data_go_kr")
+  return build_agri_price_rows_from_items(items, api_meta=api_meta, source="data_go_kr")
 
 
 def load_agri_analysis_from_env() -> dict[str, Any] | None:
