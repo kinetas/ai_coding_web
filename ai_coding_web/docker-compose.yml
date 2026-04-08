@@ -23,9 +23,12 @@ services:
     environment:
       APP_ENV: production
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-etuser}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-etapp}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost}
+      # 브라우저 접속 URL과 동일한 오리진을 나열 (LAN IP로 열면 http://192.168.x.x:포트 포함)
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME:-et_session}
-      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
+      # 미니 PC 등 HTTP로만 서빙할 때 true면 브라우저가 세션 쿠키를 저장하지 않음 → 페이지마다 로그아웃됨
+      # HTTPS(리버스 프록시) 뒤에서만 true 권장
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
       AUTH_COOKIE_SAMESITE: ${AUTH_COOKIE_SAMESITE:-lax}
       AUTH_SESSION_TTL_HOURS: ${AUTH_SESSION_TTL_HOURS:-168}
       AUTH_SEED_DEMO_USER: ${AUTH_SEED_DEMO_USER:-false}
