@@ -61,14 +61,33 @@
     return nice * pow;
   }
 
+  function fmtShort(v) {
+    // 차트 값 축약: 10,000 이상 → K
+    var n = Math.round(v);
+    if (n >= 10000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+    return n.toLocaleString ? n.toLocaleString() : String(n);
+  }
+
   function lineChart(canvas, series, opts) {
     if (!canvas) return;
     var o = opts || {};
-    var accent = o.accent || getCssVar("--accent") || "#00D4FF";
-    var grid = o.grid || "rgba(234,240,255,.08)";
-    var text = o.text || "rgba(234,240,255,.70)";
+    var accent  = o.accent  || getCssVar("--accent") || "#00D4FF";
+    var grid    = o.grid    || "rgba(234,240,255,.08)";
+    var textCol = o.text    || "rgba(234,240,255,.70)";
+    var labels      = Array.isArray(o.labels) ? o.labels : null;      // x축 레이블
+    var showValues  = o.showValues !== false;                          // 점 위 값 표시(기본 true)
 
-    var m = { t: 18, r: 14, b: 26, l: 34 };
+    // 레이블 밀도 제어: 픽셀당 최소 간격
+    var MIN_LABEL_PX = 42;
+
+    // 마진: 값 표시 → 위 여백↑, 레이블 → 아래 여백↑
+    var m = {
+      t: showValues ? 30 : 18,
+      r: 18,
+      b: labels     ? 46 : 26,
+      l: 50
+    };
+
     var scaled = dprScale(canvas);
     var ctx = scaled.ctx, W = scaled.w, H = scaled.h;
     clear(ctx, W, H);
@@ -84,22 +103,23 @@
     // background grid
     drawGrid(ctx, x0, y0, innerW, innerH, 28, grid);
 
-    // axes labels (minimal)
+    // Y축 레이블
     ctx.save();
-    ctx.fillStyle = text;
-    ctx.font = "12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.fillStyle = textCol;
+    ctx.font = "11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     var ticks = 4;
     for (var t = 0; t <= ticks; t++) {
       var v = (yMax * (ticks - t)) / ticks;
       var yy = y0 + (innerH * t) / ticks;
-      ctx.fillText(String(Math.round(v)), x0 - 8, yy);
+      ctx.fillText(fmtShort(v), x0 - 6, yy);
     }
     ctx.restore();
 
-    // line
     var n = Math.max(2, series.length);
+
+    // 선
     ctx.save();
     ctx.lineWidth = 2.25;
     ctx.strokeStyle = accent;
@@ -116,18 +136,52 @@
     ctx.stroke();
     ctx.restore();
 
-    // points
+    // 포인트 + 값 표시
+    var stepPx = innerW / Math.max(1, n - 1);
+    var showEvery = Math.max(1, Math.ceil(MIN_LABEL_PX / Math.max(1, stepPx)));
+
     ctx.save();
     for (var p = 0; p < series.length; p++) {
       var xp = x0 + (innerW * p) / (n - 1);
       var vp = Number(series[p] || 0);
       var yp = y0 + innerH - (innerH * vp) / Math.max(1, yMax);
+
+      // 점
       ctx.beginPath();
       ctx.fillStyle = hexToRgba(accent, 0.92);
-      ctx.arc(xp, yp, 3.2, 0, Math.PI * 2);
+      ctx.arc(xp, yp, 3.5, 0, Math.PI * 2);
       ctx.fill();
+
+      // 점 위 값
+      if (showValues && p % showEvery === 0) {
+        ctx.fillStyle = textCol;
+        ctx.font = "10px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        ctx.fillText(fmtShort(vp), xp, yp - 5);
+      }
     }
     ctx.restore();
+
+    // X축 레이블 (회전 -30°)
+    if (labels) {
+      ctx.save();
+      ctx.fillStyle = textCol;
+      ctx.font = "10px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "top";
+      for (var lx = 0; lx < labels.length && lx < series.length; lx++) {
+        if (lx % showEvery !== 0) continue;
+        var xl = x0 + (innerW * lx) / (n - 1);
+        var yl = y0 + innerH + 6;
+        ctx.save();
+        ctx.translate(xl, yl);
+        ctx.rotate(-Math.PI / 6);   // -30°
+        ctx.fillText(labels[lx], 0, 0);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
   }
 
   function barChart(canvas, values, opts) {

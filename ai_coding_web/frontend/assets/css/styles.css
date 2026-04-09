@@ -881,14 +881,15 @@ body.manual-handoff--locked{overflow:hidden}
 }
 .mover-card{
   display:flex;
-  flex-direction:column;
+  flex-direction:row;
   justify-content:space-between;
+  align-items:flex-start;
   padding:12px 14px;
   border-radius:12px;
   border:1px solid rgba(255,255,255,.1);
   background:rgba(255,255,255,.04);
   min-height:90px;
-  gap:6px;
+  gap:8px;
 }
 .mover-card__name{
   font-size:13px;
@@ -914,6 +915,16 @@ body.manual-handoff--locked{overflow:hidden}
   font-size:11px;
   opacity:.55;
   font-variant-numeric:tabular-nums;
+}
+.mover-card__cur{
+  font-size:12px;
+  font-variant-numeric:tabular-nums;
+  color:var(--muted,#8899aa);
+  margin-top:4px;
+}
+.mover-card__right{
+  text-align:right;
+  flex-shrink:0;
 }
 
 @media(max-width:900px){

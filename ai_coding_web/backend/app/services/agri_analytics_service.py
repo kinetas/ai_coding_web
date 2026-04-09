@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import re
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from sqlalchemy import select
@@ -150,6 +150,43 @@ def _w4_pct(p: dict[str, Any], family: str) -> float | None:
   return round((cur - prev) / prev * 100, 2)
 
 
+def _kst_today_ymd() -> str:
+  """KST 기준 오늘 날짜(YYYYMMDD)."""
+  kst = timezone(timedelta(hours=9))
+  return datetime.now(kst).date().strftime("%Y%m%d")
+
+
+def _item_exmn_ymd_raw(it: dict[str, Any]) -> str:
+  return str(it.get("exmn_ymd") or it.get("exmnYmd") or "").strip()
+
+
+def _items_latest_survey_lte_kst_today(items: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], str]:
+  """
+  KST 오늘을 넘지 않는 조사일(exmn_ymd) 중 가장 늦은 날짜의 행만 남긴다.
+  이력 병합 raw에 여러 조사일이 섞여 있어도 차트 집계와 동일한 최신 스냅샷만 등락에 사용한다.
+  """
+  if not items:
+    return [], ""
+
+  dates: list[str] = []
+  for it in items:
+    ymd = _item_exmn_ymd_raw(it)
+    if ymd and len(ymd) == 8 and ymd.isdigit():
+      dates.append(ymd)
+
+  if not dates:
+    return list(items), ""
+
+  today = _kst_today_ymd()
+  candidates = [d for d in set(dates) if d <= today]
+  if not candidates:
+    candidates = list(set(dates))
+
+  latest = max(candidates)
+  filtered = [it for it in items if _item_exmn_ymd_raw(it) == latest]
+  return filtered, latest
+
+
 class AgriAnalyticsService:
   """로컬 DB(SQLite/PostgreSQL)에서 농산물 가격 분석 데이터 조회."""
 
@@ -287,7 +324,8 @@ class AgriAnalyticsService:
 
   def get_price_movers(self, top_n: int = 10) -> AgriPriceMoversResponse | None:
     """
-    최신 조사일 기준 전주 대비 등락률 상위 품목.
+    KST 오늘 이하의 조사일 중 가장 최근 exmn_ymd 행만 사용해 전주 대비 등락률 상위 품목을 계산한다.
+    (이력 병합 raw에 여러 조사일이 있어도 최신 스냅샷 한 시점만 반영.)
     가이드 5-1 추천 지표: 전주 대비 증감률 (price_wow_pct).
     """
     with self._session_factory() as db:
@@ -296,11 +334,8 @@ class AgriAnalyticsService:
       return None
 
     updated_at = row.updated_at.isoformat() if row.updated_at else datetime.now(timezone.utc).isoformat()
-    items: list[dict] = row.items or []
-
-    # 가장 최근 조사일 파악
-    survey_dates = [str(it.get("exmn_ymd") or "").strip() for it in items if it.get("exmn_ymd")]
-    survey_date = max(survey_dates) if survey_dates else ""
+    raw_items: list[dict] = row.items or []
+    items, survey_date = _items_latest_survey_lte_kst_today(raw_items)
 
     movers: list[AgriPriceMover] = []
     for it in items:
@@ -344,8 +379,12 @@ class AgriAnalyticsService:
       top_fallers=top_fallers,
       meta={
         "source_table": "agri_price_raw",
-        "item_count": len(items),
+        "item_count": len(raw_items),
+        "movers_item_count": len(items),
         "movers_computed": len(movers),
+        "movers_latest_exmn_ymd": survey_date,
+        "movers_today_kst_ymd": _kst_today_ymd(),
+        "movers_scope": "latest_exmn_ymd_lte_kst_today",
       },
     )
 

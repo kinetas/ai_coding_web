@@ -164,13 +164,16 @@
       if (m.unit_label) subParts.push(m.unit_label);
       var subStr = subParts.join(" · ");
 
+      var curPrice = fmtPrice(m.price_cur);
+
       return (
         '<div class="mover-card">' +
         '<div>' +
         '<p class="mover-card__name">' + nameStr + '</p>' +
         (subStr ? '<p class="mover-card__sub">' + subStr + '</p>' : '') +
+        '<p class="mover-card__cur">' + curPrice + '</p>' +
         '</div>' +
-        '<div>' +
+        '<div class="mover-card__right">' +
         '<p class="mover-card__pct ' + pctClass + '">' + (pct || "—") + '</p>' +
         (w4str ? '<p class="mover-card__w4">4주 ' + w4str + '</p>' : '') +
         '</div>' +
@@ -213,8 +216,18 @@
     setText("rice-week-count", series.length ? series.length + "개 기간" : "—");
 
     if (window.EtCharts && byId("chart-rice-series") && series.length > 1) {
-      var chartData = series.map(function (pt) { return pt.avg_price; });
-      window.EtCharts.lineChart(byId("chart-rice-series"), chartData, { accent: "#9AF7D0" });
+      var chartData   = series.map(function (pt) { return pt.avg_price; });
+      // "2026-W15" → "26/W15" 축약
+      var chartLabels = series.map(function (pt) {
+        var lbl = String(pt.week_label || "");
+        var m = lbl.match(/^(\d{4})-W(\d+)$/);
+        return m ? String(m[1]).slice(2) + "/W" + m[2] : lbl;
+      });
+      window.EtCharts.lineChart(
+        byId("chart-rice-series"),
+        chartData,
+        { accent: "#9AF7D0", labels: chartLabels, showValues: true }
+      );
     }
   }
 
