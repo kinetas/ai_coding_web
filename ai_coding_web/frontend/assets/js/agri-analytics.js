@@ -163,25 +163,6 @@
     setText("dist-unit", dist && dist.unit_hint ? dist.unit_hint : "");
   }
 
-  function forecastMethodLabel(m) {
-    var s = String(m || "").trim();
-    if (s === "linear_extrapolation") return "선형 외삽";
-    return s || "—";
-  }
-
-  function renderForecast(fc) {
-    if (!fc) return;
-    setText("fc-next", fmt(fc.next_step_estimate));
-    setText("fc-wow", fc.week_over_week_pct !== undefined ? fmt(fc.week_over_week_pct) + "%" : "—");
-    setText("fc-slope", fmt(fc.slope_per_week));
-    setText("fc-method", fc.method ? forecastMethodLabel(fc.method) : "선형 외삽");
-    setText("fc-note", fc.note || "");
-
-    if (window.EtCharts && byId("chart-fc-series") && Array.isArray(fc.mean_series_weeks) && fc.mean_series_weeks.length > 1) {
-      window.EtCharts.lineChart(byId("chart-fc-series"), fc.mean_series_weeks, { accent: "#9AF7D0" });
-    }
-  }
-
   function renderCharts(bundle) {
     if (!window.EtCharts) return;
     var b = bundle || {};
@@ -224,7 +205,6 @@
 
         renderRegions(data && data.region_stats);
         renderBins(data && data.distribution);
-        renderForecast(data && data.forecast);
         renderCharts(data && data.chart_bundle);
       })
       .catch(function (reason) {

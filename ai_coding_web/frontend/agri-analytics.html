@@ -74,7 +74,7 @@
       <section class="panel">
         <div class="container">
           <h2 class="panel-title">카테고리별 통계</h2>
-          <p class="panel-desc"><code>ctgry_nm</code> 기준 집계이며, 최저·최고 품목을 포함합니다.</p>
+          <p class="panel-desc"><code>종류별</code> 기준 집계이며, 최저·최고 품목을 포함합니다.</p>
           <p id="cat-error" class="chart-error" hidden></p>
           <div id="cat-tabs" class="cat-tabs" role="tablist"></div>
           <div id="cat-panels"></div>
@@ -148,38 +148,6 @@
           <article class="card" style="margin-top: 1rem">
             <h3>쌀 주간 평균 추이</h3>
             <canvas class="chart-canvas" id="chart-rice-series" role="img" aria-label="쌀 주간 평균 추이"></canvas>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="container">
-          <h2 class="panel-title">단기 추세(전체 품목)</h2>
-          <p class="panel-desc">
-            품목 전체의 주간 <strong>평균 가격</strong>에 대한 1단계 외삽입니다. 실제 시장과 다를 수 있습니다.
-            <span id="fc-note" class="muted"></span>
-          </p>
-          <div class="grid">
-            <article class="card">
-              <h3>다음 기간 추정</h3>
-              <p class="hero-subtitle" id="fc-next">—</p>
-            </article>
-            <article class="card">
-              <h3>전주 대비(%)</h3>
-              <p class="hero-subtitle" id="fc-wow">—</p>
-            </article>
-            <article class="card">
-              <h3>주당 기울기</h3>
-              <p class="hero-subtitle" id="fc-slope">—</p>
-            </article>
-            <article class="card">
-              <h3>방법</h3>
-              <p id="fc-method" class="muted">—</p>
-            </article>
-          </div>
-          <article class="card" style="margin-top: 1rem">
-            <h3>주간 평균 시계열</h3>
-            <canvas class="chart-canvas" id="chart-fc-series" role="img" aria-label="주간 평균 추세"></canvas>
           </article>
         </div>
       </section>
