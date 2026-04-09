@@ -184,6 +184,218 @@
     }
   }
 
+  // ── 쌀 주간 시계열 전용 (날짜 x축 + 호버 툴팁) ───────────────────────────
+  function riceLineChart(canvas, series, dateLabels, opts) {
+    if (!canvas || !series || series.length < 2) return;
+    var o = opts || {};
+    var accent  = o.accent  || "#9AF7D0";
+    var grid    = "rgba(234,240,255,.07)";
+    var textCol = "rgba(234,240,255,.68)";
+    var n = series.length;
+
+    // 마진: 상(값표시) / 하(회전 날짜 레이블) 충분히 확보
+    var M = { t: 32, r: 20, b: 72, l: 56 };
+
+    var maxV = 0;
+    for (var i = 0; i < n; i++) maxV = Math.max(maxV, Number(series[i] || 0));
+    var yMax = niceMax(maxV);
+
+    // 레이블 스킵 간격 계산
+    function showEvery(innerW) {
+      var step = innerW / Math.max(1, n - 1);
+      return Math.max(1, Math.ceil(56 / Math.max(1, step)));
+    }
+
+    // 포인트 좌표
+    function ptX(idx, innerW, x0) {
+      return x0 + (innerW * idx) / (n - 1);
+    }
+    function ptY(val, innerH, y0) {
+      return y0 + innerH - (innerH * Number(val || 0)) / Math.max(1, yMax);
+    }
+
+    // 날짜 파싱 "2026-04-06" → {year, md}
+    function parseLbl(dl) {
+      var m = String(dl || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) return { year: "", md: String(dl || "") };
+      return { year: m[1], md: String(parseInt(m[2])) + "/" + String(parseInt(m[3])) };
+    }
+
+    function draw(hoverIdx) {
+      var scaled = dprScale(canvas);
+      var ctx = scaled.ctx, W = scaled.w, H = scaled.h;
+      clear(ctx, W, H);
+
+      var innerW = Math.max(1, W - M.l - M.r);
+      var innerH = Math.max(1, H - M.t - M.b);
+      var x0 = M.l, y0 = M.t;
+
+      // 배경 그리드
+      drawGrid(ctx, x0, y0, innerW, innerH, 32, grid);
+
+      // Y축 틱
+      ctx.save();
+      ctx.fillStyle = textCol;
+      ctx.font = "11px ui-sans-serif,system-ui,sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      var ticks = 4;
+      for (var t = 0; t <= ticks; t++) {
+        var tv = yMax * (ticks - t) / ticks;
+        var ty = y0 + (innerH * t) / ticks;
+        ctx.fillText(fmtShort(tv), x0 - 6, ty);
+      }
+      ctx.restore();
+
+      // X축 날짜 레이블 (−36° 회전, 년도 변환 시 강조)
+      var se = showEvery(innerW);
+      ctx.save();
+      var prevYear = "";
+      for (var li = 0; li < n; li++) {
+        if (li % se !== 0) continue;
+        var parsed = parseLbl(dateLabels && dateLabels[li]);
+        var yearChanged = parsed.year && parsed.year !== prevYear;
+        if (parsed.year) prevYear = parsed.year;
+
+        var lx = ptX(li, innerW, x0);
+        var ly = y0 + innerH + 8;
+        var dispText = yearChanged
+          ? ("'" + (parsed.year ? parsed.year.slice(2) : "") + " " + parsed.md)
+          : parsed.md;
+
+        ctx.save();
+        ctx.translate(lx, ly);
+        ctx.rotate(-Math.PI / 5);   // −36°
+        ctx.font = yearChanged
+          ? "bold 10px ui-sans-serif,system-ui,sans-serif"
+          : "10px ui-sans-serif,system-ui,sans-serif";
+        ctx.fillStyle = yearChanged ? "rgba(234,240,255,.90)" : "rgba(234,240,255,.55)";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "top";
+        ctx.fillText(dispText, 0, 0);
+        ctx.restore();
+      }
+      ctx.restore();
+
+      // 선
+      ctx.save();
+      ctx.lineWidth = 2.2;
+      ctx.strokeStyle = accent;
+      ctx.shadowColor = hexToRgba(accent, 0.28);
+      ctx.shadowBlur = 14;
+      ctx.beginPath();
+      for (var k = 0; k < n; k++) {
+        var kx = ptX(k, innerW, x0);
+        var ky = ptY(series[k], innerH, y0);
+        if (k === 0) ctx.moveTo(kx, ky); else ctx.lineTo(kx, ky);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // 포인트
+      ctx.save();
+      for (var p = 0; p < n; p++) {
+        var px2 = ptX(p, innerW, x0);
+        var py2 = ptY(series[p], innerH, y0);
+        var isHover = (p === hoverIdx);
+        ctx.beginPath();
+        ctx.fillStyle = isHover ? "rgba(255,255,255,.95)" : hexToRgba(accent, 0.80);
+        ctx.arc(px2, py2, isHover ? 5.5 : 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // 호버: 수직선 + 툴팁
+      if (hoverIdx >= 0 && hoverIdx < n) {
+        var hx = ptX(hoverIdx, innerW, x0);
+        var hy = ptY(series[hoverIdx], innerH, y0);
+
+        // 수직 점선
+        ctx.save();
+        ctx.strokeStyle = "rgba(234,240,255,.22)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(hx, y0);
+        ctx.lineTo(hx, y0 + innerH);
+        ctx.stroke();
+        ctx.restore();
+
+        // 툴팁 내용
+        var parsed2 = parseLbl(dateLabels && dateLabels[hoverIdx]);
+        var dateTxt  = parsed2.year + "년 " + parsed2.md;
+        var priceTxt = Number(series[hoverIdx] || 0).toLocaleString("ko-KR") + "원";
+
+        ctx.save();
+        ctx.font = "bold 12px ui-sans-serif,system-ui,sans-serif";
+        var tw1 = ctx.measureText(priceTxt).width;
+        ctx.font = "10px ui-sans-serif,system-ui,sans-serif";
+        var tw2 = ctx.measureText(dateTxt).width;
+        var boxW = Math.max(tw1, tw2) + 22;
+        var boxH = 44;
+        var boxX = hx + 12;
+        var boxY = hy - 28;
+        if (boxX + boxW > W - 4) boxX = hx - boxW - 12;
+        if (boxY < y0) boxY = y0 + 2;
+        if (boxY + boxH > y0 + innerH) boxY = y0 + innerH - boxH;
+
+        // 배경
+        ctx.fillStyle = "rgba(8,14,28,.90)";
+        ctx.strokeStyle = hexToRgba(accent, 0.55);
+        ctx.lineWidth = 1;
+        roundRect(ctx, boxX, boxY, boxW, boxH, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        // 텍스트
+        ctx.fillStyle = "rgba(234,240,255,.72)";
+        ctx.font = "10px ui-sans-serif,system-ui,sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText(dateTxt, boxX + 11, boxY + 8);
+
+        ctx.fillStyle = accent;
+        ctx.font = "bold 13px ui-sans-serif,system-ui,sans-serif";
+        ctx.fillText(priceTxt, boxX + 11, boxY + 23);
+        ctx.restore();
+      }
+
+      // mousemove 에서 쓸 레이아웃 캐시
+      canvas._riceLayout = { innerW: innerW, innerH: innerH, x0: x0, y0: y0 };
+    }
+
+    // 이벤트 정리 후 재등록
+    if (canvas._riceCleanup) canvas._riceCleanup();
+    var lastHover = -1;
+
+    function onMove(e) {
+      var lay = canvas._riceLayout;
+      if (!lay) return;
+      var rect = canvas.getBoundingClientRect();
+      var mx = e.clientX - rect.left;
+      var step = lay.innerW / (n - 1);
+      var half = step / 2 + 10;
+      var closest = -1;
+      var minD = Infinity;
+      for (var ii = 0; ii < n; ii++) {
+        var xi = lay.x0 + (lay.innerW * ii) / (n - 1);
+        var d  = Math.abs(mx - xi);
+        if (d < half && d < minD) { minD = d; closest = ii; }
+      }
+      if (closest !== lastHover) { lastHover = closest; draw(closest); }
+    }
+    function onLeave() { if (lastHover !== -1) { lastHover = -1; draw(-1); } }
+
+    canvas.addEventListener("mousemove", onMove);
+    canvas.addEventListener("mouseleave", onLeave);
+    canvas._riceCleanup = function () {
+      canvas.removeEventListener("mousemove", onMove);
+      canvas.removeEventListener("mouseleave", onLeave);
+    };
+
+    draw(-1);
+  }
+
   function barChart(canvas, values, opts) {
     if (!canvas) return;
     var o = opts || {};
@@ -292,6 +504,7 @@
   window.EtCharts = {
     lineChart: lineChart,
     barChart: barChart,
-    donutChart: donutChart
+    donutChart: donutChart,
+    riceLineChart: riceLineChart
   };
 })();

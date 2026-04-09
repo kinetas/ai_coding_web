@@ -239,20 +239,13 @@
     setText("rice-week-count", series.length ? series.length + "개 기간" : "—");
 
     if (window.EtCharts && byId("chart-rice-series") && series.length > 1) {
-      var chartData   = series.map(function (pt) { return pt.avg_price; });
-      // date_label("2026-04-07") → "4/7", 없으면 week_label 축약
-      var chartLabels = series.map(function (pt) {
-        var dl = String(pt.date_label || "");
-        var dm = dl.match(/^\d{4}-(\d{2})-(\d{2})$/);
-        if (dm) return String(parseInt(dm[1])) + "/" + String(parseInt(dm[2]));
-        var wl = String(pt.week_label || "");
-        var wm = wl.match(/^(\d{4})-W(\d+)$/);
-        return wm ? wm[1].slice(2) + "/W" + wm[2] : wl;
-      });
-      window.EtCharts.lineChart(
+      var chartData = series.map(function (pt) { return pt.avg_price; });
+      var dateLabels = series.map(function (pt) { return pt.date_label || ""; });
+      window.EtCharts.riceLineChart(
         byId("chart-rice-series"),
         chartData,
-        { accent: "#9AF7D0", labels: chartLabels, showValues: true }
+        dateLabels,
+        { accent: "#9AF7D0" }
       );
     }
   }
