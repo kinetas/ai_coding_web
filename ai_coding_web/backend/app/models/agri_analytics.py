@@ -81,6 +81,7 @@ class AgriCategoryStats(BaseModel):
 
 class AgriCategoryStatsResponse(BaseModel):
   updated_at: str
+  survey_date: str = ""   # 집계 기준 최신 조사일 YYYYMMDD
   categories: list[AgriCategoryStats] = Field(default_factory=list)
   meta: dict[str, Any] = Field(default_factory=dict)
 
@@ -113,6 +114,7 @@ class AgriPriceMoversResponse(BaseModel):
 
 class AgriWeeklyPoint(BaseModel):
   week_label: str   # "YYYY-WNN"
+  date_label: str = ""  # 해당 주 월요일 날짜 "YYYY-MM-DD"
   avg_price: float
 
 

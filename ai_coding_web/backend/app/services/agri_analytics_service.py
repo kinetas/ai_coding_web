@@ -230,12 +230,13 @@ class AgriAnalyticsService:
 
   def get_category_stats(self) -> AgriCategoryStatsResponse | None:
     """
-    AgriPriceRaw.items 를 ctgry_nm × unit_family 별로 집계.
+    AgriPriceRaw.items 를 최신 조사일 기준으로 필터링 후 ctgry_nm × unit_family 별 집계.
 
     가이드 핵심 규칙:
     - weight(kg/g): exmn_dd_cnvs_avg_prc (kg 환산 단가) → 서로 다른 포장 규격도 비교 가능
     - 그 외(개/마리/포기 등): exmn_dd_avg_prc, unit_sz 구분 필수
     - item_nm 만으로 합치지 않음: 카테고리 수준 집계는 unit_family 내에서만
+    - 이력 병합 raw에 여러 조사일이 섞여 있으므로 최신 조사일(≤ KST 오늘) 행만 사용
     """
     with self._session_factory() as db:
       row = db.scalar(select(AgriPriceRaw).where(AgriPriceRaw.slug == "latest"))
@@ -243,7 +244,10 @@ class AgriAnalyticsService:
       return None
 
     updated_at = row.updated_at.isoformat() if row.updated_at else datetime.now(timezone.utc).isoformat()
-    items: list[dict] = row.items or []
+    raw_items: list[dict] = row.items or []
+
+    # 최신 조사일(KST 오늘 이하) 행만 필터링
+    items, survey_date = _items_latest_survey_lte_kst_today(raw_items)
 
     # ctgry_nm → unit_family → [(item_nm, price, unit_label), ...]
     groups: dict[str, dict[str, list[tuple[str, float, str]]]] = defaultdict(lambda: defaultdict(list))
@@ -316,8 +320,14 @@ class AgriAnalyticsService:
 
     return AgriCategoryStatsResponse(
       updated_at=updated_at,
+      survey_date=survey_date,
       categories=categories,
-      meta={"source_table": "agri_price_raw", "item_count": len(items)},
+      meta={
+        "source_table": "agri_price_raw",
+        "total_item_count": len(raw_items),
+        "survey_item_count": len(items),
+        "survey_date": survey_date,
+      },
     )
 
   # ── 가격 등락 품목 (WoW / 4주) ────────────────────────────────────────────
@@ -463,7 +473,18 @@ class AgriAnalyticsService:
     weekly_series: list[AgriWeeklyPoint] = []
     for label in sorted(week_buckets.keys()):
       vals = week_buckets[label]
-      weekly_series.append(AgriWeeklyPoint(week_label=label, avg_price=round(sum(vals) / len(vals), 1)))
+      # "YYYY-WNN" → 해당 주 월요일 날짜 계산 (Python 3.8+ datetime.fromisocalendar)
+      date_label = ""
+      try:
+        parts = label.split("-W")
+        if len(parts) == 2:
+          monday = datetime.fromisocalendar(int(parts[0]), int(parts[1]), 1)
+          date_label = monday.strftime("%Y-%m-%d")
+      except (ValueError, AttributeError):
+        date_label = label
+      weekly_series.append(
+        AgriWeeklyPoint(week_label=label, date_label=date_label, avg_price=round(sum(vals) / len(vals), 1))
+      )
 
     # 5) 선형 회귀 (numpy 없이)
     forecast: dict[str, Any] = {"method": "linear_extrapolation"}

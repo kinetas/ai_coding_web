@@ -37,6 +37,7 @@
         <div class="container">
           <p class="badge">공공 데이터 ETL</p>
           <h1 class="page-title">농산물 가격 · 카테고리별 통계 · 등락 품목</h1>
+          <p id="agri-survey-date" class="survey-date-badge" hidden></p>
           <p class="muted" id="agri-meta" style="font-size: 0.9rem"></p>
           <p id="agri-error" class="chart-error" hidden></p>
         </div>
@@ -50,6 +51,7 @@
             <strong>중량(kg·g)</strong>은 kg환산가, <strong>개수(개·마리·포기 등)</strong>는 실거래 단가 기준입니다.
             단위가 다른 품목을 직접 평균하지 않습니다.
           </p>
+          <p id="cat-survey-date" class="section-survey-date"></p>
           <p id="cat-error" class="chart-error" hidden></p>
           <div id="cat-tabs" class="cat-tabs" role="tablist"></div>
           <div id="cat-panels"></div>
@@ -97,6 +99,7 @@
             조사일 기준 전주 대비 등락률 상위 품목입니다.
             중량(kg·g) 계열은 kg환산가, 개수 계열은 실거래 단가 기준입니다.
           </p>
+          <p id="movers-survey-date" class="section-survey-date"></p>
           <p id="movers-error" class="chart-error" hidden></p>
           <div class="movers-section">
             <h3 class="movers-group-title movers-group-title--rise">상승 품목</h3>

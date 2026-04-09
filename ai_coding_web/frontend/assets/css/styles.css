@@ -862,6 +862,32 @@ body.manual-handoff--locked{overflow:hidden}
   margin:4px 0 0;
 }
 
+/* ── 조사 기준일 표시 ── */
+.survey-date-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--accent,#00D4FF);
+  background:rgba(0,212,255,.10);
+  border:1px solid rgba(0,212,255,.25);
+  border-radius:20px;
+  padding:4px 14px;
+  margin:8px 0 4px;
+  letter-spacing:.02em;
+}
+.survey-date-badge::before{
+  content:"📅";
+  font-size:12px;
+}
+.section-survey-date{
+  font-size:12px;
+  color:var(--muted,#8899aa);
+  margin:0 0 10px;
+}
+.section-survey-date:empty{ display:none }
+
 /* ── 가격 등락 품목 그리드 ── */
 .movers-group-title{
   font-size:14px;

@@ -29,6 +29,29 @@
     if (el) el.textContent = text;
   }
 
+  // "20260315" → "2026-03-15"
+  function fmtSurveyDate(ymd) {
+    if (!ymd || ymd.length !== 8) return ymd || "";
+    return ymd.slice(0, 4) + "-" + ymd.slice(4, 6) + "-" + ymd.slice(6, 8);
+  }
+
+  // 조사 기준일을 hero 배지 + 섹션 부제로 모두 반영
+  var _surveyDateSet = false;
+  function applySurveyDate(ymd) {
+    if (!ymd) return;
+    var formatted = fmtSurveyDate(ymd);
+    // hero 배지
+    var badge = byId("agri-survey-date");
+    if (badge) {
+      badge.textContent = "조사 기준일: " + formatted;
+      badge.hidden = false;
+    }
+    // 섹션 부제 (한 번만 세팅하되 이미 설정됐으면 덮어쓰기)
+    setText("cat-survey-date", "조사 기준일: " + formatted);
+    setText("movers-survey-date", "조사 기준일: " + formatted);
+    _surveyDateSet = true;
+  }
+
   var _FAMILY_LABEL = {
     weight: "중량(kg·g)",
     count: "개수(개·마리·포기 등)",
@@ -217,11 +240,14 @@
 
     if (window.EtCharts && byId("chart-rice-series") && series.length > 1) {
       var chartData   = series.map(function (pt) { return pt.avg_price; });
-      // "2026-W15" → "26/W15" 축약
+      // date_label("2026-04-07") → "4/7", 없으면 week_label 축약
       var chartLabels = series.map(function (pt) {
-        var lbl = String(pt.week_label || "");
-        var m = lbl.match(/^(\d{4})-W(\d+)$/);
-        return m ? String(m[1]).slice(2) + "/W" + m[2] : lbl;
+        var dl = String(pt.date_label || "");
+        var dm = dl.match(/^\d{4}-(\d{2})-(\d{2})$/);
+        if (dm) return String(parseInt(dm[1])) + "/" + String(parseInt(dm[2]));
+        var wl = String(pt.week_label || "");
+        var wm = wl.match(/^(\d{4})-W(\d+)$/);
+        return wm ? wm[1].slice(2) + "/W" + wm[2] : wl;
       });
       window.EtCharts.lineChart(
         byId("chart-rice-series"),
@@ -258,14 +284,17 @@
           metaEl.textContent = bits.length ? bits.join(" · ") : "";
         }
         renderCharts(data && data.chart_bundle);
+        // analytics 쪽에도 survey_date가 있으면 선반영
+        if (data && data.meta && data.meta.survey_date) applySurveyDate(data.meta.survey_date);
       })
       .catch(function () {
         // 차트 번들 실패는 조용히 처리 (주요 섹션에 영향 없음)
       });
 
-    // 2) Category stats
+    // 2) Category stats — 최신 조사일 기준
     window.EtApi.fetchJson("/api/agri-analytics/category-stats", { method: "GET" })
       .then(function (data) {
+        if (data && data.survey_date) applySurveyDate(data.survey_date);
         renderCategoryStats(data);
       })
       .catch(function (reason) {
@@ -287,9 +316,10 @@
         errEl.textContent = reason && reason.message ? reason.message : "쌀 가격 시계열을 불러오지 못했습니다.";
       });
 
-    // 4) Price movers (전주 대비 등락 품목, 8개씩)
+    // 4) Price movers — 최신 조사일 기준 전주 대비 등락 (8개씩)
     window.EtApi.fetchJson("/api/agri-analytics/price-movers?top_n=8", { method: "GET" })
       .then(function (data) {
+        if (data && data.survey_date) applySurveyDate(data.survey_date);
         renderPriceMovers(data);
       })
       .catch(function (reason) {
