@@ -1,33 +1,33 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Et | Health</title>
-    <meta name="description" content="Et health category analysis demo" />
+    <title>Et | 보건</title>
+    <meta name="description" content="Et 보건 카테고리 분석 데모" />
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
   <body data-page="analysis-2">
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="./index.html" aria-label="Et home">Et</a>
+        <a class="brand" href="./index.html" aria-label="Et 홈">Et</a>
 
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-          <span class="sr-only">Open menu</span>
+          <span class="sr-only">메뉴 열기</span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
         </button>
 
-        <nav id="site-nav" class="site-nav" aria-label="Primary">
-          <a class="nav-link" href="./index.html" data-nav="home">Home</a>
-          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">Agri prices</a>
-          <a class="nav-link" href="./analysis-2.html" data-nav="health">Health</a>
-          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">Traffic</a>
-          <a class="nav-link" href="./analysis-4.html" data-nav="tour">Tourism</a>
-          <a class="nav-link" href="./analysis-5.html" data-nav="env">Environment</a>
+        <nav id="site-nav" class="site-nav" aria-label="주 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">홈</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 가격</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="health">보건</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">교통</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="tour">관광</a>
+          <a class="nav-link" href="./analysis-5.html" data-nav="env">환경</a>
         </nav>
       </div>
     </header>
@@ -35,10 +35,10 @@
     <main id="main" class="site-main">
       <section class="hero">
         <div class="container">
-          <p class="badge">Health</p>
-          <h1 class="page-title">Health · infection signals</h1>
+          <p class="badge">보건</p>
+          <h1 class="page-title">보건 · 감염 신호</h1>
           <p class="page-subtitle">
-            Demo combining public health aggregates with search/community keywords to spot regional surges.
+            공공 보건 집계와 검색·커뮤니티 키워드를 묶어 지역별 급증을 살피는 데모입니다.
           </p>
         </div>
       </section>
@@ -51,32 +51,32 @@
         <div class="container">
           <div class="panel-head">
             <div>
-              <h2 class="panel-title">Sample charts</h2>
+              <h2 class="panel-title">샘플 차트</h2>
             </div>
           </div>
 
           <div class="grid">
             <article class="card">
-              <h3>Trend (12 months)</h3>
-              <p>Regional/time aggregates (sample)</p>
-              <canvas class="chart-canvas" id="chart-line" role="img" aria-label="Trend line chart"></canvas>
+              <h3>추세(12개월)</h3>
+              <p>지역·시간 집계(샘플)</p>
+              <canvas class="chart-canvas" id="chart-line" role="img" aria-label="추세 꺾은선 차트"></canvas>
             </article>
 
             <article class="card">
-              <h3>Surge leaders</h3>
-              <p>Top 5 by recent window (sample)</p>
-              <canvas class="chart-canvas" id="chart-bar" role="img" aria-label="Surge bar chart"></canvas>
+              <h3>급증 상위</h3>
+              <p>최근 구간 상위 5(샘플)</p>
+              <canvas class="chart-canvas" id="chart-bar" role="img" aria-label="급증 막대 차트"></canvas>
             </article>
 
             <article class="card">
-              <h3>Signal mix</h3>
-              <p>Symptoms / visits / keywords / other (sample)</p>
-              <canvas class="chart-canvas chart-canvas--donut" id="chart-donut" role="img" aria-label="Signal mix donut"></canvas>
+              <h3>신호 구성</h3>
+              <p>증상·방문·키워드·기타(샘플)</p>
+              <canvas class="chart-canvas chart-canvas--donut" id="chart-donut" role="img" aria-label="신호 구성 도넛"></canvas>
             </article>
 
             <article class="card">
-              <h3>How to read</h3>
-              <p>Aggregates only—summarize “where/when surges” without personal data.</p>
+              <h3>읽는 법</h3>
+              <p>집계만 다루며 개인정보 없이 “어디·언제 급증인지”를 요약합니다.</p>
               <div class="tagrow">
                 <span class="tag">aggregation</span>
                 <span class="tag">privacy</span>
@@ -90,68 +90,68 @@
 
       <section class="panel">
         <div class="container">
-          <h2 class="panel-title">Layout sample</h2>
-          <p class="panel-desc">Demo focused on public aggregates, not PII.</p>
+          <h2 class="panel-title">레이아웃 샘플</h2>
+          <p class="panel-desc">공개 집계에 초점을 맞춘 데모입니다(PII 아님).</p>
 
           <div class="grid">
             <article class="card">
-              <h3>Data sources (sample)</h3>
-              <p>Respiratory/infection stats (aggregated), facility load (aggregated), search trends</p>
+              <h3>데이터 출처(샘플)</h3>
+              <p>호흡기·감염 통계(집계), 시설 부하(집계), 검색 추세</p>
               <div class="tagrow">
                 <span class="tag">aggregate</span>
                 <span class="tag">region</span>
                 <span class="tag">period</span>
                 <span class="tag">keyword</span>
               </div>
-              <table class="table" aria-label="Health sample schema">
+              <table class="table" aria-label="보건 샘플 스키마">
                 <tr>
-                  <th>Field</th>
-                  <th>Description</th>
+                  <th>필드</th>
+                  <th>설명</th>
                 </tr>
                 <tr>
                   <td>region</td>
-                  <td>Area (city/county)</td>
+                  <td>지역(시·군)</td>
                 </tr>
                 <tr>
                   <td>signal</td>
-                  <td>Symptom/disease signal (aggregate)</td>
+                  <td>증상·질병 신호(집계)</td>
                 </tr>
                 <tr>
                   <td>visit_index</td>
-                  <td>Visit/congestion index (aggregate)</td>
+                  <td>방문·혼잡 지수(집계)</td>
                 </tr>
                 <tr>
                   <td>timestamp</td>
-                  <td>Observation time</td>
+                  <td>관측 시각</td>
                 </tr>
               </table>
             </article>
 
             <article class="card">
-              <h3>Spark Streaming sketch</h3>
-              <p>Window per region; rank “surge areas” as top-N for alerts.</p>
+              <h3>스트리밍 스케치</h3>
+              <p>지역별 창에서 “급증 지역”을 상위 N으로 순위 매겨 알림에 씁니다.</p>
               <div class="tagrow">
                 <span class="tag">top-N</span>
                 <span class="tag">watermark</span>
                 <span class="tag">trend</span>
                 <span class="tag">alert</span>
               </div>
-              <table class="table" aria-label="Sample metrics">
+              <table class="table" aria-label="샘플 지표">
                 <tr>
-                  <th>Metric</th>
-                  <th>Description</th>
+                  <th>지표</th>
+                  <th>설명</th>
                 </tr>
                 <tr>
                   <td>region_rank</td>
-                  <td>Surge rank by period</td>
+                  <td>기간별 급증 순위</td>
                 </tr>
                 <tr>
                   <td>keyword_cooccur</td>
-                  <td>Symptom keyword co-occurrence (counts)</td>
+                  <td>증상 키워드 동시 출현(건수)</td>
                 </tr>
                 <tr>
                   <td>baseline_diff</td>
-                  <td>Deviation from baseline (e.g. z-score)</td>
+                  <td>기준선 대비 편차(예: z-score)</td>
                 </tr>
               </table>
             </article>
@@ -162,8 +162,8 @@
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <a class="brand brand--sm" href="./index.html" aria-label="Et home">Et</a>
-        <p class="muted">Health · trends</p>
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈">Et</a>
+        <p class="muted">보건 · 추세</p>
       </div>
     </footer>
 

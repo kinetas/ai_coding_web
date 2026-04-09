@@ -13,7 +13,7 @@
     if (v === null || v === undefined || v === "") return "—";
     var n = Number(v);
     if (!isFinite(n)) return String(v);
-    return n.toLocaleString("en-US") + " KRW";
+    return n.toLocaleString("ko-KR") + "원";
   }
 
   function setText(id, text) {
@@ -31,7 +31,7 @@
 
     var cats = (data && Array.isArray(data.categories)) ? data.categories : [];
     if (!cats.length) {
-      if (errEl) { errEl.hidden = false; errEl.textContent = "No category data."; }
+      if (errEl) { errEl.hidden = false; errEl.textContent = "카테고리 데이터가 없습니다."; }
       return;
     }
     if (errEl) errEl.hidden = true;
@@ -58,10 +58,10 @@
 
       panel.innerHTML =
         '<div class="cat-stat-grid">' +
-        statCard("Sample count", fmt(cat.count), "") +
-        statCard("Average", fmtPrice(cat.avg_price), "") +
-        statCard("Min", fmtPrice(cat.min_price), cheapestTxt) +
-        statCard("Max", fmtPrice(cat.max_price), expTxt) +
+        statCard("표본 수", fmt(cat.count), "") +
+        statCard("평균", fmtPrice(cat.avg_price), "") +
+        statCard("최소", fmtPrice(cat.min_price), cheapestTxt) +
+        statCard("최대", fmtPrice(cat.max_price), expTxt) +
         "</div>";
       panelsEl.appendChild(panel);
     });
@@ -93,21 +93,21 @@
   function renderRiceSeries(data) {
     var errEl = byId("rice-error");
     if (!data) {
-      if (errEl) { errEl.hidden = false; errEl.textContent = "Could not load rice price data."; }
+      if (errEl) { errEl.hidden = false; errEl.textContent = "쌀 가격 데이터를 불러오지 못했습니다."; }
       return;
     }
     if (errEl) errEl.hidden = true;
 
-    setText("rice-item-nm", data.item_nm || "Rice");
+    setText("rice-item-nm", data.item_nm || "쌀");
 
     var fc = data.forecast || {};
     setText("rice-fc-note", fc.note || "");
     setText("rice-fc-next", fc.next_step_estimate != null ? fmtPrice(fc.next_step_estimate) : "—");
     setText("rice-fc-wow", fc.week_over_week_pct != null ? fmt(fc.week_over_week_pct) + "%" : "—");
-    setText("rice-fc-slope", fc.slope_per_week != null ? fmt(fc.slope_per_week) + " KRW/wk" : "—");
+    setText("rice-fc-slope", fc.slope_per_week != null ? fmt(fc.slope_per_week) + " 원/주" : "—");
 
     var series = Array.isArray(data.weekly_series) ? data.weekly_series : [];
-    setText("rice-week-count", series.length ? series.length + " periods" : "—");
+    setText("rice-week-count", series.length ? series.length + "개 기간" : "—");
 
     if (window.EtCharts && byId("chart-rice-series") && series.length > 1) {
       var chartData = series.map(function (pt) { return pt.avg_price; });
@@ -163,12 +163,18 @@
     setText("dist-unit", dist && dist.unit_hint ? dist.unit_hint : "");
   }
 
+  function forecastMethodLabel(m) {
+    var s = String(m || "").trim();
+    if (s === "linear_extrapolation") return "선형 외삽";
+    return s || "—";
+  }
+
   function renderForecast(fc) {
     if (!fc) return;
     setText("fc-next", fmt(fc.next_step_estimate));
     setText("fc-wow", fc.week_over_week_pct !== undefined ? fmt(fc.week_over_week_pct) + "%" : "—");
     setText("fc-slope", fmt(fc.slope_per_week));
-    setText("fc-method", fc.method ? fmt(fc.method) : "linear_extrapolation");
+    setText("fc-method", fc.method ? forecastMethodLabel(fc.method) : "선형 외삽");
     setText("fc-note", fc.note || "");
 
     if (window.EtCharts && byId("chart-fc-series") && Array.isArray(fc.mean_series_weeks) && fc.mean_series_weeks.length > 1) {
@@ -203,8 +209,8 @@
         var metaEl = byId("agri-meta");
         if (metaEl) {
           var bits = [];
-          if (meta.item_count != null) bits.push("samples " + meta.item_count);
-          if (meta.generated_at) bits.push("generated " + meta.generated_at);
+          if (meta.item_count != null) bits.push("표본 " + meta.item_count + "건");
+          if (meta.generated_at) bits.push("생성 " + meta.generated_at);
           if (meta.api_path_hint) bits.push("API " + meta.api_path_hint);
           metaEl.textContent = bits.length ? bits.join(" · ") : "";
         }
@@ -224,7 +230,7 @@
       .catch(function (reason) {
         if (!err) return;
         err.hidden = false;
-        err.textContent = reason && reason.message ? reason.message : "Could not load analytics data.";
+        err.textContent = reason && reason.message ? reason.message : "분석 데이터를 불러오지 못했습니다.";
       });
 
     // 2) Category stats
@@ -236,7 +242,7 @@
         var errEl = byId("cat-error");
         if (!errEl) return;
         errEl.hidden = false;
-        errEl.textContent = reason && reason.message ? reason.message : "Could not load category stats.";
+        errEl.textContent = reason && reason.message ? reason.message : "카테고리 통계를 불러오지 못했습니다.";
       });
 
     // 3) Rice weekly series
@@ -248,7 +254,7 @@
         var errEl = byId("rice-error");
         if (!errEl) return;
         errEl.hidden = false;
-        errEl.textContent = reason && reason.message ? reason.message : "Could not load rice price series.";
+        errEl.textContent = reason && reason.message ? reason.message : "쌀 가격 시계열을 불러오지 못했습니다.";
       });
   });
 })();

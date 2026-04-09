@@ -1,33 +1,33 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Et | Agriculture</title>
-    <meta name="description" content="Et agriculture and price trend demo" />
+    <title>Et | 농업</title>
+    <meta name="description" content="Et 농업·가격 추세 데모" />
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
   <body data-page="analysis-1">
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="./index.html" aria-label="Et home">Et</a>
+        <a class="brand" href="./index.html" aria-label="Et 홈">Et</a>
 
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-          <span class="sr-only">Open menu</span>
+          <span class="sr-only">메뉴 열기</span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
         </button>
 
-        <nav id="site-nav" class="site-nav" aria-label="Primary">
-          <a class="nav-link" href="./index.html" data-nav="home">Home</a>
-          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">Agri prices</a>
-          <a class="nav-link" href="./analysis-2.html" data-nav="health">Health</a>
-          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">Traffic</a>
-          <a class="nav-link" href="./analysis-4.html" data-nav="tour">Tourism</a>
-          <a class="nav-link" href="./analysis-5.html" data-nav="env">Environment</a>
+        <nav id="site-nav" class="site-nav" aria-label="주 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">홈</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 가격</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="health">보건</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">교통</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="tour">관광</a>
+          <a class="nav-link" href="./analysis-5.html" data-nav="env">환경</a>
         </nav>
       </div>
     </header>
@@ -35,10 +35,10 @@
     <main id="main" class="site-main">
       <section class="hero">
         <div class="container">
-          <p class="badge">Agriculture</p>
-          <h1 class="page-title">Agriculture · price trends</h1>
+          <p class="badge">농업</p>
+          <h1 class="page-title">농업 · 가격 추세</h1>
           <p class="page-subtitle">
-            Demo combining public data (wholesale, origin, weather) with online signals for spike/dip detection.
+            도매·산지·날씨 등 공공 데이터와 온라인 신호를 묶어 급등·급락을 찾는 데모입니다.
           </p>
         </div>
       </section>
@@ -51,32 +51,32 @@
         <div class="container">
           <div class="panel-head">
             <div>
-              <h2 class="panel-title">Sample charts</h2>
+              <h2 class="panel-title">샘플 차트</h2>
             </div>
           </div>
 
           <div class="grid">
             <article class="card">
-              <h3>Trend (12 months)</h3>
-              <p>Windowed aggregates (sample)</p>
-              <canvas class="chart-canvas" id="chart-line" role="img" aria-label="Trend line chart"></canvas>
+              <h3>추세(12개월)</h3>
+              <p>구간 집계(샘플)</p>
+              <canvas class="chart-canvas" id="chart-line" role="img" aria-label="추세 꺾은선 차트"></canvas>
             </article>
 
             <article class="card">
-              <h3>Top movers</h3>
-              <p>Top 5 by recent window (sample)</p>
-              <canvas class="chart-canvas" id="chart-bar" role="img" aria-label="Top movers bar chart"></canvas>
+              <h3>변동 상위</h3>
+              <p>최근 구간 상위 5(샘플)</p>
+              <canvas class="chart-canvas" id="chart-bar" role="img" aria-label="변동 상위 막대 차트"></canvas>
             </article>
 
             <article class="card">
-              <h3>Signal mix</h3>
-              <p>Price / supply / weather / keywords (sample)</p>
-              <canvas class="chart-canvas chart-canvas--donut" id="chart-donut" role="img" aria-label="Signal mix donut"></canvas>
+              <h3>신호 구성</h3>
+              <p>가격·공급·날씨·키워드(샘플)</p>
+              <canvas class="chart-canvas chart-canvas--donut" id="chart-donut" role="img" aria-label="신호 구성 도넛"></canvas>
             </article>
 
             <article class="card">
-              <h3>How to read</h3>
-              <p>In production, add thresholds, seasonality, and external events for alerts and root-cause hints.</p>
+              <h3>읽는 법</h3>
+              <p>운영 환경에서는 임계값·계절성·외부 이벤트를 더해 알림과 원인 힌트를 줄 수 있습니다.</p>
               <div class="tagrow">
                 <span class="tag">threshold</span>
                 <span class="tag">seasonality</span>
@@ -90,68 +90,68 @@
 
       <section class="panel">
         <div class="container">
-          <h2 class="panel-title">Layout sample</h2>
-          <p class="panel-desc">Demo content showing “collect many feeds, group by category”.</p>
+          <h2 class="panel-title">레이아웃 샘플</h2>
+          <p class="panel-desc">여러 피드를 모아 카테고리별로 묶는 예시입니다.</p>
 
           <div class="grid">
             <article class="card">
-              <h3>Data sources (sample)</h3>
-              <p>Wholesale prices, origin volume, weather (temp/rain), news/community keywords</p>
+              <h3>데이터 출처(샘플)</h3>
+              <p>도매가, 산지 물량, 날씨(기온·강수), 뉴스·커뮤니티 키워드</p>
               <div class="tagrow">
                 <span class="tag">price</span>
                 <span class="tag">supply</span>
                 <span class="tag">weather</span>
                 <span class="tag">keyword</span>
               </div>
-              <table class="table" aria-label="Agri sample schema">
+              <table class="table" aria-label="농업 샘플 스키마">
                 <tr>
-                  <th>Field</th>
-                  <th>Description</th>
+                  <th>필드</th>
+                  <th>설명</th>
                 </tr>
                 <tr>
                   <td>item_name</td>
-                  <td>Product name (e.g. apple, cabbage)</td>
+                  <td>품목명(예: 사과, 배추)</td>
                 </tr>
                 <tr>
                   <td>price</td>
-                  <td>Unit price (KRW)</td>
+                  <td>단가(원)</td>
                 </tr>
                 <tr>
                   <td>volume</td>
-                  <td>Trade or shipment volume</td>
+                  <td>거래·출하 물량</td>
                 </tr>
                 <tr>
                   <td>timestamp</td>
-                  <td>Observation time</td>
+                  <td>관측 시각</td>
                 </tr>
               </table>
             </article>
 
             <article class="card">
-              <h3>Spark Streaming sketch</h3>
-              <p>Aggregate streams in 1–5 minute windows; surface volatile items on dashboards and alerts.</p>
+              <h3>스트리밍 스케치</h3>
+              <p>1~5분 창으로 집계하고 변동이 큰 품목을 대시보드·알림에 노출합니다.</p>
               <div class="tagrow">
                 <span class="tag">window</span>
                 <span class="tag">stateful</span>
                 <span class="tag">anomaly</span>
                 <span class="tag">join</span>
               </div>
-              <table class="table" aria-label="Sample metrics">
+              <table class="table" aria-label="샘플 지표">
                 <tr>
-                  <th>Metric</th>
-                  <th>Description</th>
+                  <th>지표</th>
+                  <th>설명</th>
                 </tr>
                 <tr>
                   <td>price_change_rate</td>
-                  <td>Price change vs previous window</td>
+                  <td>이전 창 대비 가격 변화율</td>
                 </tr>
                 <tr>
                   <td>top_movers</td>
-                  <td>Fastest up/down products</td>
+                  <td>가장 빠르게 오른/내린 품목</td>
                 </tr>
                 <tr>
                   <td>keyword_spike</td>
-                  <td>Related keyword surge</td>
+                  <td>관련 키워드 급증</td>
                 </tr>
               </table>
             </article>
@@ -162,8 +162,8 @@
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <a class="brand brand--sm" href="./index.html" aria-label="Et home">Et</a>
-        <p class="muted">Agriculture · trends</p>
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈">Et</a>
+        <p class="muted">농업 · 추세</p>
       </div>
     </footer>
 

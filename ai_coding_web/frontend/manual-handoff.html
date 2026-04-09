@@ -1,31 +1,31 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Et | Manual steps (Playwright)</title>
+    <title>Et | 수동 단계(Playwright)</title>
     <meta name="robots" content="noindex,nofollow" />
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
   <body data-page="manual-handoff" class="manual-handoff--locked">
-    <a class="skip-link" href="#manual-panel">Skip to panel</a>
+    <a class="skip-link" href="#manual-panel">패널로 건너뛰기</a>
 
     <div class="manual-handoff__backdrop" aria-hidden="true"></div>
 
     <main id="manual-panel" class="manual-handoff__panel" role="dialog" aria-modal="true" aria-labelledby="manual-title">
-      <p class="badge">Manual step · automation paused</p>
-      <h1 id="manual-title">Instructions</h1>
+      <p class="badge">수동 단계 · 자동화 일시정지</p>
+      <h1 id="manual-title">안내</h1>
       <p class="muted" id="manual-desc"></p>
       <ol class="manual-handoff__list" id="manual-steps"></ol>
 
       <div class="alert alert--error" id="manual-hint" role="note" hidden></div>
 
-      <button class="btn" type="button" id="manual-done-btn">Done · continue automation</button>
-      <a class="btn btn--ghost" href="./index.html" style="margin-top:10px; display:inline-flex">Home</a>
+      <button class="btn" type="button" id="manual-done-btn">완료 · 자동화 계속</button>
+      <a class="btn btn--ghost" href="./index.html" style="margin-top:10px; display:inline-flex">홈</a>
 
       <div id="manual-continue-block" hidden>
         <p class="manual-handoff__signal" id="pw-continue-text">PLAYWRIGHT_MANUAL_CONTINUE</p>
-        <p class="muted" style="margin-top:10px; font-size:12px">When this text is visible, Playwright MCP can proceed.</p>
+        <p class="muted" style="margin-top:10px; font-size:12px">이 문구가 보이면 Playwright MCP가 다음 단계로 진행할 수 있습니다.</p>
       </div>
     </main>
 
@@ -33,41 +33,41 @@
       (function () {
         var STEPS = {
           supabase: {
-            title: "Add Supabase keys to config",
-            desc: "Finish the steps below, then click the button so automation can continue.",
+            title: "config에 Supabase 키 추가",
+            desc: "아래 단계를 마친 뒤 버튼을 눌러 자동화를 이어가세요.",
             items: [
-              "In Supabase dashboard → Project Settings → API, copy Project URL and anon public key.",
-              "Open frontend/assets/js/config.js locally, set supabaseUrl and supabaseAnonKey, save.",
-              "In Authentication, ensure the Email provider is enabled.",
-              "Refresh the login page in the browser and retry if needed."
+              "Supabase 대시보드 → Project Settings → API에서 Project URL과 anon public 키를 복사합니다.",
+              "로컬에서 frontend/assets/js/config.js를 열어 supabaseUrl과 supabaseAnonKey를 설정하고 저장합니다.",
+              "Authentication에서 Email 공급자가 켜져 있는지 확인합니다.",
+              "브라우저에서 로그인 페이지를 새로고침하고 필요 시 다시 시도합니다."
             ]
           },
           login: {
-            title: "Prepare account or sign in",
-            desc: "Make sure you can sign in, then continue.",
+            title: "계정 준비 또는 로그인",
+            desc: "로그인할 수 있는지 확인한 뒤 계속하세요.",
             items: [
-              "Create a test user under Supabase Authentication → Users, or register via the form.",
-              "If email confirmation is on, complete verification from the email link.",
-              "Confirm email/password sign-in works on the login page."
+              "Supabase Authentication → Users에서 테스트 사용자를 만들거나 폼으로 가입합니다.",
+              "이메일 확인이 켜져 있으면 메일 링크로 인증을 완료합니다.",
+              "로그인 페이지에서 이메일·비밀번호 로그인이 되는지 확인합니다."
             ]
           },
           backend: {
-            title: "Run FastAPI backend",
-            desc: "The backend is required for wordcloud and analysis APIs.",
+            title: "FastAPI 백엔드 실행",
+            desc: "워드클라우드와 분석 API에 백엔드가 필요합니다.",
             items: [
-              "In ai_coding_web, activate venv and install requirements.",
-              "Run uvicorn backend.app.main:app on 127.0.0.1:8000.",
-              "Check GET /api/health.",
-              "Ensure frontend/assets/js/config.js apiBase matches the backend URL."
+              "ai_coding_web에서 venv를 활성화하고 requirements를 설치합니다.",
+              "uvicorn backend.app.main:app을 127.0.0.1:8000에서 실행합니다.",
+              "GET /api/health를 확인합니다.",
+              "frontend/assets/js/config.js의 apiBase가 백엔드 URL과 일치하는지 확인합니다."
             ]
           },
           default: {
-            title: "Manual task",
-            desc: "Complete the work the agent described, then press the button below.",
+            title: "수동 작업",
+            desc: "에이전트가 설명한 작업을 마친 뒤 아래 버튼을 누르세요.",
             items: [
-              "Follow instructions from chat/logs.",
-              "Finish any save/build/dashboard steps that need a human.",
-              "Press the button below to resume automation."
+              "채팅/로그의 안내를 따릅니다.",
+              "사람이 해야 하는 저장·빌드·대시보드 단계를 완료합니다.",
+              "아래 버튼을 눌러 자동화를 재개합니다."
             ]
           }
         };

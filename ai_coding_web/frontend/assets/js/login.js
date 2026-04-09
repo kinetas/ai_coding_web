@@ -49,7 +49,7 @@
     var regOk = $("#register-success");
 
     if (!window.EtAuth || !window.EtAuth.login || !window.EtAuth.register) {
-      setAlert(err, "Could not load auth module (check auth.js).");
+      setAlert(err, "인증 모듈을 불러오지 못했습니다(auth.js 확인).");
       return;
     }
 
@@ -73,13 +73,13 @@
 
           window.EtAuth.login(email, password)
             .then(function () {
-              setAlert(ok, "Signed in. Redirecting...");
+              setAlert(ok, "로그인되었습니다. 이동 중…");
               window.setTimeout(function () {
                 safeRedirect(next || "analysis-1.html");
               }, 350);
             })
             .catch(function (error) {
-              setAlert(err, error && error.message ? error.message : "Sign-in failed.");
+              setAlert(err, error && error.message ? error.message : "로그인에 실패했습니다.");
             });
         });
       }
@@ -98,16 +98,16 @@
           window.EtAuth.register(name, email, password)
             .then(function (res) {
               if (res && res.needsEmailConfirmation) {
-                setAlert(regOk, "Confirmation email sent. Verify via the link, then sign in.");
+                setAlert(regOk, "확인 메일을 보냈습니다. 메일의 링크로 인증한 뒤 로그인하세요.");
                 return;
               }
-              setAlert(regOk, "Account created. Redirecting...");
+              setAlert(regOk, "계정이 생성되었습니다. 이동 중…");
               window.setTimeout(function () {
                 safeRedirect(next || "analysis-1.html");
               }, 350);
             })
             .catch(function (error) {
-              setAlert(regErr, error && error.message ? error.message : "Registration failed.");
+              setAlert(regErr, error && error.message ? error.message : "회원가입에 실패했습니다.");
             });
         });
       }

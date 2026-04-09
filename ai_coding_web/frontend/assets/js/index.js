@@ -161,7 +161,7 @@
         renderSidebarKpi(results[0]);
       })
       .catch(function (reason) {
-        var msg = reason && reason.message ? reason.message : "Could not load wordcloud data.";
+        var msg = reason && reason.message ? reason.message : "워드클라우드 데이터를 불러오지 못했습니다.";
         renderCloudError(kr, msg);
         renderCloudError(gl, msg);
       });
@@ -172,7 +172,7 @@
     if (!kpiEl) return;
     var top = (words || []).slice(0, 5);
     if (!top.length) {
-      kpiEl.innerHTML = '<p class="kpi-error">No data</p>';
+      kpiEl.innerHTML = '<p class="kpi-error">데이터 없음</p>';
       return;
     }
     var maxW = top[0].weight || 1;
@@ -260,15 +260,15 @@ async function fetchLastUpdated() {
     const res = await fetch('/api/public/price?limit=1');
     const data = await res.json();
     const raw = data?.last_updated || data?.items?.[0]?.updated_at || null;
-    if (!raw) { el.textContent = 'Last updated: unknown'; return; }
+    if (!raw) { el.textContent = '최종 갱신: 알 수 없음'; return; }
     const dt = new Date(raw);
-    el.textContent = 'Last updated: ' + dt.toLocaleString('en-US', {
+    el.textContent = '최종 갱신: ' + dt.toLocaleString('ko-KR', {
       timeZone: 'Asia/Seoul',
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit'
     });
   } catch (e) {
-    el.textContent = 'Last updated: unknown';
+    el.textContent = '최종 갱신: 알 수 없음';
   }
 }
 document.addEventListener('DOMContentLoaded', fetchLastUpdated);

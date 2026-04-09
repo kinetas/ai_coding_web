@@ -40,7 +40,7 @@
               encodeURIComponent(it.metric) +
               "&label=" +
               encodeURIComponent(it.metric_label || "");
-            a.textContent = it.title || "(Untitled)";
+            a.textContent = it.title || "(제목 없음)";
 
             var td1 = document.createElement("td");
             td1.appendChild(a);
@@ -64,7 +64,7 @@
         .catch(function (reason) {
           if (empty) {
             empty.hidden = false;
-            empty.textContent = reason && reason.message ? reason.message : "Could not load the list.";
+            empty.textContent = reason && reason.message ? reason.message : "목록을 불러오지 못했습니다.";
           }
           if (table) table.hidden = true;
         });

@@ -1,102 +1,102 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Et | Trend word cloud</title>
-    <meta name="description" content="Et: category-based trend word clouds (KR/global) and links to analysis pages" />
+    <title>Et | 트렌드 워드클라우드</title>
+    <meta name="description" content="Et: 카테고리별 트렌드 워드클라우드(한국/글로벌) 및 분석 페이지 링크" />
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
   <body data-page="home">
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="./index.html" aria-label="Et home">Et</a>
+        <a class="brand" href="./index.html" aria-label="Et 홈">Et</a>
 
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-          <span class="sr-only">Open menu</span>
+          <span class="sr-only">메뉴 열기</span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
           <span class="nav-toggle__bar"></span>
         </button>
 
-        <nav id="site-nav" class="site-nav" aria-label="Primary">
-          <a class="nav-link" href="./index.html" data-nav="home">Home</a>
-          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">Agri prices</a>
-          <a class="nav-link" href="./analysis-2.html" data-nav="health">Health</a>
-          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">Traffic</a>
-          <a class="nav-link" href="./analysis-4.html" data-nav="tour">Tourism</a>
-          <a class="nav-link" href="./analysis-5.html" data-nav="env">Environment</a>
+        <nav id="site-nav" class="site-nav" aria-label="주 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">홈</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 가격</a>
+          <a class="nav-link" href="./analysis-2.html" data-nav="health">보건</a>
+          <a class="nav-link" href="./analysis-3.html" data-nav="traffic">교통</a>
+          <a class="nav-link" href="./analysis-4.html" data-nav="tour">관광</a>
+          <a class="nav-link" href="./analysis-5.html" data-nav="env">환경</a>
         </nav>
       </div>
     </header>
 
     <main id="main" class="site-main">
-  <div id="last-updated-bar" class="last-updated-bar">Checking last update time…</div>
+  <div id="last-updated-bar" class="last-updated-bar">최종 갱신 시각 확인 중…</div>
       <div class="container dashboard">
         <div class="dashboard-grid">
 
-          <section class="wordcloud-panel" aria-label="Trend word cloud">
+          <section class="wordcloud-panel" aria-label="트렌드 워드클라우드">
             <div class="panel-head">
               <div>
-                <h2 class="panel-title">Trend word cloud</h2>
-                <p class="panel-desc">Filter by category to focus on a topic.</p>
+                <h2 class="panel-title">트렌드 워드클라우드</h2>
+                <p class="panel-desc">카테고리를 골라 주제에 집중해 보세요.</p>
               </div>
             </div>
 
-            <div class="filters" aria-label="Category filter">
-              <button class="chip is-active" type="button" data-category="all">All</button>
-              <button class="chip" type="button" data-category="agri">Agriculture</button>
-              <button class="chip" type="button" data-category="health">Health</button>
-              <button class="chip" type="button" data-category="traffic">Traffic</button>
-              <button class="chip" type="button" data-category="tour">Tourism</button>
-              <button class="chip" type="button" data-category="env">Environment</button>
+            <div class="filters" aria-label="카테고리 필터">
+              <button class="chip is-active" type="button" data-category="all">전체</button>
+              <button class="chip" type="button" data-category="agri">농업</button>
+              <button class="chip" type="button" data-category="health">보건</button>
+              <button class="chip" type="button" data-category="traffic">교통</button>
+              <button class="chip" type="button" data-category="tour">관광</button>
+              <button class="chip" type="button" data-category="env">환경</button>
             </div>
 
-            <div class="wc-region-tabs" role="tablist" aria-label="Region">
-              <button class="wc-tab is-active" type="button" data-region="kr" role="tab" aria-selected="true">Korea</button>
-              <button class="wc-tab" type="button" data-region="global" role="tab" aria-selected="false">Global</button>
+            <div class="wc-region-tabs" role="tablist" aria-label="지역">
+              <button class="wc-tab is-active" type="button" data-region="kr" role="tab" aria-selected="true">한국</button>
+              <button class="wc-tab" type="button" data-region="global" role="tab" aria-selected="false">글로벌</button>
             </div>
 
             <div class="wc-panel is-active" id="wc-panel-kr">
-              <div class="wordcloud" id="cloud-kr" role="img" aria-label="Korea trend word cloud"></div>
+              <div class="wordcloud" id="cloud-kr" role="img" aria-label="한국 트렌드 워드클라우드"></div>
             </div>
             <div class="wc-panel" id="wc-panel-global">
-              <div class="wordcloud" id="cloud-global" role="img" aria-label="Global trend word cloud"></div>
+              <div class="wordcloud" id="cloud-global" role="img" aria-label="글로벌 트렌드 워드클라우드"></div>
             </div>
           </section>
 
-          <aside class="dashboard-sidebar" aria-label="Trend summary">
+          <aside class="dashboard-sidebar" aria-label="트렌드 요약">
 
             <div class="sidebar-card">
-              <p class="sidebar-title">Top keywords</p>
+              <p class="sidebar-title">상위 키워드</p>
               <div id="sidebar-kpi" class="kpi-list">
-                <p class="kpi-loading">Loading…</p>
+                <p class="kpi-loading">불러오는 중…</p>
               </div>
             </div>
 
             <div class="sidebar-card">
-              <p class="sidebar-title">Analysis pages</p>
-              <nav class="quick-links" aria-label="Analysis shortcuts">
+              <p class="sidebar-title">분석 페이지</p>
+              <nav class="quick-links" aria-label="분석 바로가기">
                 <a class="quick-link" href="./agri-analytics.html">
-                  <span>Agri prices</span>
+                  <span>농산물 가격</span>
                   <span class="quick-link__arrow">›</span>
                 </a>
                 <a class="quick-link" href="./analysis-2.html">
-                  <span>Health · infection</span>
+                  <span>보건 · 감염</span>
                   <span class="quick-link__arrow">›</span>
                 </a>
                 <a class="quick-link" href="./analysis-3.html">
-                  <span>Traffic</span>
+                  <span>교통</span>
                   <span class="quick-link__arrow">›</span>
                 </a>
                 <a class="quick-link" href="./analysis-4.html">
-                  <span>Tourism</span>
+                  <span>관광</span>
                   <span class="quick-link__arrow">›</span>
                 </a>
                 <a class="quick-link" href="./analysis-5.html">
-                  <span>Environment</span>
+                  <span>환경</span>
                   <span class="quick-link__arrow">›</span>
                 </a>
               </nav>
@@ -110,8 +110,8 @@
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <a class="brand brand--sm" href="./index.html" aria-label="Et home">Et</a>
-        <p class="muted">Public data insights</p>
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈">Et</a>
+        <p class="muted">공공 데이터 인사이트</p>
       </div>
     </footer>
 

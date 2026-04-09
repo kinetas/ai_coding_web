@@ -49,7 +49,7 @@
           var nickname = String(fd.get("nickname") || "").trim();
 
           if (!nickname) {
-            setAlert(err, "Enter a nickname.");
+            setAlert(err, "닉네임을 입력하세요.");
             return;
           }
 
@@ -59,10 +59,10 @@
             body: JSON.stringify({ nickname: nickname })
           })
             .then(function () {
-              setAlert(ok, "Nickname saved.");
+              setAlert(ok, "닉네임이 저장되었습니다.");
             })
             .catch(function (error) {
-              setAlert(err, error && error.message ? error.message : "Save failed.");
+              setAlert(err, error && error.message ? error.message : "저장에 실패했습니다.");
             });
         });
       }
@@ -71,10 +71,10 @@
         delBtn.addEventListener("click", function () {
           setAlert(delErr, "");
           if (!delInput || String(delInput.value || "").trim().toUpperCase() !== "DELETE") {
-            setAlert(delErr, "Type DELETE exactly to confirm.");
+            setAlert(delErr, "확인을 위해 DELETE를 정확히 입력하세요.");
             return;
           }
-          if (!window.confirm("Delete your account? This cannot be undone.")) {
+          if (!window.confirm("계정을 삭제할까요? 되돌릴 수 없습니다.")) {
             return;
           }
 
@@ -86,7 +86,7 @@
               window.location.href = "./login.html";
             })
             .catch(function (error) {
-              setAlert(delErr, error && error.message ? error.message : "Account deletion failed.");
+              setAlert(delErr, error && error.message ? error.message : "계정 삭제에 실패했습니다.");
             });
         });
       }
@@ -98,23 +98,23 @@
 const PRESET_TEMPLATES = [
   {
     id: 'agri_price',
-    label: 'Agri price trend',
+    label: '농산물 가격 추이',
     icon: '🥬',
-    desc: 'Spot major crop price moves at a glance',
+    desc: '주요 작물 가격 변동을 한눈에',
     widget: { type: 'chart', endpoint: '/api/public/price', chart_type: 'line' }
   },
   {
     id: 'weekly_news',
-    label: 'Weekly news keywords',
+    label: '주간 뉴스 키워드',
     icon: '📰',
-    desc: 'Word cloud of this week’s top keywords',
+    desc: '이번 주 상위 키워드 워드클라우드',
     widget: { type: 'wordcloud', endpoint: '/api/public/news/wordcloud' }
   },
   {
     id: 'category_issue',
-    label: 'Category issue trends',
+    label: '카테고리별 이슈 추이',
     icon: '📊',
-    desc: 'News frequency trends by category',
+    desc: '카테고리별 뉴스 빈도 추이',
     widget: { type: 'chart', endpoint: '/api/public/category', chart_type: 'bar' }
   }
 ];
@@ -135,7 +135,7 @@ async function applyPreset(presetId) {
   const preset = (PRESET_TEMPLATES || []).find(t => t.id === presetId);
   if (!preset) return;
   if (!window.EtAuth || !window.EtAuth.isAuthed()) {
-    alert('Please sign in to use this.');
+    alert('이 기능을 쓰려면 로그인하세요.');
     window.location.href = './login.html';
     return;
   }
@@ -145,10 +145,10 @@ async function applyPreset(presetId) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: preset.label, config: preset.widget })
     });
-    alert(`Widget '${preset.label}' was added.`);
+    alert(`위젯 '${preset.label}'이(가) 추가되었습니다.`);
     location.reload();
   } catch (e) {
-    alert(e && e.message ? e.message : 'Could not add widget. Try again.');
+    alert(e && e.message ? e.message : '위젯을 추가하지 못했습니다. 다시 시도하세요.');
   }
 }
 

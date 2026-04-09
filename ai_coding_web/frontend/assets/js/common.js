@@ -21,7 +21,7 @@
       return res.json()
         .catch(function () { return {}; })
         .then(function (json) {
-          var err = new Error((json && (json.detail || json.message)) || "Request failed.");
+          var err = new Error((json && (json.detail || json.message)) || "요청에 실패했습니다.");
           err.status = res.status;
           throw err;
         });
@@ -60,12 +60,12 @@
   };
 
   var PRIMARY_NAV_LABELS = {
-    home: "Home",
-    "agri-analytics": "Agri prices",
-    health: "Health",
-    traffic: "Traffic",
-    tour: "Tourism",
-    env: "Environment"
+    home: "홈",
+    "agri-analytics": "농산물 가격",
+    health: "보건",
+    traffic: "교통",
+    tour: "관광",
+    env: "환경"
   };
 
   function applyPrimaryNavLabels() {
@@ -141,17 +141,17 @@
     var myCreate = document.createElement("a");
     myCreate.className = "nav-link nav-link--btn";
     myCreate.href = "./my-analysis.html";
-    myCreate.textContent = "Build analysis";
+    myCreate.textContent = "분석 만들기";
 
     var mySaved = document.createElement("a");
     mySaved.className = "nav-link nav-link--btn";
     mySaved.href = "./my-analyses.html";
-    mySaved.textContent = "Saved analyses";
+    mySaved.textContent = "저장된 분석";
 
     var myPage = document.createElement("a");
     myPage.className = "nav-link nav-link--btn";
     myPage.href = "./mypage.html";
-    myPage.textContent = "My page";
+    myPage.textContent = "마이페이지";
 
     var userPill = document.createElement("span");
     userPill.className = "user-pill";
@@ -159,12 +159,12 @@
     var loginLink = document.createElement("a");
     loginLink.className = "nav-link nav-link--btn";
     loginLink.href = "./login.html";
-    loginLink.textContent = "Log in";
+    loginLink.textContent = "로그인";
 
     var logoutBtn = document.createElement("button");
     logoutBtn.className = "nav-link nav-link--btn";
     logoutBtn.type = "button";
-    logoutBtn.textContent = "Log out";
+    logoutBtn.textContent = "로그아웃";
 
     slot.appendChild(myCreate);
     slot.appendChild(mySaved);
@@ -184,7 +184,7 @@
       userPill.style.display = authed ? "inline-flex" : "none";
       loginLink.style.display = authed ? "none" : "inline-flex";
       logoutBtn.style.display = authed ? "inline-flex" : "none";
-      userPill.textContent = authed ? (user.nickname || user.email || "User") : "";
+      userPill.textContent = authed ? (user.nickname || user.email || "사용자") : "";
 
       try {
         var current = window.location.pathname.split("/").pop() || "index.html";

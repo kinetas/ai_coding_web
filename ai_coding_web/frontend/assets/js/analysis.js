@@ -36,7 +36,7 @@
         window.EtCharts.donutChart(byId("chart-donut"), donut, {});
       })
       .catch(function (reason) {
-        showChartError(reason && reason.message ? reason.message : "Could not load chart data.");
+        showChartError(reason && reason.message ? reason.message : "차트 데이터를 불러오지 못했습니다.");
       });
   }
 
@@ -73,9 +73,9 @@
         el.innerHTML = top.map(function (w, i) {
           var pct = Math.round((w.weight / maxW) * 100);
           return '<div class="kpi-card">' +
-            '<p class="kpi-card__label">TOP ' + (i + 1) + '</p>' +
+            '<p class="kpi-card__label">상위 ' + (i + 1) + '</p>' +
             '<p class="kpi-card__value">' + w.text + '</p>' +
-            '<p class="kpi-card__sub">Score ' + pct + '</p>' +
+            '<p class="kpi-card__sub">점수 ' + pct + '</p>' +
             '</div>';
         }).join("");
       })
