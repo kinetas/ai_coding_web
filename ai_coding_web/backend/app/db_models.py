@@ -130,15 +130,25 @@ class AgriPriceRaw(Base):
 
 
 class AgriPriceHistory(Base):
-  """농산물 품목별 조사일 시계열 이력."""
+  """농산물 품목별 조사일 시계열 이력.
+
+  시계열 식별 키(가이드 4-1):
+    item_cd + vrty_cd + grd_cd + se_cd + exmn_ymd
+  - unit/unit_sz 는 payload 에 보존 (컬럼 추가 시 UniqueConstraint NULL 처리 복잡도로 payload 활용)
+  - 중량계열(kg/g): payload.exmn_dd_cnvs_avg_prc 사용
+  - 개수계열(개/마리 등): payload.exmn_dd_avg_prc + unit_sz 유지
+  """
   __tablename__ = "agri_price_history"
   __table_args__ = (
-    UniqueConstraint("item_cd", "vrty_cd", "exmn_ymd", name="uq_agri_history_key"),
+    # 가이드 기준 시계열 키: item_cd + vrty_cd + grd_cd + se_cd + exmn_ymd
+    UniqueConstraint("item_cd", "vrty_cd", "grd_cd", "se_cd", "exmn_ymd", name="uq_agri_history_key"),
   )
 
   id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
   item_cd: Mapped[str] = mapped_column(String(32), index=True)
   vrty_cd: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+  grd_cd: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)   # 등급코드
+  se_cd: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)    # 거래단계코드
   exmn_ymd: Mapped[str] = mapped_column(String(8), index=True)  # YYYYMMDD
   payload: Mapped[dict] = mapped_column(JSON, default=dict)
   created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

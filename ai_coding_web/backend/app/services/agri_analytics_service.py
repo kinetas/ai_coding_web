@@ -20,8 +20,11 @@ from backend.app.models.agri_analytics import (
   AgriCategoryStatsResponse,
   AgriItemSeriesPoint,
   AgriItemSeriesResponse,
+  AgriPriceMover,
+  AgriPriceMoversResponse,
   AgriPriceRawResponse,
   AgriRiceSeriesResponse,
+  AgriUnitFamilyStats,
   AgriWeeklyPoint,
 )
 
@@ -70,6 +73,83 @@ def _survey_prices_from_payload(p: dict[str, Any]) -> tuple[float | None, float 
   return cur, raw
 
 
+# ── 단위 분류 (가이드 6번 실무 규칙, 7번 unit_family) ────────────────────────
+
+_WEIGHT_UNITS = {"kg", "g"}
+_COUNT_UNITS = {"개", "마리", "포기", "구"}
+_PACK_UNITS = {"장", "묶음", "손", "속", "봉"}
+_VOLUME_UNITS = {"L"}
+
+
+def _unit_family(unit: str) -> str:
+  """가이드 7번 unit_family 분류."""
+  u = str(unit or "").strip()
+  if u in _WEIGHT_UNITS:
+    return "weight"
+  if u in _COUNT_UNITS:
+    return "count"
+  if u in _PACK_UNITS:
+    return "pack"
+  if u in _VOLUME_UNITS:
+    return "volume"
+  return "special"
+
+
+def _price_for_family(p: dict[str, Any], family: str) -> float | None:
+  """
+  가이드 실무 규칙:
+  - weight(kg/g): exmn_dd_cnvs_avg_prc 우선 (kg 환산 단가)
+  - 그 외: exmn_dd_avg_prc (개당/포기당 등 원시가격)
+  """
+  if family == "weight":
+    v = _to_float_agri(
+      p.get("exmn_dd_cnvs_avg_prc") or p.get("조사일kg환산평균가격")
+    )
+    if v is None:
+      v = _to_float_agri(p.get("exmn_dd_avg_prc") or p.get("조사일평균가격"))
+    return v
+  return _to_float_agri(p.get("exmn_dd_avg_prc") or p.get("조사일평균가격"))
+
+
+def _price_label(family: str, unit: str, unit_sz: str) -> str:
+  """사람이 읽기 좋은 가격 단위 레이블."""
+  if family == "weight":
+    return "원/kg환산"
+  sz = str(unit_sz or "").strip()
+  u = str(unit or "").strip()
+  if sz and u:
+    return f"원/{sz}{u}"
+  if u:
+    return f"원/{u}"
+  return "원"
+
+
+def _wow_pct(p: dict[str, Any], family: str) -> float | None:
+  """전주 대비 % (가이드 7번 price_wow_pct / price_cnvs_wow_pct)."""
+  if family == "weight":
+    cur = _to_float_agri(p.get("exmn_dd_cnvs_avg_prc") or p.get("조사일kg환산평균가격"))
+    prev = _to_float_agri(p.get("ww1_bfr_cnvs_avg_prc") or p.get("1주일전kg환산평균가격"))
+  else:
+    cur = _to_float_agri(p.get("exmn_dd_avg_prc") or p.get("조사일평균가격"))
+    prev = _to_float_agri(p.get("ww1_bfr_avg_prc") or p.get("1주일전평균가격"))
+  if cur is None or prev is None or prev == 0:
+    return None
+  return round((cur - prev) / prev * 100, 2)
+
+
+def _w4_pct(p: dict[str, Any], family: str) -> float | None:
+  """4주 대비 % (가이드 7번 price_4w_pct / price_cnvs_4w_pct)."""
+  if family == "weight":
+    cur = _to_float_agri(p.get("exmn_dd_cnvs_avg_prc") or p.get("조사일kg환산평균가격"))
+    prev = _to_float_agri(p.get("ww4_bfr_cnvs_avg_prc") or p.get("4주일전kg환산평균가격"))
+  else:
+    cur = _to_float_agri(p.get("exmn_dd_avg_prc") or p.get("조사일평균가격"))
+    prev = _to_float_agri(p.get("ww4_bfr_avg_prc") or p.get("4주일전평균가격"))
+  if cur is None or prev is None or prev == 0:
+    return None
+  return round((cur - prev) / prev * 100, 2)
+
+
 class AgriAnalyticsService:
   """로컬 DB(SQLite/PostgreSQL)에서 농산물 가격 분석 데이터 조회."""
 
@@ -112,7 +192,14 @@ class AgriAnalyticsService:
   # ── 카테고리별 통계 ──────────────────────────────────────────────────────
 
   def get_category_stats(self) -> AgriCategoryStatsResponse | None:
-    """AgriPriceRaw.items 를 ctgry_nm 별로 집계해 카테고리별 통계 반환."""
+    """
+    AgriPriceRaw.items 를 ctgry_nm × unit_family 별로 집계.
+
+    가이드 핵심 규칙:
+    - weight(kg/g): exmn_dd_cnvs_avg_prc (kg 환산 단가) → 서로 다른 포장 규격도 비교 가능
+    - 그 외(개/마리/포기 등): exmn_dd_avg_prc, unit_sz 구분 필수
+    - item_nm 만으로 합치지 않음: 카테고리 수준 집계는 unit_family 내에서만
+    """
     with self._session_factory() as db:
       row = db.scalar(select(AgriPriceRaw).where(AgriPriceRaw.slug == "latest"))
     if not row:
@@ -121,34 +208,72 @@ class AgriAnalyticsService:
     updated_at = row.updated_at.isoformat() if row.updated_at else datetime.now(timezone.utc).isoformat()
     items: list[dict] = row.items or []
 
-    # ctgry_nm → [(item_nm, price), ...]
-    groups: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    # ctgry_nm → unit_family → [(item_nm, price, unit_label), ...]
+    groups: dict[str, dict[str, list[tuple[str, float, str]]]] = defaultdict(lambda: defaultdict(list))
+
     for it in items:
       ctgry = str(it.get("ctgry_nm") or it.get("category") or "other").strip() or "other"
       nm = str(it.get("item_nm") or it.get("품목명") or "").strip()
-      price, _ = _survey_prices_from_payload(it)
+      unit = str(it.get("unit") or "").strip()
+      unit_sz = str(it.get("unit_sz") or "").strip()
+      family = _unit_family(unit)
+      price = _price_for_family(it, family)
       if price is not None and price > 0:
-        groups[ctgry].append((nm, price))
+        label = _price_label(family, unit, unit_sz)
+        groups[ctgry][family].append((nm, price, label))
+
+    _FAMILY_ORDER = ["weight", "count", "pack", "volume", "special"]
 
     categories: list[AgriCategoryStats] = []
-    for ctgry_nm, pairs in sorted(groups.items()):
-      prices = [p for _, p in pairs]
-      min_p = min(prices)
-      max_p = max(prices)
-      avg_p = round(sum(prices) / len(prices), 1)
+    for ctgry_nm in sorted(groups.keys()):
+      family_map = groups[ctgry_nm]
+      total_count = sum(len(v) for v in family_map.values())
 
-      cheapest_pair = min(pairs, key=lambda x: x[1])
-      most_exp_pair = max(pairs, key=lambda x: x[1])
+      # 단위군별 세부 통계
+      unit_breakdown: list[AgriUnitFamilyStats] = []
+      for fam in _FAMILY_ORDER:
+        triplets = family_map.get(fam, [])
+        if not triplets:
+          continue
+        prices = [p for _, p, _ in triplets]
+        # weight 계열 레이블: "원/kg환산", 나머지는 가장 흔한 unit_label
+        label_counts: dict[str, int] = defaultdict(int)
+        for _, _, lbl in triplets:
+          label_counts[lbl] += 1
+        rep_label = max(label_counts, key=lambda k: label_counts[k])
+
+        cheapest_t = min(triplets, key=lambda x: x[1])
+        most_exp_t = max(triplets, key=lambda x: x[1])
+        unit_breakdown.append(
+          AgriUnitFamilyStats(
+            unit_family=fam,
+            price_label=rep_label,
+            count=len(prices),
+            avg_price=round(sum(prices) / len(prices), 1),
+            min_price=round(min(prices), 1),
+            max_price=round(max(prices), 1),
+            cheapest=AgriCategoryItem(item_nm=cheapest_t[0], price=cheapest_t[1], unit_label=cheapest_t[2]),
+            most_expensive=AgriCategoryItem(item_nm=most_exp_t[0], price=most_exp_t[1], unit_label=most_exp_t[2]),
+          )
+        )
+
+      # 대표 통계: weight 계열 우선, 없으면 첫 번째 단위군
+      rep_fam_stats = next(
+        (s for s in unit_breakdown if s.unit_family == "weight"),
+        unit_breakdown[0] if unit_breakdown else None,
+      )
 
       categories.append(
         AgriCategoryStats(
           ctgry_nm=ctgry_nm,
-          count=len(pairs),
-          min_price=min_p,
-          max_price=max_p,
-          avg_price=avg_p,
-          cheapest=AgriCategoryItem(item_nm=cheapest_pair[0], price=cheapest_pair[1]),
-          most_expensive=AgriCategoryItem(item_nm=most_exp_pair[0], price=most_exp_pair[1]),
+          count=total_count,
+          min_price=rep_fam_stats.min_price if rep_fam_stats else None,
+          max_price=rep_fam_stats.max_price if rep_fam_stats else None,
+          avg_price=rep_fam_stats.avg_price if rep_fam_stats else None,
+          price_label=rep_fam_stats.price_label if rep_fam_stats else "원",
+          cheapest=rep_fam_stats.cheapest if rep_fam_stats else None,
+          most_expensive=rep_fam_stats.most_expensive if rep_fam_stats else None,
+          unit_breakdown=unit_breakdown,
         )
       )
 
@@ -156,6 +281,72 @@ class AgriAnalyticsService:
       updated_at=updated_at,
       categories=categories,
       meta={"source_table": "agri_price_raw", "item_count": len(items)},
+    )
+
+  # ── 가격 등락 품목 (WoW / 4주) ────────────────────────────────────────────
+
+  def get_price_movers(self, top_n: int = 10) -> AgriPriceMoversResponse | None:
+    """
+    최신 조사일 기준 전주 대비 등락률 상위 품목.
+    가이드 5-1 추천 지표: 전주 대비 증감률 (price_wow_pct).
+    """
+    with self._session_factory() as db:
+      row = db.scalar(select(AgriPriceRaw).where(AgriPriceRaw.slug == "latest"))
+    if not row:
+      return None
+
+    updated_at = row.updated_at.isoformat() if row.updated_at else datetime.now(timezone.utc).isoformat()
+    items: list[dict] = row.items or []
+
+    # 가장 최근 조사일 파악
+    survey_dates = [str(it.get("exmn_ymd") or "").strip() for it in items if it.get("exmn_ymd")]
+    survey_date = max(survey_dates) if survey_dates else ""
+
+    movers: list[AgriPriceMover] = []
+    for it in items:
+      unit = str(it.get("unit") or "").strip()
+      unit_sz = str(it.get("unit_sz") or "").strip()
+      family = _unit_family(unit)
+      wow = _wow_pct(it, family)
+      if wow is None:
+        continue
+      w4 = _w4_pct(it, family)
+      price_cur = _price_for_family(it, family)
+      prev_key = "ww1_bfr_cnvs_avg_prc" if family == "weight" else "ww1_bfr_avg_prc"
+      price_prev = _to_float_agri(it.get(prev_key))
+
+      movers.append(
+        AgriPriceMover(
+          item_nm=str(it.get("item_nm") or "").strip(),
+          vrty_nm=str(it.get("vrty_nm") or "").strip(),
+          grd_nm=str(it.get("grd_nm") or "").strip(),
+          se_nm=str(it.get("se_nm") or "").strip(),
+          ctgry_nm=str(it.get("ctgry_nm") or "").strip(),
+          unit_label=_price_label(family, unit, unit_sz),
+          price_cur=price_cur,
+          price_prev=price_prev,
+          wow_pct=wow,
+          w4_pct=w4,
+        )
+      )
+
+    movers.sort(key=lambda x: (x.wow_pct or 0), reverse=True)
+    top_risers = [m for m in movers if (m.wow_pct or 0) > 0][:top_n]
+    top_fallers = sorted(
+      [m for m in movers if (m.wow_pct or 0) < 0],
+      key=lambda x: (x.wow_pct or 0),
+    )[:top_n]
+
+    return AgriPriceMoversResponse(
+      updated_at=updated_at,
+      survey_date=survey_date,
+      top_risers=top_risers,
+      top_fallers=top_fallers,
+      meta={
+        "source_table": "agri_price_raw",
+        "item_count": len(items),
+        "movers_computed": len(movers),
+      },
     )
 
   # ── 쌀 주차별 시계열 + 선형 회귀 예측 ─────────────────────────────────────

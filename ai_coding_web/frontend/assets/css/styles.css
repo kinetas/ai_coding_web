@@ -408,6 +408,9 @@ a{color:inherit}
 .table tr:last-child th,.table tr:last-child td{border-bottom:none}
 
 .form{display:flex; flex-direction:column; gap:12px; margin-top:12px}
+.form--inline{flex-direction:row; align-items:center; gap:8px; margin-top:0; flex-wrap:wrap}
+.input--sm{padding:6px 10px; font-size:.85rem; height:32px}
+.btn--sm{padding:5px 12px; font-size:.85rem; height:32px; white-space:nowrap}
 .field{display:flex; flex-direction:column; gap:8px}
 .field__label{font-size:13px; font-weight:750; color:var(--muted)}
 .input{

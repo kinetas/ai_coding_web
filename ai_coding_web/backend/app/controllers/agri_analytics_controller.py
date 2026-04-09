@@ -6,6 +6,7 @@ from backend.app.models.agri_analytics import (
   AgriAnalyticsResponse,
   AgriCategoryStatsResponse,
   AgriItemSeriesResponse,
+  AgriPriceMoversResponse,
   AgriPriceRawResponse,
   AgriRiceSeriesResponse,
 )
@@ -62,6 +63,19 @@ def build_router(service: AgriAnalyticsService) -> APIRouter:
       raise HTTPException(
         status_code=503,
         detail="agri_price_history query failed. Ensure ETL has run.",
+      )
+    return row
+
+  @router.get("/agri-analytics/price-movers", response_model=AgriPriceMoversResponse)
+  def get_agri_price_movers(
+    top_n: int = Query(default=10, ge=1, le=50, description="상위 N개 등락 품목"),
+  ) -> AgriPriceMoversResponse:
+    """전주 대비 가격 등락 상위 품목 (가이드 5-1 기반)."""
+    row = service.get_price_movers(top_n=top_n)
+    if row is None:
+      raise HTTPException(
+        status_code=404,
+        detail="No agri_price_raw data. Run: python etl.py --agri or --all.",
       )
     return row
 

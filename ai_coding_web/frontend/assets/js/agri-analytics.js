@@ -16,10 +16,26 @@
     return n.toLocaleString("ko-KR") + "원";
   }
 
+  function fmtPct(v) {
+    if (v === null || v === undefined) return null;
+    var n = Number(v);
+    if (!isFinite(n)) return null;
+    var sign = n >= 0 ? "+" : "";
+    return sign + n.toFixed(2) + "%";
+  }
+
   function setText(id, text) {
     var el = byId(id);
     if (el) el.textContent = text;
   }
+
+  var _FAMILY_LABEL = {
+    weight: "중량(kg·g)",
+    count: "개수(개·마리·포기 등)",
+    pack: "묶음(장·묶음·손 등)",
+    volume: "용량(L)",
+    special: "특수단위"
+  };
 
   // Category stats tabs
 
@@ -44,7 +60,7 @@
       var btn = document.createElement("button");
       btn.className = "cat-tab" + (idx === 0 ? " is-active" : "");
       btn.type = "button";
-      btn.textContent = cat.ctgry_nm;
+      btn.textContent = cat.ctgry_nm + " (" + (cat.count || 0) + ")";
       btn.dataset.target = "cat-panel-" + idx;
       tabsEl.appendChild(btn);
 
@@ -53,16 +69,48 @@
       panel.id = "cat-panel-" + idx;
       panel.className = "cat-panel" + (idx === 0 ? " is-active" : "");
 
-      var cheapestTxt = cat.cheapest ? cat.cheapest.item_nm + " " + fmtPrice(cat.cheapest.price) : "—";
-      var expTxt = cat.most_expensive ? cat.most_expensive.item_nm + " " + fmtPrice(cat.most_expensive.price) : "—";
+      // 대표 통계 (weight 계열 우선)
+      var cheapestTxt = cat.cheapest
+        ? cat.cheapest.item_nm + " " + fmtPrice(cat.cheapest.price) + (cat.cheapest.unit_label ? " (" + cat.cheapest.unit_label + ")" : "")
+        : "—";
+      var expTxt = cat.most_expensive
+        ? cat.most_expensive.item_nm + " " + fmtPrice(cat.most_expensive.price) + (cat.most_expensive.unit_label ? " (" + cat.most_expensive.unit_label + ")" : "")
+        : "—";
 
-      panel.innerHTML =
+      var html =
+        '<p class="panel-desc" style="margin-bottom:0.5rem">대표 통계 (' + (cat.price_label || "원") + ')</p>' +
         '<div class="cat-stat-grid">' +
-        statCard("표본 수", fmt(cat.count), "") +
-        statCard("평균", fmtPrice(cat.avg_price), "") +
-        statCard("최소", fmtPrice(cat.min_price), cheapestTxt) +
-        statCard("최대", fmtPrice(cat.max_price), expTxt) +
+        statCard("표본 수", fmt(cat.count) + "건", "") +
+        statCard("평균", fmtPrice(cat.avg_price), cat.price_label || "") +
+        statCard("최저가 품목", fmtPrice(cat.min_price), cheapestTxt) +
+        statCard("최고가 품목", fmtPrice(cat.max_price), expTxt) +
         "</div>";
+
+      // 단위군별 세부 통계
+      var breakdown = Array.isArray(cat.unit_breakdown) ? cat.unit_breakdown : [];
+      if (breakdown.length > 1) {
+        html += '<details style="margin-top:1rem"><summary style="cursor:pointer;font-size:0.85rem;opacity:0.8">단위군별 세부 통계 보기</summary>';
+        html += '<div style="margin-top:0.75rem">';
+        breakdown.forEach(function (fam) {
+          var famLabel = _FAMILY_LABEL[fam.unit_family] || fam.unit_family;
+          var famCheapest = fam.cheapest
+            ? fam.cheapest.item_nm + " " + fmtPrice(fam.cheapest.price)
+            : "—";
+          var famExp = fam.most_expensive
+            ? fam.most_expensive.item_nm + " " + fmtPrice(fam.most_expensive.price)
+            : "—";
+          html +=
+            '<p style="font-size:0.8rem;opacity:0.7;margin:0.5rem 0 0.25rem">' + famLabel + ' — ' + (fam.price_label || "") + '</p>' +
+            '<div class="cat-stat-grid" style="--col:3">' +
+            statCard("건수", fmt(fam.count) + "건", "") +
+            statCard("평균", fmtPrice(fam.avg_price), "") +
+            statCard("최저↑최고", fmtPrice(fam.min_price) + " / " + fmtPrice(fam.max_price), famCheapest + " / " + famExp) +
+            "</div>";
+        });
+        html += "</div></details>";
+      }
+
+      panel.innerHTML = html;
       panelsEl.appendChild(panel);
     });
 
@@ -86,6 +134,53 @@
       (sub ? '<p class="cat-stat-card__sub">' + sub + "</p>" : "") +
       "</div>"
     );
+  }
+
+  // Price movers
+
+  function renderPriceMovers(data) {
+    var errEl = byId("movers-error");
+    if (!data) {
+      if (errEl) { errEl.hidden = false; errEl.textContent = "가격 등락 데이터를 불러오지 못했습니다."; }
+      return;
+    }
+    if (errEl) errEl.hidden = true;
+
+    var risersEl = byId("movers-risers");
+    var fallersEl = byId("movers-fallers");
+
+    function buildMoverList(items, isRise) {
+      if (!items || !items.length) return '<p style="opacity:0.6;font-size:0.85rem">데이터 없음</p>';
+      var rows = items.map(function (m) {
+        var pct = fmtPct(m.wow_pct);
+        var pctColor = isRise ? "color:var(--accent,#00D4FF)" : "color:#ff6b6b";
+        var w4str = fmtPct(m.w4_pct);
+        var nameParts = [m.item_nm];
+        if (m.vrty_nm) nameParts.push(m.vrty_nm);
+        if (m.grd_nm) nameParts.push(m.grd_nm);
+        var nameStr = nameParts.join(" ");
+        var subParts = [];
+        if (m.se_nm) subParts.push(m.se_nm);
+        if (m.unit_label) subParts.push(m.unit_label);
+        var subStr = subParts.join(" · ");
+        return (
+          '<div class="mover-row" style="display:flex;justify-content:space-between;align-items:baseline;padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.06)">' +
+          '<div>' +
+          '<span style="font-size:0.9rem">' + nameStr + '</span>' +
+          (subStr ? '<span style="font-size:0.75rem;opacity:0.6;margin-left:0.4rem">' + subStr + '</span>' : '') +
+          '</div>' +
+          '<div style="text-align:right;flex-shrink:0;margin-left:0.75rem">' +
+          '<span style="font-size:1rem;font-weight:600;' + pctColor + '">' + (pct || "—") + '</span>' +
+          (w4str ? '<span style="font-size:0.72rem;opacity:0.55;display:block">4주: ' + w4str + '</span>' : '') +
+          '</div>' +
+          '</div>'
+        );
+      });
+      return rows.join("");
+    }
+
+    if (risersEl) risersEl.innerHTML = buildMoverList(data.top_risers, true);
+    if (fallersEl) fallersEl.innerHTML = buildMoverList(data.top_fallers, false);
   }
 
   // Rice weekly series
@@ -235,6 +330,18 @@
         if (!errEl) return;
         errEl.hidden = false;
         errEl.textContent = reason && reason.message ? reason.message : "쌀 가격 시계열을 불러오지 못했습니다.";
+      });
+
+    // 4) Price movers (전주 대비 등락 품목)
+    window.EtApi.fetchJson("/api/agri-analytics/price-movers?top_n=10", { method: "GET" })
+      .then(function (data) {
+        renderPriceMovers(data);
+      })
+      .catch(function (reason) {
+        var errEl = byId("movers-error");
+        if (!errEl) return;
+        errEl.hidden = false;
+        errEl.textContent = reason && reason.message ? reason.message : "가격 등락 데이터를 불러오지 못했습니다.";
       });
   });
 })();

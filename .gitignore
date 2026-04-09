@@ -14,6 +14,7 @@ credentials
 secrets/
 config.local.*
 **/token.txt
+a.json
 
 # OS / editor
 Thumbs.db

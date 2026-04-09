@@ -74,7 +74,11 @@
       <section class="panel">
         <div class="container">
           <h2 class="panel-title">카테고리별 통계</h2>
-          <p class="panel-desc"><code>종류별</code> 기준 집계이며, 최저·최고 품목을 포함합니다.</p>
+          <p class="panel-desc">
+            단위군별로 분리하여 집계합니다.
+            <strong>중량(kg·g)</strong>은 kg환산가, <strong>개수(개·마리·포기 등)</strong>는 실거래 단가 기준입니다.
+            단위가 다른 품목을 직접 평균하지 않습니다.
+          </p>
           <p id="cat-error" class="chart-error" hidden></p>
           <div id="cat-tabs" class="cat-tabs" role="tablist"></div>
           <div id="cat-panels"></div>
@@ -149,6 +153,27 @@
             <h3>쌀 주간 평균 추이</h3>
             <canvas class="chart-canvas" id="chart-rice-series" role="img" aria-label="쌀 주간 평균 추이"></canvas>
           </article>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <h2 class="panel-title">전주 대비 가격 등락 품목</h2>
+          <p class="panel-desc">
+            조사일 기준 전주 대비 등락률 상위 품목입니다.
+            중량(kg·g) 계열은 kg환산가, 개수 계열은 실거래 단가 기준입니다.
+          </p>
+          <p id="movers-error" class="chart-error" hidden></p>
+          <div class="grid grid--2col" style="gap: 1.5rem">
+            <div>
+              <h3 class="panel-subtitle" style="color: var(--accent, #00D4FF)">상승 품목</h3>
+              <div id="movers-risers"></div>
+            </div>
+            <div>
+              <h3 class="panel-subtitle" style="color: #ff6b6b">하락 품목</h3>
+              <div id="movers-fallers"></div>
+            </div>
+          </div>
         </div>
       </section>
 

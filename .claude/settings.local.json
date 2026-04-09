@@ -50,7 +50,17 @@
       "Read(//usr/local/**)",
       "Bash(/c/Users/Administrator/.local/bin/python3.14 autonomous_agent.py --plan-only)",
       "Bash(/c/Users/Administrator/.local/bin/python3.14 autonomous_agent.py --status)",
-      "Bash(/c/Users/Administrator/.local/bin/python3.14 autonomous_agent.py --reset)"
+      "Bash(/c/Users/Administrator/.local/bin/python3.14 autonomous_agent.py --reset)",
+      "Bash(ls C:/Users/Administrator/web/ai_coding_web/scripts/*.sql)",
+      "Bash(python -m pytest --collect-only)",
+      "Bash(python -c \"import sys; sys.path.insert\\(0,'C:/Users/Administrator/web/ai_coding_web'\\); from backend.app.services.agri_analytics_service import _unit_family, _price_for_family, _wow_pct; print\\('import OK'\\)\")",
+      "Bash(python -c \"from backend.app.services.agri_analytics_service import _unit_family; print\\(_unit_family\\('kg'\\)\\)\")",
+      "Bash(py -3 -c \"import sys; print\\(sys.version\\)\")",
+      "Bash(ls /usr/bin/python*)",
+      "Read(//c/Users/Administrator/AppData/Local/Programs/**)",
+      "Bash(python3 -c ':*)",
+      "Bash(/c/Users/Administrator/AppData/Local/Microsoft/WindowsApps/python3 --version)",
+      "Bash(/c/Users/Administrator/.local/bin/python3.14.exe -c ':*)"
     ]
   }
 }

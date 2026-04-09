@@ -78,9 +78,12 @@ def upsert_agri_price_from_full_package(full: dict[str, Any], session_factory: s
         continue
       item_cd = _norm_item_cd(hr)
       vrty_cd = hr.get("vrty_cd")
+      grd_cd = hr.get("grd_cd")
+      se_cd = hr.get("se_cd")
       exmn = hr["exmn_ymd"]
       payload = hr.get("payload") or {}
 
+      # 가이드 4-1: item_cd + vrty_cd + grd_cd + se_cd + exmn_ymd 로 시계열 식별
       q = select(AgriPriceHistory).where(
         AgriPriceHistory.item_cd == item_cd,
         AgriPriceHistory.exmn_ymd == exmn,
@@ -89,12 +92,27 @@ def upsert_agri_price_from_full_package(full: dict[str, Any], session_factory: s
         q = q.where(AgriPriceHistory.vrty_cd.is_(None))
       else:
         q = q.where(AgriPriceHistory.vrty_cd == vrty_cd)
+      if grd_cd is None:
+        q = q.where(AgriPriceHistory.grd_cd.is_(None))
+      else:
+        q = q.where(AgriPriceHistory.grd_cd == grd_cd)
+      if se_cd is None:
+        q = q.where(AgriPriceHistory.se_cd.is_(None))
+      else:
+        q = q.where(AgriPriceHistory.se_cd == se_cd)
+
       existing = db.scalar(q)
       if existing:
         existing.payload = payload
       else:
-        db.add(AgriPriceHistory(item_cd=item_cd, vrty_cd=vrty_cd, exmn_ymd=exmn, payload=payload))
-      # 동일 배치에 같은 (item_cd, vrty_cd, exmn_ymd)가 있으면 아직 flush 전에는 select가 못 찾아 UniqueViolation 남.
+        db.add(AgriPriceHistory(
+          item_cd=item_cd,
+          vrty_cd=vrty_cd,
+          grd_cd=grd_cd,
+          se_cd=se_cd,
+          exmn_ymd=exmn,
+          payload=payload,
+        ))
       db.flush()
       n_ok += 1
 

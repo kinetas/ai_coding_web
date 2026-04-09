@@ -120,6 +120,8 @@
       });
   }
 
+  var PRESET_CATEGORIES = ["농산물 가격", "보건", "교통", "관광", "환경"];
+
   var state = {
     keyword: "",
     categoryLabel: "",
@@ -180,12 +182,13 @@
         state.categoryLabel = String(label || "").trim();
         if (!state.categoryLabel) return;
         setCategorySelected(state.categoryLabel);
-        var ks = byId("keyword-step");
-        if (ks) ks.hidden = false;
         if (sugPanel) sugPanel.hidden = true;
         if (resultPanel) resultPanel.hidden = true;
         if (noSug) noSug.hidden = true;
         state.metric = "";
+        state.keyword = "";
+        var keywordInput = byId("keyword");
+        if (keywordInput) keywordInput.value = "";
         state.lastMetricData = null;
         loadSavedInCategory();
         loadSuggestionsFromServer();
@@ -234,67 +237,67 @@
           });
       }
 
+      function initCategories(cats) {
+        var list = (cats && cats.length) ? cats : PRESET_CATEGORIES;
+        state.classifications = list;
+        renderCategoryButtons(list);
+
+        var categoryRoot = byId("category-pick");
+        if (categoryRoot) {
+          categoryRoot.addEventListener("click", function (e) {
+            var t = e.target;
+            if (!t || !t.matches || !t.matches("button[data-category]")) return;
+            var cat = t.getAttribute("data-category") || "";
+            selectCategory(cat);
+          });
+        }
+
+        try {
+          var params = new URLSearchParams(window.location.search || "");
+          var catParam = params.get("category");
+          var kw = params.get("keyword");
+          var metric = params.get("metric");
+          var label = params.get("label");
+
+          if (catParam && list.indexOf(catParam) >= 0) {
+            selectCategory(catParam);
+            if (kw && keywordInput) keywordInput.value = kw;
+            state.keyword = kw || "";
+
+            if (kw) {
+              fetchJson(suggestionsUrl(kw))
+                .then(function (j) {
+                  var slist = j && Array.isArray(j.suggestions) ? j.suggestions : [];
+                  renderSuggestions(slist);
+                  if (sugPanel) sugPanel.hidden = false;
+
+                  if (metric) {
+                    var found = null;
+                    for (var i = 0; i < slist.length; i++) {
+                      if (slist[i].id === metric) { found = slist[i]; break; }
+                    }
+                    applyMetric(metric, (found && found.label) || label || metric, (found && found.description) || "");
+                  }
+                })
+                .catch(function () {});
+            } else if (metric) {
+              applyMetric(metric, label || metric, "");
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
       fetchJson("/api/builder/classifications", { method: "GET" })
         .then(function (json) {
           var cats = (json && Array.isArray(json.classifications)) ? json.classifications : [];
-          state.classifications = cats;
-          renderCategoryButtons(cats);
-          if (!cats.length) {
-            setAlert(error, "등록된 분류가 없습니다. builder_keyword_catalog에 행을 추가하세요.");
-          }
-
-          var categoryRoot = byId("category-pick");
-          if (categoryRoot) {
-            categoryRoot.addEventListener("click", function (e) {
-              var t = e.target;
-              if (!t || !t.matches || !t.matches("button[data-category]")) return;
-              var cat = t.getAttribute("data-category") || "";
-              selectCategory(cat);
-            });
-          }
-
-          try {
-            var params = new URLSearchParams(window.location.search || "");
-            var catParam = params.get("category");
-            var kw = params.get("keyword");
-            var metric = params.get("metric");
-            var label = params.get("label");
-
-            if (catParam && cats.indexOf(catParam) >= 0) {
-              selectCategory(catParam);
-              if (kw && keywordInput) keywordInput.value = kw;
-              state.keyword = kw || "";
-
-              if (kw) {
-                fetchJson(suggestionsUrl(kw))
-                  .then(function (j) {
-                    var list = j && Array.isArray(j.suggestions) ? j.suggestions : [];
-                    renderSuggestions(list);
-                    if (sugPanel) sugPanel.hidden = false;
-
-                    if (metric) {
-                      var found = null;
-                      for (var i = 0; i < list.length; i++) {
-                        if (list[i].id === metric) {
-                          found = list[i];
-                          break;
-                        }
-                      }
-                      applyMetric(metric, (found && found.label) || label || metric, (found && found.description) || "");
-                    }
-                  })
-                  .catch(function () {});
-              } else if (metric) {
-                applyMetric(metric, label || metric, "");
-              }
-            }
-          } catch (e) {
-            // ignore
-          }
+          initCategories(cats);
         })
-        .catch(function (reason) {
-          setAlert(error, reason && reason.message ? reason.message : "분류 목록을 불러오지 못했습니다.");
+        .catch(function () {
+          initCategories([]);
         });
+
 
       if (form) {
         form.addEventListener("submit", function (e) {
