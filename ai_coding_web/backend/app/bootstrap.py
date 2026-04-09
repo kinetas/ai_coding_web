@@ -100,6 +100,18 @@ def _migrate_sqlite() -> None:
       if "분류" in bc_names:
         conn.exec_driver_sql('ALTER TABLE builder_keyword_catalog RENAME COLUMN "분류" TO classification')
 
+    # agri_price_history: grd_cd / se_cd 추가 (가이드 4-1 시계열 식별 키)
+    exists_aph = conn.execute(
+      text("SELECT name FROM sqlite_master WHERE type='table' AND name='agri_price_history'")
+    ).fetchone()
+    if exists_aph:
+      aph_cols = conn.execute(text("PRAGMA table_info(agri_price_history)")).fetchall()
+      aph_names = {row[1] for row in aph_cols}
+      if "grd_cd" not in aph_names:
+        conn.exec_driver_sql("ALTER TABLE agri_price_history ADD COLUMN grd_cd VARCHAR(32)")
+      if "se_cd" not in aph_names:
+        conn.exec_driver_sql("ALTER TABLE agri_price_history ADD COLUMN se_cd VARCHAR(32)")
+
     _migrate_legacy_korean_labels(conn)
 
 
@@ -149,6 +161,26 @@ def _migrate_postgres() -> None:
       colset = {row[0] for row in cols}
       if "분류" in colset:
         conn.execute(text('ALTER TABLE builder_keyword_catalog RENAME COLUMN "분류" TO classification'))
+
+    # agri_price_history: grd_cd / se_cd 추가
+    r_aph = conn.execute(
+      text(
+        "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
+        "WHERE table_schema='public' AND table_name='agri_price_history')"
+      )
+    ).scalar()
+    if r_aph:
+      aph_cols = conn.execute(
+        text(
+          "SELECT column_name FROM information_schema.columns "
+          "WHERE table_schema='public' AND table_name='agri_price_history'"
+        )
+      ).fetchall()
+      aph_names = {row[0] for row in aph_cols}
+      if "grd_cd" not in aph_names:
+        conn.execute(text("ALTER TABLE agri_price_history ADD COLUMN grd_cd TEXT"))
+      if "se_cd" not in aph_names:
+        conn.execute(text("ALTER TABLE agri_price_history ADD COLUMN se_cd TEXT"))
 
     _migrate_legacy_korean_labels(conn)
 

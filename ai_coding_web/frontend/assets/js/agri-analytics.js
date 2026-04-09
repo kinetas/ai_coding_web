@@ -136,7 +136,7 @@
     );
   }
 
-  // Price movers
+  // Price movers — 2행×4열 카드 그리드 (반응형 4행×2열)
 
   function renderPriceMovers(data) {
     var errEl = byId("movers-error");
@@ -149,38 +149,46 @@
     var risersEl = byId("movers-risers");
     var fallersEl = byId("movers-fallers");
 
-    function buildMoverList(items, isRise) {
-      if (!items || !items.length) return '<p style="opacity:0.6;font-size:0.85rem">데이터 없음</p>';
-      var rows = items.map(function (m) {
-        var pct = fmtPct(m.wow_pct);
-        var pctColor = isRise ? "color:var(--accent,#00D4FF)" : "color:#ff6b6b";
-        var w4str = fmtPct(m.w4_pct);
-        var nameParts = [m.item_nm];
-        if (m.vrty_nm) nameParts.push(m.vrty_nm);
-        if (m.grd_nm) nameParts.push(m.grd_nm);
-        var nameStr = nameParts.join(" ");
-        var subParts = [];
-        if (m.se_nm) subParts.push(m.se_nm);
-        if (m.unit_label) subParts.push(m.unit_label);
-        var subStr = subParts.join(" · ");
-        return (
-          '<div class="mover-row" style="display:flex;justify-content:space-between;align-items:baseline;padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.06)">' +
-          '<div>' +
-          '<span style="font-size:0.9rem">' + nameStr + '</span>' +
-          (subStr ? '<span style="font-size:0.75rem;opacity:0.6;margin-left:0.4rem">' + subStr + '</span>' : '') +
-          '</div>' +
-          '<div style="text-align:right;flex-shrink:0;margin-left:0.75rem">' +
-          '<span style="font-size:1rem;font-weight:600;' + pctColor + '">' + (pct || "—") + '</span>' +
-          (w4str ? '<span style="font-size:0.72rem;opacity:0.55;display:block">4주: ' + w4str + '</span>' : '') +
-          '</div>' +
-          '</div>'
-        );
-      });
-      return rows.join("");
+    function buildMoverCard(m, isRise) {
+      var pct = fmtPct(m.wow_pct);
+      var w4str = fmtPct(m.w4_pct);
+      var pctClass = isRise ? "mover-card__pct--rise" : "mover-card__pct--fall";
+
+      var nameParts = [m.item_nm];
+      if (m.vrty_nm) nameParts.push(m.vrty_nm);
+      if (m.grd_nm) nameParts.push(m.grd_nm);
+      var nameStr = nameParts.join(" ");
+
+      var subParts = [];
+      if (m.se_nm) subParts.push(m.se_nm);
+      if (m.unit_label) subParts.push(m.unit_label);
+      var subStr = subParts.join(" · ");
+
+      return (
+        '<div class="mover-card">' +
+        '<div>' +
+        '<p class="mover-card__name">' + nameStr + '</p>' +
+        (subStr ? '<p class="mover-card__sub">' + subStr + '</p>' : '') +
+        '</div>' +
+        '<div>' +
+        '<p class="mover-card__pct ' + pctClass + '">' + (pct || "—") + '</p>' +
+        (w4str ? '<p class="mover-card__w4">4주 ' + w4str + '</p>' : '') +
+        '</div>' +
+        '</div>'
+      );
     }
 
-    if (risersEl) risersEl.innerHTML = buildMoverList(data.top_risers, true);
-    if (fallersEl) fallersEl.innerHTML = buildMoverList(data.top_fallers, false);
+    function buildMoverGrid(items, isRise) {
+      if (!items || !items.length) {
+        return '<p style="opacity:0.6;font-size:0.85rem">데이터 없음</p>';
+      }
+      return items.slice(0, 8).map(function (m) {
+        return buildMoverCard(m, isRise);
+      }).join("");
+    }
+
+    if (risersEl) risersEl.innerHTML = buildMoverGrid(data.top_risers, true);
+    if (fallersEl) fallersEl.innerHTML = buildMoverGrid(data.top_fallers, false);
   }
 
   // Rice weekly series
@@ -210,54 +218,6 @@
     }
   }
 
-  function renderRegions(rows) {
-    var tb = byId("tbl-regions");
-    if (!tb) return;
-    var body = tb.querySelector("tbody");
-    if (!body) return;
-    body.innerHTML = "";
-    (rows || []).forEach(function (r) {
-      var tr = document.createElement("tr");
-      tr.innerHTML =
-        "<td>" +
-        fmt(r.region) +
-        "</td><td>" +
-        fmt(r.count) +
-        "</td><td>" +
-        fmt(r.min) +
-        "</td><td>" +
-        fmt(r.max) +
-        "</td><td>" +
-        fmt(r.avg) +
-        "</td>";
-      body.appendChild(tr);
-    });
-  }
-
-  function renderBins(dist) {
-    var tb = byId("tbl-distribution");
-    if (!tb) return;
-    var body = tb.querySelector("tbody");
-    if (!body) return;
-    body.innerHTML = "";
-    var bins = dist && Array.isArray(dist.bins) ? dist.bins : [];
-    bins.forEach(function (b) {
-      var tr = document.createElement("tr");
-      tr.innerHTML =
-        "<td>" +
-        fmt(b.label) +
-        "</td><td>" +
-        fmt(b.price_min) +
-        "</td><td>" +
-        fmt(b.price_max) +
-        "</td><td>" +
-        fmt(b.count) +
-        "</td>";
-      body.appendChild(tr);
-    });
-    setText("dist-unit", dist && dist.unit_hint ? dist.unit_hint : "");
-  }
-
   function renderCharts(bundle) {
     if (!window.EtCharts) return;
     var b = bundle || {};
@@ -272,40 +232,22 @@
   document.addEventListener("DOMContentLoaded", function () {
     var err = byId("agri-error");
 
-    // 1) Full analytics payload
+    // 1) Full analytics payload (차트 번들 + 메타 표시용)
     window.EtApi.fetchJson("/api/agri-analytics", { method: "GET" })
       .then(function (data) {
-        if (err) {
-          err.hidden = true;
-          err.textContent = "";
-        }
-        setText("agri-updated", data && data.updated_at ? data.updated_at : "—");
-        setText("agri-source", data && data.source ? data.source : "—");
+        if (err) { err.hidden = true; err.textContent = ""; }
         var meta = data && data.meta ? data.meta : {};
         var metaEl = byId("agri-meta");
         if (metaEl) {
           var bits = [];
           if (meta.item_count != null) bits.push("표본 " + meta.item_count + "건");
           if (meta.generated_at) bits.push("생성 " + meta.generated_at);
-          if (meta.api_path_hint) bits.push("API " + meta.api_path_hint);
           metaEl.textContent = bits.length ? bits.join(" · ") : "";
         }
-
-        var ov = (data && data.overall) || {};
-        setText("ov-min", fmt(ov.min));
-        setText("ov-max", fmt(ov.max));
-        setText("ov-avg", fmt(ov.avg));
-        setText("ov-spread", fmt(ov.spread));
-        setText("ov-count", fmt(ov.count));
-
-        renderRegions(data && data.region_stats);
-        renderBins(data && data.distribution);
         renderCharts(data && data.chart_bundle);
       })
-      .catch(function (reason) {
-        if (!err) return;
-        err.hidden = false;
-        err.textContent = reason && reason.message ? reason.message : "분석 데이터를 불러오지 못했습니다.";
+      .catch(function () {
+        // 차트 번들 실패는 조용히 처리 (주요 섹션에 영향 없음)
       });
 
     // 2) Category stats
@@ -332,8 +274,8 @@
         errEl.textContent = reason && reason.message ? reason.message : "쌀 가격 시계열을 불러오지 못했습니다.";
       });
 
-    // 4) Price movers (전주 대비 등락 품목)
-    window.EtApi.fetchJson("/api/agri-analytics/price-movers?top_n=10", { method: "GET" })
+    // 4) Price movers (전주 대비 등락 품목, 8개씩)
+    window.EtApi.fetchJson("/api/agri-analytics/price-movers?top_n=8", { method: "GET" })
       .then(function (data) {
         renderPriceMovers(data);
       })
