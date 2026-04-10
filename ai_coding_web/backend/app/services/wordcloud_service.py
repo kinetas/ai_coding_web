@@ -11,13 +11,13 @@ class WordcloudService:
 
   def get_wordcloud(self, category: Category, region: Region):
     words = self._store.get_wordcloud(category, region)
-    updated_at = None
+    generated_at = None
     if hasattr(self._store, "get_wordcloud_updated_at"):
-      updated_at = self._store.get_wordcloud_updated_at(category, region)
+      generated_at = self._store.get_wordcloud_updated_at(category, region)
     return {
       "category": category,
       "region": region,
-      "updated_at": updated_at or utc_now_iso(),
+      "generated_at": generated_at or utc_now_iso(),
       "words": words,
     }
 

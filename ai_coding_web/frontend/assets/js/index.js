@@ -257,9 +257,9 @@ async function fetchLastUpdated() {
   const el = document.getElementById('last-updated-bar');
   if (!el) return;
   try {
-    const res = await fetch('/api/public/price?limit=1');
+    const res = await fetch('/api/agri-analytics');
     const data = await res.json();
-    const raw = data?.last_updated || data?.items?.[0]?.updated_at || null;
+    const raw = data?.updated_at || data?.last_updated || null;
     if (!raw) { el.textContent = '최종 갱신: 알 수 없음'; return; }
     const dt = new Date(raw);
     el.textContent = '최종 갱신: ' + dt.toLocaleString('ko-KR', {
