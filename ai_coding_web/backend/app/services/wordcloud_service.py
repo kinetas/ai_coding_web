@@ -10,11 +10,15 @@ class WordcloudService:
     self._store = store
 
   def get_wordcloud(self, category: Category, region: Region):
+    words = self._store.get_wordcloud(category, region)
+    updated_at = None
+    if hasattr(self._store, "get_wordcloud_updated_at"):
+      updated_at = self._store.get_wordcloud_updated_at(category, region)
     return {
       "category": category,
       "region": region,
-      "generated_at": utc_now_iso(),
-      "words": self._store.get_wordcloud(category, region),
+      "updated_at": updated_at or utc_now_iso(),
+      "words": words,
     }
 
   def ingest(self, category: Category, region: Region, words):

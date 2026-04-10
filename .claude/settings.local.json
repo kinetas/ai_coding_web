@@ -61,7 +61,26 @@
       "Bash(python3 -c ':*)",
       "Bash(/c/Users/Administrator/AppData/Local/Microsoft/WindowsApps/python3 --version)",
       "Bash(/c/Users/Administrator/.local/bin/python3.14.exe -c ':*)",
-      "Bash(curl -s \"http://211.58.194.46:3000/api/agri-analytics/rice-series\")"
+      "Bash(curl -s \"http://211.58.194.46:3000/api/agri-analytics/rice-series\")",
+      "Bash(sed -n '38,45p' /c/Users/Administrator/web/ai_coding_web/frontend/analysis-2.html)",
+      "Bash(sed -n '38,45p' /c/Users/Administrator/web/ai_coding_web/frontend/analysis-3.html)",
+      "Bash(python -m py_compile crawler/news_pipeline.py)",
+      "Bash(python -m py_compile etl.py)",
+      "Bash(python -m py_compile backend/app/repositories/memory_store.py)",
+      "Bash(python -m py_compile backend/app/services/wordcloud_service.py)",
+      "Bash(python -m py_compile backend/app/services/analysis_service.py)",
+      "Bash(python3 -m py_compile crawler/news_pipeline.py)",
+      "Bash(where python:*)",
+      "Bash(where python3:*)",
+      "Bash(cmd:*)",
+      "Bash(py etl.py --help)",
+      "Bash(ls /c/Python*/python.exe)",
+      "Bash(find /c -name \"python.exe\")",
+      "Bash(ls -la /c/Users/Administrator/web/ai_coding_web/frontend/analysis-*.html)",
+      "Bash($PYEXE:*)",
+      "Bash(python:*)",
+      "Bash(where py:*)",
+      "Bash(dir C:\\\\Users\\\\Administrator\\\\web:*)"
     ]
   }
 }

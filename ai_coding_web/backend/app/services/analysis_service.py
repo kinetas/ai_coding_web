@@ -17,7 +17,7 @@ class AnalysisService:
       raise HTTPException(status_code=404, detail="unknown page")
     return {
       "page": page,
-      "generated_at": utc_now_iso(),
+      "updated_at": cfg.get("updated_at") or utc_now_iso(),
       "line": cfg["line"],
       "bar": cfg["bar"],
       "donut": cfg["donut"],

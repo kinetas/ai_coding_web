@@ -19,6 +19,21 @@
     });
   }
 
+  function formatUpdatedAt(isoStr) {
+    if (!isoStr) return null;
+    try {
+      var dt = new Date(isoStr);
+      if (isNaN(dt.getTime())) return null;
+      return dt.toLocaleString("ko-KR", {
+        timeZone: "Asia/Seoul",
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit"
+      });
+    } catch (e) {
+      return null;
+    }
+  }
+
   function renderForPage(page) {
     if (!window.EtCharts) return;
     if (!page) return;
@@ -34,9 +49,17 @@
         window.EtCharts.lineChart(byId("chart-line"), line, { accent: accents.line || cssA1 });
         window.EtCharts.barChart(byId("chart-bar"), bar, { accent: accents.bar || cssA2 });
         window.EtCharts.donutChart(byId("chart-donut"), donut, {});
+
+        var el = byId("analysis-last-updated");
+        if (el) {
+          var formatted = formatUpdatedAt(cfg && cfg.updated_at);
+          el.textContent = formatted ? ("최종 갱신: " + formatted) : "최종 갱신: 알 수 없음";
+        }
       })
       .catch(function (reason) {
         showChartError(reason && reason.message ? reason.message : "차트 데이터를 불러오지 못했습니다.");
+        var el = byId("analysis-last-updated");
+        if (el) el.textContent = "최종 갱신: 알 수 없음";
       });
   }
 
@@ -68,7 +91,10 @@
       .then(function (json) {
         var words = Array.isArray(json && json.words) ? json.words : [];
         var top = words.slice(0, 3);
-        if (!top.length) return;
+        if (!top.length) {
+          el.innerHTML = '<p class="kpi-empty">뉴스 키워드 수집 중입니다. ETL이 완료되면 상위 키워드가 표시됩니다.</p>';
+          return;
+        }
         var maxW = top[0].weight || 1;
         el.innerHTML = top.map(function (w, i) {
           var pct = Math.round((w.weight / maxW) * 100);
@@ -79,7 +105,9 @@
             '</div>';
         }).join("");
       })
-      .catch(function () {});
+      .catch(function () {
+        el.innerHTML = '<p class="kpi-empty">키워드 데이터를 불러오지 못했습니다.</p>';
+      });
   }
 
   document.addEventListener("DOMContentLoaded", function () {

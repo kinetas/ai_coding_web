@@ -33,20 +33,86 @@
     </header>
 
     <main id="main" class="site-main">
-<section id="preset-bar" class="preset-bar">
-  <h3 class="preset-bar__title">빠른 시작</h3>
-  <div class="preset-card-grid" id="preset-card-grid">
-  </div>
-</section>
 
       <section class="hero">
         <div class="container">
           <p class="badge">마이페이지</p>
-          <h1 class="page-title">프로필 · 내 분석</h1>
-          <p class="page-subtitle">프로필을 수정하거나 저장된 분석으로 이동하세요.</p>
+          <h1 class="page-title">프로필 · 맞춤 분석</h1>
+          <p class="page-subtitle">카테고리를 선택하고 나만의 분석 차트를 만들어보세요.</p>
         </div>
       </section>
 
+      <!-- 맞춤 분석 위저드 -->
+      <section class="panel ca-panel" id="custom-analysis-panel">
+        <div class="container">
+          <h2 class="panel-title">맞춤 분석 만들기</h2>
+          <p class="panel-desc">아래 4단계를 순서대로 선택하면 시각화 차트가 생성됩니다.</p>
+
+          <!-- Step 1: 카테고리 -->
+          <div class="ca-step" id="ca-step-1">
+            <div class="ca-step__label">
+              <span class="ca-step__num">1</span>카테고리
+            </div>
+            <div class="ca-btn-group" id="ca-category-group">
+              <span class="ca-placeholder">불러오는 중…</span>
+            </div>
+          </div>
+
+          <!-- Step 2: 세부 카테고리 -->
+          <div class="ca-step ca-step--locked" id="ca-step-2">
+            <div class="ca-step__label">
+              <span class="ca-step__num">2</span>세부 카테고리
+            </div>
+            <div class="ca-btn-group" id="ca-subcategory-group">
+              <span class="ca-placeholder">카테고리를 먼저 선택하세요</span>
+            </div>
+          </div>
+
+          <!-- Step 3: 연도 -->
+          <div class="ca-step ca-step--locked" id="ca-step-3">
+            <div class="ca-step__label">
+              <span class="ca-step__num">3</span>연도
+              <span class="ca-step__hint">(농산물 추이·비교·비중에 적용됩니다)</span>
+            </div>
+            <div class="ca-year-row">
+              <input class="input ca-year-input" type="number" id="ca-year" min="2018" max="2030" />
+              <span class="ca-muted">년</span>
+            </div>
+          </div>
+
+          <!-- Step 4: 분석 방식 -->
+          <div class="ca-step ca-step--locked" id="ca-step-4">
+            <div class="ca-step__label">
+              <span class="ca-step__num">4</span>분석 방식
+            </div>
+            <div class="ca-btn-group" id="ca-method-group">
+              <span class="ca-placeholder">불러오는 중…</span>
+            </div>
+          </div>
+
+          <!-- 실행 버튼 -->
+          <div class="ca-actions">
+            <button class="btn" id="ca-run-btn" disabled>분석 실행</button>
+          </div>
+
+          <!-- 결과 영역 -->
+          <div class="ca-result" id="ca-result" hidden>
+            <div class="ca-result__header">
+              <h3 class="ca-result__title" id="ca-result-title"></h3>
+              <p class="ca-result__note" id="ca-result-note" hidden></p>
+            </div>
+            <div class="ca-chart-wrap">
+              <canvas class="ca-canvas" id="ca-canvas"></canvas>
+              <div class="ca-no-data" id="ca-no-data" hidden>
+                해당 조건의 데이터가 없습니다. 연도·카테고리를 변경하거나 ETL을 실행해 데이터를 수집하세요.
+              </div>
+            </div>
+            <div class="ca-legend" id="ca-legend"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 프로필 & 계정 -->
       <section class="panel">
         <div class="container">
           <div class="grid">
@@ -106,6 +172,8 @@
     <script src="./assets/js/config.js"></script>
     <script src="./assets/js/common.js"></script>
     <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/charts.js"></script>
     <script src="./assets/js/mypage.js"></script>
+    <script src="./assets/js/custom_analysis.js"></script>
   </body>
 </html>

@@ -34,6 +34,32 @@ class ContentStore:
       ).all()
       return [{"text": row.text, "weight": float(row.weight)} for row in rows[:28]]
 
+  def get_wordcloud_updated_at(self, category: Category, region: Region) -> Optional[str]:
+    """해당 카테고리·지역 워드클라우드의 DB 마지막 갱신 시각(ISO 8601)을 반환합니다."""
+    with self._session_factory() as db:
+      if category == "all":
+        row = db.scalar(
+          select(WordcloudTerm)
+          .where(WordcloudTerm.region == region)
+          .order_by(WordcloudTerm.updated_at.desc())
+          .limit(1)
+        )
+      else:
+        row = db.scalar(
+          select(WordcloudTerm)
+          .where(WordcloudTerm.category == category)
+          .where(WordcloudTerm.region == region)
+          .order_by(WordcloudTerm.updated_at.desc())
+          .limit(1)
+        )
+      if row is None or row.updated_at is None:
+        return None
+      dt = row.updated_at
+      if dt.tzinfo is None:
+        from datetime import timezone
+        dt = dt.replace(tzinfo=timezone.utc)
+      return dt.isoformat()
+
   def set_wordcloud(self, category: Category, region: Region, words: List[Word], min_words: int = 15) -> int:
     """If fewer than min_words, keep existing data and return 0."""
     if len(words) < min_words:
@@ -58,11 +84,19 @@ class ContentStore:
       row = db.scalar(select(AnalysisSnapshot).where(AnalysisSnapshot.page == page))
       if not row:
         return None
+      updated_at = None
+      if row.updated_at is not None:
+        dt = row.updated_at
+        if dt.tzinfo is None:
+          from datetime import timezone
+          dt = dt.replace(tzinfo=timezone.utc)
+        updated_at = dt.isoformat()
       return {
         "line": list(row.line or []),
         "bar": list(row.bar or []),
         "donut": list(row.donut or []),
         "accents": dict(row.accents or {"line": "#6AE4FF", "bar": "#B79BFF"}),
+        "updated_at": updated_at,
       }
 
   def set_analysis(

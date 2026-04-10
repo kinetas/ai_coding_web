@@ -137,12 +137,14 @@ def run_agri_price(*, dry_run: bool = False) -> None:
   from backend.app.repositories.memory_store import ContentStore
 
   print("[agri] 공공데이터 농가격 API 조회 중...")
-  full = fetch_full_agri_from_env()
+  fetch_with_retry = retry_with_backoff(max_retries=3, base_delay=2.0)(fetch_full_agri_from_env)
+  try:
+    full = fetch_with_retry()
+  except Exception as exc:
+    print(f"  ✗ 농가격 API 조회 최종 실패: {exc}")
+    return
   if not full:
-    print(
-      "  ⚠ 건너뜀: DATA_GO_KR_SERVICE_KEY(또는 PUBLIC_DATA_SERVICE_KEY)와 AT_PRICE_API_PATH가 "
-      "설정되어 있어야 합니다.",
-    )
+    print("  ⚠ 건너뜀: DATA_GO_KR_SERVICE_KEY(또는 PUBLIC_DATA_SERVICE_KEY)와 AT_PRICE_API_PATH가 설정되어 있어야 합니다.")
     return
 
   raw_db_row = full.get("raw_db_row") or {}

@@ -18,14 +18,14 @@
 
 ### 아키텍처
 - 패턴: Controllers → Services → Repositories
-- 저장소 전환: `CONTENT_SOURCE=local|supabase`
+- 저장소: 애플리케이션 DB(SQLite 개발 / PostgreSQL 운영) 단일 경로. 외부 BaaS 없이 백엔드가 콘텐츠·사용자 데이터를 관리한다.
 - 핵심 특징:
   - 사용자 대시보드용 데이터는 서버 저장형
   - ETL과 사용자 API가 분리된 구조
   - 운영 환경과 개발 환경 인증 방식이 구분됨
 
 ### 인증
-- Prod: Supabase JWT Bearer
+- Prod: JWT Bearer(앱 백엔드 발급) 등 운영 환경에 맞는 토큰 인증, PostgreSQL과 연동
 - Dev: SQLite 세션 쿠키
 - ETL 보호: `X-ETL-Token`
 - 보호 경로:
@@ -40,7 +40,7 @@
 ## 현재 강점
 - ETL부터 시각화까지 파이프라인이 명확하다.
 - MVP로 빠르게 검증하기 좋은 구조다.
-- `CONTENT_SOURCE`로 저장소 구현을 유연하게 교체할 수 있다.
+- 리포지토리·어댑터 패턴으로 저장소 구현을 유연하게 교체할 수 있다.
 - Static HTML + FastAPI 조합은 비용 효율이 높다.
 - 워드클라우드 생성 조건과 재시도 규칙이 이미 정의되어 있어 운영 기준이 분명하다.
 

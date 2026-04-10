@@ -12,6 +12,7 @@ from backend.app.config import get_settings
 from backend.app.controllers.analysis_controller import build_router as build_analysis_router
 from backend.app.controllers.auth_controller import router as auth_router
 from backend.app.controllers.builder_controller import build_router as build_builder_router
+from backend.app.controllers.custom_analysis_controller import build_router as build_custom_analysis_router
 from backend.app.controllers.health_controller import router as health_router
 from backend.app.controllers.agri_analytics_controller import build_router as build_agri_analytics_router
 from backend.app.controllers.public_category_controller import build_router as build_public_category_router
@@ -21,6 +22,7 @@ from backend.app.repositories.builder_store import BuilderStore
 from backend.app.repositories.memory_store import ContentStore
 from backend.app.scheduler import start_scheduler, stop_scheduler
 from backend.app.services.agri_analytics_service import AgriAnalyticsService
+from backend.app.services.custom_analysis_service import CustomAnalysisService
 from backend.app.services.public_category_service import PublicCategoryService
 from backend.app.services.analysis_service import AnalysisService
 from backend.app.services.builder_service import BuilderService
@@ -55,6 +57,7 @@ def create_app() -> FastAPI:
   builder_service = BuilderService(builder_store)
   agri_analytics_service = AgriAnalyticsService(settings)
   public_category_service = PublicCategoryService(settings)
+  custom_analysis_service = CustomAnalysisService(SessionLocal)
 
   app.include_router(health_router, prefix="/api")
   app.include_router(auth_router, prefix="/api")
@@ -63,6 +66,7 @@ def create_app() -> FastAPI:
   app.include_router(build_builder_router(builder_service), prefix="/api")
   app.include_router(build_agri_analytics_router(agri_analytics_service), prefix="/api")
   app.include_router(build_public_category_router(public_category_service), prefix="/api")
+  app.include_router(build_custom_analysis_router(custom_analysis_service), prefix="/api")
 
   # 프론트엔드 정적 파일 서빙 (API 라우터 등록 후 마지막에)
   frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"

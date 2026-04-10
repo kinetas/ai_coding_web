@@ -172,7 +172,7 @@
     if (!kpiEl) return;
     var top = (words || []).slice(0, 5);
     if (!top.length) {
-      kpiEl.innerHTML = '<p class="kpi-error">데이터 없음</p>';
+      kpiEl.innerHTML = '<p class="kpi-error">뉴스 키워드 수집 중입니다.<br>ETL이 완료되면 표시됩니다.</p>';
       return;
     }
     var maxW = top[0].weight || 1;

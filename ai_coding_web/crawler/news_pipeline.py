@@ -12,7 +12,9 @@
 from __future__ import annotations
 
 import calendar
+import functools
 import html
+import logging
 import os
 import re
 import time
@@ -24,6 +26,31 @@ from urllib.parse import quote_plus
 
 import feedparser
 import httpx
+
+logger = logging.getLogger(__name__)
+
+
+def _retry_with_backoff(max_retries: int = 3, base_delay: float = 1.0):
+  """지수 백오프로 max_retries 회 재시도하는 데코레이터 (네트워크 호출용)."""
+  def decorator(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+      last_exc = None
+      for attempt in range(max_retries):
+        try:
+          return fn(*args, **kwargs)
+        except Exception as exc:
+          last_exc = exc
+          delay = base_delay * (2 ** attempt)
+          logger.warning(
+            "[retry] %s 실패 (시도 %d/%d), %.1f초 후 재시도: %s",
+            fn.__name__, attempt + 1, max_retries, delay, exc,
+          )
+          time.sleep(delay)
+      logger.error("[retry] %s %d회 모두 실패: %s", fn.__name__, max_retries, last_exc)
+      raise last_exc
+    return wrapper
+  return decorator
 
 # 앱 카테고리 코드 → 사용자 지정 검색어 (한국 / 글로벌)
 CATEGORY_SEARCH_KR: dict[str, str] = {
@@ -122,8 +149,39 @@ KR_STOPWORDS = frozenset(
   """
   및 또는 은 는 이 가 을 를 에 의 에서 로 와 과 도 만 또 그 이거 저희 다른 통해 위한 있다 없다 대한
   google 관련 뉴스 minutes ago hour hours news 연합뉴스 뉴스1 뉴시스 기자 무단 전재 재배포
+  한국 지난 올해 내년 지역 전국 기준 대비 통해 위해 따라 경우 이후 현재 오는 정도 수준 이상 이하
+  분야 상황 활용 운영 실시 추진 관련 개선 확대 지원 강화 마련 시행 제공 발표 계획 진행 예정 완료
   """.split()
 )
+
+# 카테고리별 도메인 특수 불용어 (공통 불용어 외 추가)
+CATEGORY_STOPWORDS_KR: dict[str, frozenset[str]] = {
+  "agri": frozenset([
+    "농산물", "농업", "농가", "농촌", "농식품", "농림", "작물", "품목", "수확",
+    "출하", "도매", "소매", "유통", "판매", "구매", "구입", "공급", "수요",
+    "시장", "가격", "물가", "상승", "하락", "변동", "급등", "급락",
+  ]),
+  "health": frozenset([
+    "의료", "병원", "보건", "건강", "진료", "치료", "환자", "의사", "간호",
+    "질환", "질병", "증상", "예방", "검사", "처방", "약물", "복용",
+    "임상", "감염", "전파", "확산", "사망", "발생", "집계",
+  ]),
+  "traffic": frozenset([
+    "교통", "도로", "노선", "운행", "운전", "차량", "열차", "버스", "지하철",
+    "승객", "이용", "탑승", "정류", "역사", "구간", "통행", "혼잡",
+    "사고", "통제", "우회", "지연", "연착", "결행",
+  ]),
+  "tour": frozenset([
+    "관광", "여행", "방문", "관광객", "외국인", "관광지", "관광업",
+    "숙박", "호텔", "펜션", "리조트", "예약", "취소", "환불",
+    "항공", "비행", "여객", "입국", "출국", "출발", "도착",
+  ]),
+  "env": frozenset([
+    "환경", "기후", "탄소", "온실", "배출", "오염", "미세먼지", "대기",
+    "수질", "토양", "폐기물", "재활용", "에너지", "전력", "신재생",
+    "태양광", "풍력", "탄소중립", "그린", "친환경",
+  ]),
+}
 
 # 워드클라우드: HTML 잔재·포털·도메인 조각 등 (형식/출처 노이즈)
 WORDCLOUD_NOISE_TOKENS = frozenset(
@@ -175,8 +233,9 @@ class NewsItem:
   published_at: datetime | None
 
 
+@_retry_with_backoff(max_retries=3, base_delay=2.0)
 def fetch_rss_items(feed_url: str, *, timeout: float = 22.0, max_items: int = DEFAULT_MAX_ITEMS) -> list[NewsItem]:
-  """단일 RSS URL에서 항목만 파싱(HTTP 오류는 예외)."""
+  """단일 RSS URL에서 항목만 파싱(HTTP 오류는 예외). 네트워크 실패 시 지수 백오프 재시도."""
   with httpx.Client(timeout=timeout, headers=_HTTP_HEADERS, follow_redirects=True) as client:
     r = client.get(feed_url)
     r.raise_for_status()
@@ -264,11 +323,19 @@ def _merge_item_texts(items: Iterable[NewsItem]) -> str:
 
 
 def _category_stopwords(category: str) -> frozenset[str]:
-  """카테고리 검색어 자체(및 구성 토큰)를 워드클라우드에서 제외."""
+  """카테고리 검색어 자체(및 구성 토큰) + 카테고리별 도메인 특수 불용어를 워드클라우드에서 제외."""
   terms: set[str] = set()
+  # 검색어 토큰 제거
   for qmap in (CATEGORY_SEARCH_KR, CATEGORY_SEARCH_GLOBAL):
     q = qmap.get(category, "")
     for tok in _TOKEN_RE.findall(q.lower()):
+      terms.add(tok)
+  # 카테고리별 도메인 특수 불용어 추가
+  domain_stops = CATEGORY_STOPWORDS_KR.get(category, frozenset())
+  for w in domain_stops:
+    terms.add(w.lower())
+    # 토큰 단위로도 추가 (복합어 구성 단어 분리)
+    for tok in _TOKEN_RE.findall(w.lower()):
       terms.add(tok)
   return frozenset(terms)
 

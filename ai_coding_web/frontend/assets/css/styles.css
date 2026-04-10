@@ -623,10 +623,11 @@ a{color:inherit}
   border-color:rgba(255,255,255,.10);
 }
 .quick-link__arrow{opacity:.5;font-size:16px}
-.kpi-loading,.kpi-error{
+.kpi-loading,.kpi-error,.kpi-empty{
   font-size:13px;
   color:var(--muted2);
   padding:8px 0;
+  line-height:1.6;
 }
 
 /* ─── 분석 페이지 KPI 카드 ─── */
@@ -705,12 +706,10 @@ body.manual-handoff--locked{overflow:hidden}
 
 /* ── Last Updated Bar ── */
 .last-updated-bar {
-  font-size: 0.75rem;
-  color: #888;
-  text-align: right;
-  padding: 4px 16px;
-  background: #f9f9f9;
-  border-bottom: 1px solid #eee;
+  font-size: 0.72rem;
+  color: var(--muted2);
+  margin: 8px 0 0;
+  opacity: 0.8;
 }
 
 /* ── 데이터 수집 상태 배너 ── */
@@ -725,6 +724,185 @@ body.manual-handoff--locked{overflow:hidden}
 }
 .data-status-msg.collecting::before {
   content: '⏳ ';
+}
+
+/* ── 맞춤 분석 위저드 ── */
+.ca-panel { padding: 32px 0 40px; }
+
+.ca-step {
+  margin-bottom: 28px;
+  transition: opacity 0.25s;
+}
+.ca-step--locked {
+  opacity: 0.35;
+  pointer-events: none;
+  user-select: none;
+}
+
+.ca-step__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 12px;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+.ca-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0,212,255,.18);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.ca-step__hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted2);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.ca-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ca-btn {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s, box-shadow .15s;
+  font-family: inherit;
+  line-height: 1.4;
+}
+.ca-btn:hover {
+  border-color: rgba(0,212,255,.55);
+  color: var(--accent);
+  background: rgba(0,212,255,.07);
+}
+.ca-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(0,212,255,.14);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.ca-placeholder {
+  font-size: 13px;
+  color: var(--muted2);
+  font-style: italic;
+}
+
+.ca-year-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ca-year-input {
+  width: 110px;
+  text-align: center;
+  font-size: 16px;
+}
+.ca-muted {
+  font-size: 14px;
+  color: var(--muted2);
+}
+
+.ca-actions { margin: 4px 0 28px; }
+
+/* 결과 영역 */
+.ca-result { margin-top: 8px; }
+.ca-result__header { margin-bottom: 14px; }
+.ca-result__title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+.ca-result__note {
+  font-size: 12px;
+  color: var(--muted2);
+  margin: 0;
+}
+
+.ca-chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.ca-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ca-no-data {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-size: 14px;
+  color: var(--muted2);
+  text-align: center;
+}
+
+/* 범례 */
+.ca-legend { margin-top: 4px; }
+.ca-legend-unit {
+  font-size: 11px;
+  color: var(--muted2);
+  margin-bottom: 8px;
+}
+.ca-legend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 5px 16px;
+}
+.ca-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+}
+.ca-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ca-legend-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ca-legend-val {
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ── 프리셋 바 ── */
@@ -775,6 +953,10 @@ body.manual-handoff--locked{overflow:hidden}
   .preset-card {
     min-width: unset;
   }
+  .ca-legend-grid {
+    grid-template-columns: 1fr;
+  }
+  .ca-chart-wrap { height: 240px; }
 }
 
 @media (max-width: 375px) {
@@ -783,8 +965,7 @@ body.manual-handoff--locked{overflow:hidden}
     height: auto !important;
   }
   .last-updated-bar {
-    text-align: left;
-    padding: 4px 8px;
+    font-size: 0.68rem;
   }
   nav ul {
     display: none;
