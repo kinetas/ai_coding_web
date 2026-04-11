@@ -69,6 +69,61 @@
           </div>
         </div>
       </section>
+
+      <!-- 가격 알림 -->
+      <section class="panel" id="alerts-panel">
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">가격 알림</h2>
+              <p class="panel-desc">농산물 품목의 현재 가격이 설정한 조건을 충족하면 이 화면에 표시됩니다.</p>
+            </div>
+          </div>
+
+          <!-- 발동된 알림 -->
+          <div id="alerts-triggered" hidden>
+            <p class="panel-desc" style="font-weight:600;margin-bottom:8px" id="alerts-survey-date"></p>
+            <ul class="builder-saved-list" id="alerts-triggered-list"></ul>
+          </div>
+          <p class="hint" id="alerts-none" hidden>현재 발동된 알림이 없습니다.</p>
+
+          <!-- 등록된 알림 목록 -->
+          <div style="margin-top:20px">
+            <h3 class="panel-desc" style="font-weight:600;margin-bottom:8px">등록된 알림</h3>
+            <p class="hint" id="alerts-empty" hidden>등록된 알림이 없습니다.</p>
+            <ul class="builder-saved-list" id="alerts-list" hidden></ul>
+          </div>
+
+          <!-- 알림 추가 폼 -->
+          <div style="margin-top:24px">
+            <h3 class="panel-desc" style="font-weight:600;margin-bottom:8px">새 알림 추가</h3>
+            <div class="alert alert--error" id="alert-form-err" role="alert" hidden></div>
+            <div class="alert alert--success" id="alert-form-ok" role="status" hidden></div>
+            <form class="form" id="alert-form" novalidate>
+              <label class="field">
+                <span class="field__label">품목명</span>
+                <input class="input" type="text" name="item_name" id="alert-item" placeholder="예: 포도" required maxlength="80" />
+              </label>
+              <label class="field">
+                <span class="field__label">조건</span>
+                <select class="input" name="condition" id="alert-condition">
+                  <option value="above">이상 (가격이 기준 초과)</option>
+                  <option value="below">이하 (가격이 기준 미만)</option>
+                </select>
+              </label>
+              <label class="field">
+                <span class="field__label">기준 가격 (원/kg)</span>
+                <input class="input" type="number" name="threshold" id="alert-threshold" min="1" step="1" placeholder="예: 5000" required />
+              </label>
+              <label class="field">
+                <span class="field__label">알림 이름</span>
+                <input class="input" type="text" name="name" id="alert-name" placeholder="예: 포도 5000원 초과" maxlength="80" />
+              </label>
+              <button class="btn" type="submit">알림 추가</button>
+            </form>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">
@@ -82,5 +137,6 @@
     <script src="./assets/js/common.js"></script>
     <script src="./assets/js/auth.js"></script>
     <script src="./assets/js/my_analyses.js"></script>
+    <script src="./assets/js/mypage_alerts.js"></script>
   </body>
 </html>

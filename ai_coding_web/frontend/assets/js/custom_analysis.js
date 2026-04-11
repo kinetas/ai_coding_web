@@ -34,7 +34,8 @@
     btn.disabled = !ok;
   }
 
-  function setActiveSingle(group, code) {
+  function setActiveSingle(groupId, code) {
+    var group = document.getElementById(groupId);
     if (!group) return;
     group.querySelectorAll('.ca-btn').forEach(function (b) {
       b.classList.toggle('active', b.dataset.code === code);
@@ -49,22 +50,24 @@
     group.innerHTML = categories.map(function (cat) {
       return '<button class="ca-btn" data-code="' + escAttr(cat.code) + '">' + escHtml(cat.label) + '</button>';
     }).join('');
-    group.addEventListener('click', function (e) {
-      var btn = e.target.closest('.ca-btn');
-      if (!btn) return;
-      var code = btn.dataset.code;
-      if (state.category === code) return;
-      state.category = code;
-      state.subcategory = null;
-      state.item = 'all';
-      state.method = null;
-      setActiveSingle(group, code);
-      lockStep(3); lockStep(4); lockStep(5);
-      resetItemBtns();
-      resetMethodBtns();
-      loadSubcategories(code);
-      checkRunnable();
-    });
+  }
+
+  function onCategoryClick(e) {
+    var btn = e.target.closest('#ca-category-group .ca-btn');
+    if (!btn) return;
+    var code = btn.dataset.code;
+    if (state.category === code) return;
+    state.category = code;
+    state.subcategory = null;
+    state.item = 'all';
+    state.method = null;
+    setActiveSingle('ca-category-group', code);
+    lockStep(2); lockStep(3); lockStep(4); lockStep(5);
+    resetSubcategoryBtns();
+    resetItemBtns();
+    resetMethodBtns();
+    loadSubcategories(code);
+    checkRunnable();
   }
 
   // ── Step 2: 서브카테고리 ─────────────────────────────────────────────────
@@ -83,7 +86,6 @@
           return '<button class="ca-btn" data-code="' + escAttr(s.code) + '">' + escHtml(s.label) + '</button>';
         }).join('');
         group.innerHTML = allBtn + subBtns;
-        group.addEventListener('click', onSubcategoryClick);
       })
       .catch(function () {
         group.innerHTML = '<span class="ca-placeholder">불러오기 실패</span>';
@@ -91,18 +93,26 @@
   }
 
   function onSubcategoryClick(e) {
-    var btn = e.target.closest('.ca-btn');
+    var btn = e.target.closest('#ca-subcategory-group .ca-btn');
     if (!btn) return;
-    var group = qs('#ca-subcategory-group');
     var code = btn.dataset.code;
-    if (state.subcategory === code) return;
+    // 같은 세부카테고리라도 품목이 아직 로드되지 않았으면 다시 시도
+    if (state.subcategory === code && document.getElementById('ca-step-4').classList.contains('ca-step--locked') === false) return;
     state.subcategory = code;
     state.item = 'all';
-    setActiveSingle(group, code);
-    lockStep(4); lockStep(5);
+    setActiveSingle('ca-subcategory-group', code);
+    lockStep(3); lockStep(4); lockStep(5);
+    resetItemBtns();
     resetMethodBtns();
     loadItems(state.category, code);
     checkRunnable();
+  }
+
+  function resetSubcategoryBtns() {
+    var group = qs('#ca-subcategory-group');
+    if (!group) return;
+    group.innerHTML = '<span class="ca-placeholder">카테고리를 먼저 선택하세요</span>';
+    state.subcategory = null;
   }
 
   // ── Step 3: 품목 ─────────────────────────────────────────────────────────
@@ -130,22 +140,26 @@
           group.innerHTML = allBtn + itemBtns;
         }
         state.item = 'all';
-        group.addEventListener('click', onItemClick);
         unlockStep(4);
         unlockStep(5);
         checkRunnable();
       })
       .catch(function () {
-        group.innerHTML = '<span class="ca-placeholder">불러오기 실패</span>';
+        // 오류 시에도 '전체'로 진행 가능하도록 unlock
+        var group2 = qs('#ca-item-group');
+        if (group2) group2.innerHTML = '<button class="ca-btn active" data-code="all">전체</button>';
+        state.item = 'all';
+        unlockStep(4);
+        unlockStep(5);
+        checkRunnable();
       });
   }
 
   function onItemClick(e) {
-    var btn = e.target.closest('.ca-btn');
+    var btn = e.target.closest('#ca-item-group .ca-btn');
     if (!btn) return;
-    var group = qs('#ca-item-group');
     state.item = btn.dataset.code;
-    setActiveSingle(group, state.item);
+    setActiveSingle('ca-item-group', state.item);
     checkRunnable();
   }
 
@@ -179,7 +193,6 @@
       } else {
         toInput.value = state.yearTo;
       }
-      // 시작 > 끝이면 시각적 경고
       fromInput.style.borderColor = state.yearFrom > state.yearTo ? 'var(--danger, #e85d6f)' : '';
       toInput.style.borderColor = state.yearFrom > state.yearTo ? 'var(--danger, #e85d6f)' : '';
       checkRunnable();
@@ -197,13 +210,14 @@
     group.innerHTML = methods.map(function (m) {
       return '<button class="ca-btn" data-code="' + escAttr(m.code) + '" title="' + escAttr(m.desc || '') + '">' + escHtml(m.label) + '</button>';
     }).join('');
-    group.addEventListener('click', function (e) {
-      var btn = e.target.closest('.ca-btn');
-      if (!btn) return;
-      state.method = btn.dataset.code;
-      setActiveSingle(group, state.method);
-      checkRunnable();
-    });
+  }
+
+  function onMethodClick(e) {
+    var btn = e.target.closest('#ca-method-group .ca-btn');
+    if (!btn) return;
+    state.method = btn.dataset.code;
+    setActiveSingle('ca-method-group', state.method);
+    checkRunnable();
   }
 
   function resetMethodBtns() {
@@ -406,19 +420,33 @@
   }
   function escAttr(s) { return escHtml(s); }
 
-  // ── 초기화 ───────────────────────────────────────────────────────────────
+  // ── 초기화 ── 이벤트 리스너는 여기서 한 번만 등록 ─────────────────────────
 
   function init() {
     if (!window.EtApi) return;
 
+    // 메타 로드 (카테고리·분석방식)
     window.EtApi.fetchJson('/api/custom-analysis/meta')
       .then(function (meta) {
         renderCategoryBtns(meta.categories || []);
         renderMethodBtns(meta.methods || []);
       })
-      .catch(function () {/* meta 로드 실패는 무시 */});
+      .catch(function () {});
 
     initYearInputs();
+
+    // 이벤트 위임: 각 step의 정적 컨테이너에 한 번만 등록
+    var step1 = document.getElementById('ca-step-1');
+    if (step1) step1.addEventListener('click', onCategoryClick);
+
+    var step2 = document.getElementById('ca-step-2');
+    if (step2) step2.addEventListener('click', onSubcategoryClick);
+
+    var step3 = document.getElementById('ca-step-3');
+    if (step3) step3.addEventListener('click', onItemClick);
+
+    var step5 = document.getElementById('ca-step-5');
+    if (step5) step5.addEventListener('click', onMethodClick);
 
     var runBtn = qs('#ca-run-btn');
     if (runBtn) runBtn.addEventListener('click', runAnalysis);
