@@ -52,9 +52,7 @@
     }).join('');
   }
 
-  function onCategoryClick(e) {
-    var btn = e.target.closest('#ca-category-group .ca-btn');
-    if (!btn) return;
+  function onCategoryBtn(btn) {
     var code = btn.dataset.code;
     if (state.category === code) return;
     state.category = code;
@@ -92,9 +90,7 @@
       });
   }
 
-  function onSubcategoryClick(e) {
-    var btn = e.target.closest('#ca-subcategory-group .ca-btn');
-    if (!btn) return;
+  function onSubcategoryBtn(btn) {
     var code = btn.dataset.code;
     // 같은 세부카테고리라도 품목이 아직 로드되지 않았으면 다시 시도
     if (state.subcategory === code && document.getElementById('ca-step-4').classList.contains('ca-step--locked') === false) return;
@@ -155,9 +151,7 @@
       });
   }
 
-  function onItemClick(e) {
-    var btn = e.target.closest('#ca-item-group .ca-btn');
-    if (!btn) return;
+  function onItemBtn(btn) {
     state.item = btn.dataset.code;
     setActiveSingle('ca-item-group', state.item);
     checkRunnable();
@@ -212,9 +206,7 @@
     }).join('');
   }
 
-  function onMethodClick(e) {
-    var btn = e.target.closest('#ca-method-group .ca-btn');
-    if (!btn) return;
+  function onMethodBtn(btn) {
     state.method = btn.dataset.code;
     setActiveSingle('ca-method-group', state.method);
     checkRunnable();
@@ -435,18 +427,20 @@
 
     initYearInputs();
 
-    // 이벤트 위임: 각 step의 정적 컨테이너에 한 번만 등록
-    var step1 = document.getElementById('ca-step-1');
-    if (step1) step1.addEventListener('click', onCategoryClick);
+    // 단일 위임: ca-step--locked의 pointer-events:none 영향을 받지 않는
+    // 패널 루트에 등록. 버튼 소속 그룹을 closest()로 판별한다.
+    var panel = document.getElementById('custom-analysis-panel');
+    if (panel) {
+      panel.addEventListener('click', function (e) {
+        var btn = e.target.closest('.ca-btn');
+        if (!btn) return;
 
-    var step2 = document.getElementById('ca-step-2');
-    if (step2) step2.addEventListener('click', onSubcategoryClick);
-
-    var step3 = document.getElementById('ca-step-3');
-    if (step3) step3.addEventListener('click', onItemClick);
-
-    var step5 = document.getElementById('ca-step-5');
-    if (step5) step5.addEventListener('click', onMethodClick);
+        if (btn.closest('#ca-category-group'))    { onCategoryBtn(btn);    return; }
+        if (btn.closest('#ca-subcategory-group')) { onSubcategoryBtn(btn); return; }
+        if (btn.closest('#ca-item-group'))        { onItemBtn(btn);        return; }
+        if (btn.closest('#ca-method-group'))      { onMethodBtn(btn);      return; }
+      });
+    }
 
     var runBtn = qs('#ca-run-btn');
     if (runBtn) runBtn.addEventListener('click', runAnalysis);
