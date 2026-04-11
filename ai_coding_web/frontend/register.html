@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Et | 로그인</title>
-    <meta name="description" content="Et 데모 로그인" />
+    <title>Et | 회원가입</title>
+    <meta name="description" content="Et 회원가입" />
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
-  <body data-page="login">
+  <body data-page="register">
     <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 
     <header class="site-header">
@@ -35,38 +35,43 @@
     <main id="main" class="site-main">
       <section class="hero">
         <div class="container">
-          <p class="badge">로그인</p>
-          <h1 class="page-title">내 분석을 쓰려면 로그인</h1>
-          <p class="page-subtitle">로그인 후 분석 만들기와 저장된 분석을 이용할 수 있습니다.</p>
+          <p class="badge">회원가입</p>
+          <h1 class="page-title">Et 계정 만들기</h1>
+          <p class="page-subtitle">회원가입 후 나만의 분석 대시보드를 구성할 수 있습니다.</p>
         </div>
       </section>
 
       <section class="panel">
         <div class="container">
           <article class="card card--form" style="max-width: 480px; margin: 0 auto;">
-            <h2 class="panel-title">로그인</h2>
-            <p class="panel-desc">이메일과 비밀번호를 입력하세요.</p>
+            <h2 class="panel-title">회원가입</h2>
+            <p class="panel-desc">닉네임, 이메일, 비밀번호를 입력하세요.</p>
 
-            <div class="alert alert--error" id="login-error" role="alert" aria-live="polite" hidden></div>
-            <div class="alert alert--success" id="login-success" role="status" aria-live="polite" hidden></div>
+            <div class="alert alert--error" id="register-error" role="alert" aria-live="polite" hidden></div>
+            <div class="alert alert--success" id="register-success" role="status" aria-live="polite" hidden></div>
 
-            <form class="form" id="login-form" novalidate>
+            <form class="form" id="register-form" novalidate>
+              <label class="field">
+                <span class="field__label">닉네임</span>
+                <input class="input" type="text" name="name" autocomplete="nickname" placeholder="예: 데모 사용자" required />
+              </label>
+
               <label class="field">
                 <span class="field__label">이메일</span>
-                <input class="input" type="email" name="email" autocomplete="username" placeholder="예: demo@et.ai" required />
+                <input class="input" type="email" name="email" autocomplete="email" placeholder="예: hello@example.com" required />
               </label>
 
               <label class="field">
                 <span class="field__label">비밀번호</span>
-                <input class="input" type="password" name="password" autocomplete="current-password" placeholder="4자 이상" required />
+                <input class="input" type="password" name="password" autocomplete="new-password" placeholder="8자 이상" required />
               </label>
 
-              <button class="btn" type="submit">로그인</button>
+              <button class="btn" type="submit">회원가입</button>
               <a class="btn btn--ghost" href="./index.html">홈</a>
             </form>
 
             <p style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem;">
-              계정이 없으신가요? <a href="./register.html">회원가입</a>
+              이미 계정이 있으신가요? <a href="./login.html">로그인</a>
             </p>
           </article>
         </div>
@@ -76,12 +81,12 @@
     <footer class="site-footer">
       <div class="container footer-inner">
         <a class="brand brand--sm" href="./index.html" aria-label="Et 홈">Et</a>
-        <p class="muted">로그인</p>
+        <p class="muted">회원가입</p>
       </div>
     </footer>
 
     <script src="./assets/js/config.js"></script>
-<script src="./assets/js/common.js"></script>
+    <script src="./assets/js/common.js"></script>
     <script src="./assets/js/auth.js"></script>
     <script src="./assets/js/login.js"></script>
   </body>

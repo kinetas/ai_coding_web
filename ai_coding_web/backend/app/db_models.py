@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.app.db import Base
@@ -170,6 +170,22 @@ class PublicCategoryAnalytics(Base):
   summary: Mapped[dict] = mapped_column(JSON, default=dict)
   distribution: Mapped[dict] = mapped_column(JSON, default=dict)
   updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class PriceAlert(Base):
+  """사용자 농산물 가격 알림 설정."""
+  __tablename__ = "price_alerts"
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+  user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+  name: Mapped[str] = mapped_column(String(80))          # 알림 이름 (예: 포도 5000원 초과)
+  item_name: Mapped[str] = mapped_column(String(80))     # 품목명 (예: 포도)
+  condition: Mapped[str] = mapped_column(String(10))     # 'above' | 'below'
+  threshold: Mapped[float] = mapped_column(Float)        # 임계값 (원/kg)
+  active: Mapped[bool] = mapped_column(Boolean, server_default="1")
+  created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+  user: Mapped[User] = relationship()
 
 
 class PublicCategoryRaw(Base):

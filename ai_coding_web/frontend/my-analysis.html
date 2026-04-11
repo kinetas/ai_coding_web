@@ -37,106 +37,89 @@
         <div class="container">
           <p class="badge">내 분석</p>
           <h1 class="page-title">분석 만들기</h1>
-          <p class="page-subtitle">분류를 선택하면 관련 지표가 바로 표시됩니다.</p>
+          <p class="page-subtitle">아래 4단계를 순서대로 선택하면 시각화 차트가 생성됩니다.</p>
         </div>
       </section>
 
-      <section class="panel">
+      <!-- 맞춤 분석 위저드 -->
+      <section class="panel ca-panel" id="custom-analysis-panel">
         <div class="container">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">분류 선택</h2>
-              <p class="panel-desc">분석할 카테고리를 고르세요.</p>
+          <h2 class="panel-title">맞춤 분석 만들기</h2>
+          <p class="panel-desc">아래 4단계를 순서대로 선택하면 시각화 차트가 생성됩니다.</p>
+
+          <!-- Step 1: 카테고리 -->
+          <div class="ca-step" id="ca-step-1">
+            <div class="ca-step__label">
+              <span class="ca-step__num">1</span>카테고리
             </div>
-          </div>
-          <div class="filters" id="category-pick" role="group" aria-label="분석 분류"></div>
-        </div>
-      </section>
-
-      <section class="panel" id="saved-in-category-panel" hidden>
-        <div class="container">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">이 분류에 저장된 항목</h2>
-              <p class="panel-desc" id="saved-in-category-desc">선택한 분류 아래에 저장된 항목만 표시합니다.</p>
-            </div>
-          </div>
-          <p class="hint" id="saved-in-category-empty" hidden>이 분류에 저장된 분석이 아직 없습니다. 아래에서 키워드를 정한 뒤 저장하세요.</p>
-          <ul class="builder-saved-list" id="saved-in-category-list" hidden></ul>
-        </div>
-      </section>
-
-      <div class="alert alert--error" id="builder-error" role="alert" aria-live="polite" hidden style="margin:0 auto;max-width:900px;padding:0 1rem"></div>
-
-      <section class="panel" id="suggestions-panel" hidden>
-        <div class="container">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">추천 지표</h2>
-              <p class="panel-desc">클릭하면 서버에서 지표를 불러와 차트로 표시합니다.</p>
-            </div>
-            <form class="form form--inline" id="builder-form">
-              <input class="input input--sm" name="keyword" id="keyword" placeholder="키워드로 좁히기 (선택)" />
-              <button class="btn btn--ghost btn--sm" type="submit">검색</button>
-              <a class="btn btn--ghost btn--sm" href="./my-analyses.html">저장된 분석</a>
-            </form>
-          </div>
-
-          <div class="filters" id="suggestions" aria-label="추천 지표"></div>
-
-          <div class="hint" id="no-suggestions" hidden>
-            <p class="hint-title">추천이 충분하지 않음</p>
-            <ul class="hint-list">
-              <li>아래 채팅으로 필요한 내용을 설명해 보세요. (데모 응답)</li>
-            </ul>
-          </div>
-
-          <form class="form" id="chat-form" hidden>
-            <label class="field">
-              <span class="field__label">챗봇에 질문</span>
-              <input class="input" name="question" id="question" placeholder="예: 게임 MAU 추이 보여줘" />
-            </label>
-            <button class="btn btn--ghost" type="submit">보내기</button>
-          </form>
-          <div class="alert" id="chat-answer" role="status" aria-live="polite" hidden></div>
-        </div>
-      </section>
-
-      <section class="panel" id="result-panel" hidden>
-        <div class="container">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">결과</h2>
-              <p class="panel-desc" id="result-title">지표 출력</p>
+            <div class="ca-btn-group" id="ca-category-group">
+              <span class="ca-placeholder">불러오는 중…</span>
             </div>
           </div>
 
-          <div class="grid">
-            <article class="card">
-              <h3>추이</h3>
-              <p id="metric-desc">선택한 지표 추이(샘플)</p>
-              <canvas class="chart-canvas" id="builder-line" role="img" aria-label="분석 꺾은선 차트"></canvas>
-            </article>
+          <!-- Step 2: 세부 카테고리 -->
+          <div class="ca-step ca-step--locked" id="ca-step-2">
+            <div class="ca-step__label">
+              <span class="ca-step__num">2</span>세부 카테고리
+            </div>
+            <div class="ca-btn-group" id="ca-subcategory-group">
+              <span class="ca-placeholder">카테고리를 먼저 선택하세요</span>
+            </div>
+          </div>
 
-            <article class="card">
-              <h3>요약 상위</h3>
-              <p>최근 구간 상위(샘플)</p>
-              <canvas class="chart-canvas" id="builder-bar" role="img" aria-label="분석 막대 차트"></canvas>
-            </article>
+          <!-- Step 3: 품목 -->
+          <div class="ca-step ca-step--locked" id="ca-step-3">
+            <div class="ca-step__label">
+              <span class="ca-step__num">3</span>품목
+              <span class="ca-step__hint">(전체 포함, 선택 사항)</span>
+            </div>
+            <div class="ca-btn-group" id="ca-item-group">
+              <span class="ca-placeholder">세부 카테고리를 먼저 선택하세요</span>
+            </div>
+          </div>
 
-            <article class="card">
-              <h3>저장</h3>
-              <p>이 분석을 저장해 나중에 다시 열 수 있습니다.</p>
-              <form class="form" id="save-form">
-                <label class="field">
-                  <span class="field__label">저장 이름</span>
-                  <input class="input" name="title" id="save-title" placeholder="예: 게임 MAU 추이" required />
-                </label>
-                <button class="btn" type="submit">분석 저장</button>
-              </form>
-              <div class="alert alert--success" id="save-ok" role="status" aria-live="polite" hidden></div>
-              <div class="alert alert--error" id="save-err" role="alert" aria-live="polite" hidden></div>
-            </article>
+          <!-- Step 4: 기간 -->
+          <div class="ca-step ca-step--locked" id="ca-step-4">
+            <div class="ca-step__label">
+              <span class="ca-step__num">4</span>기간
+              <span class="ca-step__hint">(농산물 추이·비교·비중에 적용됩니다)</span>
+            </div>
+            <div class="ca-year-row">
+              <input class="input ca-year-input" type="number" id="ca-year-from" min="2018" max="2030" />
+              <span class="ca-muted">년 ~</span>
+              <input class="input ca-year-input" type="number" id="ca-year-to" min="2018" max="2030" />
+              <span class="ca-muted">년</span>
+            </div>
+          </div>
+
+          <!-- Step 5: 분석 방식 -->
+          <div class="ca-step ca-step--locked" id="ca-step-5">
+            <div class="ca-step__label">
+              <span class="ca-step__num">5</span>분석 방식
+            </div>
+            <div class="ca-btn-group" id="ca-method-group">
+              <span class="ca-placeholder">불러오는 중…</span>
+            </div>
+          </div>
+
+          <!-- 실행 버튼 -->
+          <div class="ca-actions">
+            <button class="btn" id="ca-run-btn" disabled>분석 실행</button>
+          </div>
+
+          <!-- 결과 영역 -->
+          <div class="ca-result" id="ca-result" hidden>
+            <div class="ca-result__header">
+              <h3 class="ca-result__title" id="ca-result-title"></h3>
+              <p class="ca-result__note" id="ca-result-note" hidden></p>
+            </div>
+            <div class="ca-chart-wrap">
+              <canvas class="ca-canvas" id="ca-canvas"></canvas>
+              <div class="ca-no-data" id="ca-no-data" hidden>
+                해당 조건의 데이터가 없습니다. 연도·카테고리를 변경하거나 ETL을 실행해 데이터를 수집하세요.
+              </div>
+            </div>
+            <div class="ca-legend" id="ca-legend"></div>
           </div>
         </div>
       </section>
@@ -153,6 +136,6 @@
     <script src="./assets/js/common.js"></script>
     <script src="./assets/js/auth.js"></script>
     <script src="./assets/js/charts.js"></script>
-    <script src="./assets/js/my_analysis.js"></script>
+    <script src="./assets/js/custom_analysis.js"></script>
   </body>
 </html>

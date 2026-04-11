@@ -118,26 +118,51 @@ class CustomAnalysisService:
             subs = [{"code": "all", "label": "전체"}]
         return {"category": category_code, "subcategories": subs}
 
+    # ── 품목 ─────────────────────────────────────────────────────────────────
+
+    def get_items(self, category: str, subcategory: str) -> dict:
+        if category == "agri":
+            return self._agri_items(subcategory)
+        return {"category": category, "subcategory": subcategory, "items": []}
+
+    def _agri_items(self, subcategory: str) -> dict:
+        with self._sf() as db:
+            row = db.scalar(select(AgriPriceRaw).where(AgriPriceRaw.slug == "latest"))
+        if not row:
+            return {"subcategory": subcategory, "items": []}
+        raw_items: list[dict] = row.items or []
+        seen: set[str] = set()
+        items: list[dict] = []
+        for it in raw_items:
+            ctgry = str(it.get("ctgry_nm") or "").strip()
+            if subcategory != "all" and ctgry != subcategory:
+                continue
+            nm = str(it.get("item_nm") or "").strip()
+            if nm and nm not in seen:
+                seen.add(nm)
+                items.append({"code": nm, "label": nm})
+        return {"subcategory": subcategory, "items": sorted(items, key=lambda x: x["label"])}
+
     # ── 차트 데이터 ──────────────────────────────────────────────────────────
 
-    def get_data(self, category: str, subcategory: str, year: int, method: str) -> dict:
+    def get_data(self, category: str, subcategory: str, item: str, year_from: int, year_to: int, method: str) -> dict:
         if category == "agri":
-            return self._agri_data(subcategory, year, method)
+            return self._agri_data(subcategory, item, year_from, year_to, method)
         if category in PUBLIC_CATEGORIES:
-            return self._public_data(category, subcategory, year, method)
-        return self._empty(category, subcategory, year, method, "line", "알 수 없는 카테고리")
+            return self._public_data(category, subcategory, year_from, year_to, method)
+        return self._empty(category, subcategory, year_from, method, "line", "알 수 없는 카테고리")
 
     # ── 농산물 ───────────────────────────────────────────────────────────────
 
-    def _agri_data(self, subcategory: str, year: int, method: str) -> dict:
+    def _agri_data(self, subcategory: str, item: str, year_from: int, year_to: int, method: str) -> dict:
         if method == "movers":
-            return self._agri_movers(subcategory)
+            return self._agri_movers(subcategory, item)
 
-        year_prefix = str(year)
         with self._sf() as db:
             rows = db.scalars(
                 select(AgriPriceHistory)
-                .where(AgriPriceHistory.exmn_ymd.like(f"{year_prefix}%"))
+                .where(AgriPriceHistory.exmn_ymd >= f"{year_from}0101")
+                .where(AgriPriceHistory.exmn_ymd <= f"{year_to}1231")
                 .order_by(AgriPriceHistory.exmn_ymd.asc())
             ).all()
 
@@ -145,52 +170,70 @@ class CustomAnalysisService:
         for r in rows:
             p = _parse_payload(r.payload)
             ctgry = str(p.get("ctgry_nm") or "").strip()
-            if subcategory == "all" or ctgry == subcategory:
-                filtered.append((r, p))
+            nm = str(p.get("item_nm") or p.get("품목명") or "").strip()
+            if subcategory != "all" and ctgry != subcategory:
+                continue
+            if item != "all" and nm != item:
+                continue
+            filtered.append((r, p))
+
+        period_label = f"{year_from}" if year_from == year_to else f"{year_from}~{year_to}"
+        sub_label = item if item != "all" else subcategory
 
         if not filtered:
             return self._empty(
-                "agri", subcategory, year, method, "line",
-                f"{year}년 {subcategory} 데이터가 없습니다. ETL을 실행해 데이터를 수집하세요."
+                "agri", subcategory, year_from, method, "line",
+                f"{period_label}년 {sub_label} 데이터가 없습니다. ETL을 실행해 데이터를 수집하세요."
             )
 
         if method == "trend":
-            return self._agri_trend(subcategory, year, filtered)
+            return self._agri_trend(sub_label, year_from, year_to, filtered)
         if method == "compare":
-            return self._agri_compare(subcategory, year, filtered)
+            return self._agri_compare(sub_label, year_from, year_to, filtered)
         if method == "distribution":
-            return self._agri_distribution(subcategory, year, filtered)
-        return self._empty("agri", subcategory, year, method, "bar", "지원하지 않는 분석 방식")
+            return self._agri_distribution(sub_label, year_from, year_to, filtered)
+        return self._empty("agri", subcategory, year_from, method, "bar", "지원하지 않는 분석 방식")
 
-    def _agri_trend(self, subcategory: str, year: int, filtered: list) -> dict:
-        month_buckets: dict[str, list[float]] = defaultdict(list)
+    def _agri_trend(self, label: str, year_from: int, year_to: int, filtered: list) -> dict:
+        multi_year = year_from != year_to
+        bucket: dict[str, list[float]] = defaultdict(list)
+        months_kr = ["1월", "2월", "3월", "4월", "5월", "6월",
+                     "7월", "8월", "9월", "10월", "11월", "12월"]
+
         for r, p in filtered:
             ymd = r.exmn_ymd or ""
             if len(ymd) == 8:
+                year_str = ymd[:4]
                 month = ymd[4:6]
+                key = f"{year_str}-{month}" if multi_year else month
                 price = _get_price(p)
                 if price and price > 0:
-                    month_buckets[month].append(price)
+                    bucket[key].append(price)
 
-        months_kr = ["1월", "2월", "3월", "4월", "5월", "6월",
-                     "7월", "8월", "9월", "10월", "11월", "12월"]
+        sorted_keys = sorted(bucket.keys())
         labels: list[str] = []
         series: list[float] = []
-        for m in sorted(month_buckets.keys()):
-            mi = int(m) - 1
-            labels.append(months_kr[mi] if 0 <= mi < 12 else f"{m}월")
-            vals = month_buckets[m]
+        for k in sorted_keys:
+            if multi_year:
+                y, m = k.split("-")
+                mi = int(m) - 1
+                labels.append(f"{y}/{months_kr[mi] if 0 <= mi < 12 else m + '월'}")
+            else:
+                mi = int(k) - 1
+                labels.append(months_kr[mi] if 0 <= mi < 12 else f"{k}월")
+            vals = bucket[k]
             series.append(round(sum(vals) / len(vals), 1))
 
+        period_label = f"{year_from}" if year_from == year_to else f"{year_from}~{year_to}"
         return {
-            "category": "agri", "subcategory": subcategory, "year": year, "method": "trend",
+            "category": "agri", "subcategory": label, "year": year_from, "method": "trend",
             "chart_type": "line",
             "labels": labels, "series": series,
-            "title": f"{subcategory} 월별 평균 가격 추이 ({year})",
+            "title": f"{label} 월별 평균 가격 추이 ({period_label})",
             "unit": "원/kg환산",
         }
 
-    def _agri_compare(self, subcategory: str, year: int, filtered: list) -> dict:
+    def _agri_compare(self, label: str, year_from: int, year_to: int, filtered: list) -> dict:
         item_prices: dict[str, list[float]] = defaultdict(list)
         for r, p in filtered:
             nm = str(p.get("item_nm") or p.get("품목명") or "").strip()
@@ -203,16 +246,17 @@ class CustomAnalysisService:
             key=lambda x: -x[1],
         )[:15]
 
+        period_label = f"{year_from}" if year_from == year_to else f"{year_from}~{year_to}"
         return {
-            "category": "agri", "subcategory": subcategory, "year": year, "method": "compare",
+            "category": "agri", "subcategory": label, "year": year_from, "method": "compare",
             "chart_type": "bar",
             "labels": [x[0] for x in items_sorted],
             "series": [x[1] for x in items_sorted],
-            "title": f"{subcategory} 품목별 평균 가격 비교 ({year})",
+            "title": f"{label} 품목별 평균 가격 비교 ({period_label})",
             "unit": "원/kg환산",
         }
 
-    def _agri_distribution(self, subcategory: str, year: int, filtered: list) -> dict:
+    def _agri_distribution(self, label: str, year_from: int, year_to: int, filtered: list) -> dict:
         item_prices: dict[str, list[float]] = defaultdict(list)
         for r, p in filtered:
             nm = str(p.get("item_nm") or p.get("품목명") or "").strip()
@@ -225,16 +269,17 @@ class CustomAnalysisService:
             key=lambda x: -x[1],
         )[:8]
 
+        period_label = f"{year_from}" if year_from == year_to else f"{year_from}~{year_to}"
         return {
-            "category": "agri", "subcategory": subcategory, "year": year, "method": "distribution",
+            "category": "agri", "subcategory": label, "year": year_from, "method": "distribution",
             "chart_type": "donut",
             "labels": [x[0] for x in items_sorted],
             "series": [x[1] for x in items_sorted],
-            "title": f"{subcategory} 가격 비중 ({year})",
+            "title": f"{label} 가격 비중 ({period_label})",
             "unit": "원/kg환산",
         }
 
-    def _agri_movers(self, subcategory: str) -> dict:
+    def _agri_movers(self, subcategory: str, item: str = "all") -> dict:
         with self._sf() as db:
             row = db.scalar(select(AgriPriceRaw).where(AgriPriceRaw.slug == "latest"))
         if not row:
@@ -249,6 +294,8 @@ class CustomAnalysisService:
             if subcategory != "all" and ctgry != subcategory:
                 continue
             nm = str(it.get("item_nm") or "").strip()
+            if item != "all" and nm != item:
+                continue
             unit = str(it.get("unit") or "").strip()
             if unit in {"kg", "g"}:
                 cur = _to_float(it.get("exmn_dd_cnvs_avg_prc") or it.get("조사일kg환산평균가격"))
@@ -277,7 +324,7 @@ class CustomAnalysisService:
 
     # ── 공공 카테고리 ─────────────────────────────────────────────────────────
 
-    def _public_data(self, category_code: str, subcategory: str, year: int, method: str) -> dict:
+    def _public_data(self, category_code: str, subcategory: str, year_from: int, year_to: int, method: str) -> dict:
         label = CATEGORY_LABELS.get(category_code, category_code)
         with self._sf() as db:
             row = db.scalar(
@@ -287,7 +334,7 @@ class CustomAnalysisService:
             )
         if not row:
             return self._empty(
-                category_code, subcategory, year, method, "line",
+                category_code, subcategory, year_from, method, "line",
                 f"{label} 데이터가 없습니다. ETL을 실행해 데이터를 수집하세요."
             )
 
@@ -301,7 +348,7 @@ class CustomAnalysisService:
             line = bundle.get("line") or []
             x_labels = bundle.get("labels") or bundle.get("x_labels") or [str(i + 1) for i in range(len(line))]
             return {
-                "category": category_code, "subcategory": subcategory, "year": year, "method": "trend",
+                "category": category_code, "subcategory": subcategory, "year": year_from, "method": "trend",
                 "chart_type": "line",
                 "labels": x_labels, "series": line,
                 "title": f"{label} 추이 (최신 데이터)",
@@ -312,7 +359,7 @@ class CustomAnalysisService:
             bar = bundle.get("bar") or []
             x_labels = bundle.get("labels") or [str(i + 1) for i in range(len(bar))]
             return {
-                "category": category_code, "subcategory": subcategory, "year": year, "method": "compare",
+                "category": category_code, "subcategory": subcategory, "year": year_from, "method": "compare",
                 "chart_type": "bar",
                 "labels": x_labels, "series": bar,
                 "title": f"{label} 항목 비교 (최신 데이터)",
@@ -326,7 +373,7 @@ class CustomAnalysisService:
                 numeric_items.sort(key=lambda x: -x[1])
                 top8 = numeric_items[:8]
                 return {
-                    "category": category_code, "subcategory": subcategory, "year": year, "method": "distribution",
+                    "category": category_code, "subcategory": subcategory, "year": year_from, "method": "distribution",
                     "chart_type": "donut",
                     "labels": [x[0] for x in top8],
                     "series": [x[1] for x in top8],
@@ -335,7 +382,7 @@ class CustomAnalysisService:
                 }
             donut = bundle.get("donut") or []
             return {
-                "category": category_code, "subcategory": subcategory, "year": year, "method": "distribution",
+                "category": category_code, "subcategory": subcategory, "year": year_from, "method": "distribution",
                 "chart_type": "donut",
                 "labels": [], "series": donut,
                 "title": f"{label} 비중 분포 (최신 데이터)",
@@ -348,7 +395,7 @@ class CustomAnalysisService:
             numeric_items.sort(key=lambda x: -x[1])
             top12 = numeric_items[:12]
             return {
-                "category": category_code, "subcategory": subcategory, "year": year, "method": "movers",
+                "category": category_code, "subcategory": subcategory, "year": year_from, "method": "movers",
                 "chart_type": "bar",
                 "labels": [x[0] for x in top12],
                 "series": [x[1] for x in top12],
@@ -356,7 +403,7 @@ class CustomAnalysisService:
                 "note": note,
             }
 
-        return self._empty(category_code, subcategory, year, method, "line", "지원하지 않는 분석 방식")
+        return self._empty(category_code, subcategory, year_from, method, "line", "지원하지 않는 분석 방식")
 
     # ── 공통 헬퍼 ────────────────────────────────────────────────────────────
 

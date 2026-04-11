@@ -119,10 +119,13 @@ def run_agri_price_etl() -> None:
     store.record_etl_run("agri_price_data_go_kr", "error", str(exc)[:500])
 
 
+_KST = "Asia/Seoul"
+
+
 def start_scheduler() -> None:
-  _scheduler.add_job(run_wordcloud_etl, CronTrigger(hour=0, minute=0), id="wordcloud_daily")
-  _scheduler.add_job(run_agri_price_etl, CronTrigger(hour=0, minute=30), id="agri_price_daily")
-  _scheduler.add_job(run_analysis_etl, CronTrigger(day_of_week="mon", hour=0, minute=0), id="analysis_weekly")
+  _scheduler.add_job(run_wordcloud_etl, CronTrigger(hour=0, minute=0, timezone=_KST), id="wordcloud_daily")
+  _scheduler.add_job(run_agri_price_etl, CronTrigger(hour=0, minute=30, timezone=_KST), id="agri_price_daily")
+  _scheduler.add_job(run_analysis_etl, CronTrigger(day_of_week="mon", hour=0, minute=0, timezone=_KST), id="analysis_weekly")
   _scheduler.start()
   logger.info("[Scheduler] Started — wordcloud 00:00 / agri 00:30 / analysis Mon 00:00 (Asia/Seoul)")
 

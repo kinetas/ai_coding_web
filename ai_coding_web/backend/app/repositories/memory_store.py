@@ -19,10 +19,21 @@ class ContentStore:
     with self._session_factory() as db:
       if category == "all":
         rows = db.scalars(select(WordcloudTerm).where(WordcloudTerm.region == region)).all()
-        merged: Dict[str, float] = {}
+        # 카테고리별로 최대 weight 기준 정규화 후 최댓값으로 병합
+        # (합산 시 범용 단어가 여러 카테고리에 걸쳐 과다 노출되는 문제 방지)
+        from collections import defaultdict
+        cat_groups: Dict[str, List] = defaultdict(list)
         for row in rows:
-          merged[row.text] = merged.get(row.text, 0) + float(row.weight)
-        words = [{"text": key, "weight": value} for key, value in merged.items()]
+          cat_groups[row.category].append((row.text, float(row.weight)))
+        merged: Dict[str, float] = {}
+        for cat_words in cat_groups.values():
+          if not cat_words:
+            continue
+          max_w = max(w for _, w in cat_words) or 1.0
+          for text, weight in cat_words:
+            norm_w = weight / max_w * 100.0
+            merged[text] = max(merged.get(text, 0.0), norm_w)
+        words = [{"text": k, "weight": round(v, 2)} for k, v in merged.items()]
         words.sort(key=lambda item: float(item["weight"]), reverse=True)
         return words[:28]
 

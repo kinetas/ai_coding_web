@@ -18,13 +18,22 @@ def build_router(service: CustomAnalysisService) -> APIRouter:
     ) -> dict:
         return service.get_subcategories(category)
 
+    @router.get("/custom-analysis/items")
+    def get_items(
+        category: str = Query(..., description="카테고리 코드"),
+        subcategory: str = Query(default="all", description="하위 카테고리 코드"),
+    ) -> dict:
+        return service.get_items(category, subcategory)
+
     @router.get("/custom-analysis/data")
     def get_data(
         category: str = Query(..., description="카테고리 코드"),
         subcategory: str = Query(default="all", description="하위 카테고리 코드"),
-        year: int = Query(default=2024, ge=2018, le=2030, description="분석 연도"),
+        item: str = Query(default="all", description="품목 코드 (all=전체)"),
+        year_from: int = Query(default=2024, ge=2018, le=2030, description="시작 연도"),
+        year_to: int = Query(default=2024, ge=2018, le=2030, description="종료 연도"),
         method: str = Query(default="trend", description="trend/compare/distribution/movers"),
     ) -> dict:
-        return service.get_data(category, subcategory, year, method)
+        return service.get_data(category, subcategory, item, year_from, year_to, method)
 
     return router

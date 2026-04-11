@@ -151,6 +151,11 @@ KR_STOPWORDS = frozenset(
   google 관련 뉴스 minutes ago hour hours news 연합뉴스 뉴스1 뉴시스 기자 무단 전재 재배포
   한국 지난 올해 내년 지역 전국 기준 대비 통해 위해 따라 경우 이후 현재 오는 정도 수준 이상 이하
   분야 상황 활용 운영 실시 추진 관련 개선 확대 지원 강화 마련 시행 제공 발표 계획 진행 예정 완료
+  서울 정부 국가 국내 국외 국제 정책 사업 제도 문제 해결 필요 중요 주요 핵심
+  대통령 국회 장관 위원회 부처 당국 기관 기업 업계 단체 협회
+  억원 조원 만원 천원 억달러 예산 비용 투자 지출 재원
+  오늘 어제 내일 이번 다음 최근 지금 당시 그동안 올해부터 내년부터
+  하지만 그러나 따라서 때문에 그리고 또한 아울러 한편
   """.split()
 )
 
@@ -278,7 +283,7 @@ def _collect_from_feed_urls(urls: list[str], *, max_items: int) -> list[NewsItem
 
 
 def collect_for_category(category: str, region: str, *, max_items: int | None = None) -> list[NewsItem]:
-  """1) 키워드 Google News RSS → 2) 실패 시 섹션 피드 폴백."""
+  """1) 키워드 Google News RSS → 2) 실패 시 섹션 피드 폴백(카테고리 키워드 포함 기사만 필터링)."""
   if max_items is None:
     max_items = news_rss_max_items()
   qmap = CATEGORY_SEARCH_KR if region == "kr" else CATEGORY_SEARCH_GLOBAL
@@ -298,7 +303,16 @@ def collect_for_category(category: str, region: str, *, max_items: int | None = 
   urls = feed_map.get(category, [])
   if not urls:
     return []
-  return _collect_from_feed_urls(urls, max_items=max_items)
+
+  # 섹션 피드는 광범위하므로 카테고리 검색 토큰이 포함된 기사만 남김
+  raw = _collect_from_feed_urls(urls, max_items=max_items * 4)
+  query_tokens = set(_TOKEN_RE.findall(query.lower()))
+  filtered = [
+    it for it in raw
+    if any(tok in (it.title + " " + it.summary).lower() for tok in query_tokens)
+  ]
+  # 필터 결과가 너무 적으면 원본 사용 (아예 없는 것보다 낫기 때문)
+  return filtered[:max_items] if len(filtered) >= 5 else raw[:max_items]
 
 
 def category_keyword_label(category: str, region: str) -> str:

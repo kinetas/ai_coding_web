@@ -3,10 +3,14 @@
 
   var DONUT_COLORS = ['#00D4FF', '#A78BFF', '#FFD36A', '#9AF7D0', '#FF7AD9', '#FF9F56', '#56CFFF', '#B4F26E'];
 
+  var DEFAULT_YEAR = new Date().getFullYear() - 1;
+
   var state = {
     category: null,
     subcategory: null,
-    year: new Date().getFullYear() - 1,
+    item: 'all',
+    yearFrom: DEFAULT_YEAR,
+    yearTo: DEFAULT_YEAR,
     method: null,
     loading: false,
   };
@@ -25,7 +29,8 @@
   function checkRunnable() {
     var btn = qs('#ca-run-btn');
     if (!btn) return;
-    var ok = state.category && state.subcategory && state.year && state.method && !state.loading;
+    var ok = state.category && state.subcategory && state.yearFrom && state.yearTo
+      && state.yearFrom <= state.yearTo && state.method && !state.loading;
     btn.disabled = !ok;
   }
 
@@ -42,7 +47,7 @@
     var group = qs('#ca-category-group');
     if (!group) return;
     group.innerHTML = categories.map(function (cat) {
-      return '<button class="ca-btn" data-code="' + cat.code + '">' + cat.label + '</button>';
+      return '<button class="ca-btn" data-code="' + escAttr(cat.code) + '">' + escHtml(cat.label) + '</button>';
     }).join('');
     group.addEventListener('click', function (e) {
       var btn = e.target.closest('.ca-btn');
@@ -51,10 +56,11 @@
       if (state.category === code) return;
       state.category = code;
       state.subcategory = null;
+      state.item = 'all';
       state.method = null;
       setActiveSingle(group, code);
-      // Reset downstream
-      lockStep(3); lockStep(4);
+      lockStep(3); lockStep(4); lockStep(5);
+      resetItemBtns();
       resetMethodBtns();
       loadSubcategories(code);
       checkRunnable();
@@ -88,37 +94,108 @@
     var btn = e.target.closest('.ca-btn');
     if (!btn) return;
     var group = qs('#ca-subcategory-group');
-    state.subcategory = btn.dataset.code;
-    setActiveSingle(group, state.subcategory);
-    unlockStep(3);
-    unlockStep(4);
+    var code = btn.dataset.code;
+    if (state.subcategory === code) return;
+    state.subcategory = code;
+    state.item = 'all';
+    setActiveSingle(group, code);
+    lockStep(4); lockStep(5);
+    resetMethodBtns();
+    loadItems(state.category, code);
     checkRunnable();
   }
 
-  // ── Step 3: 연도 ─────────────────────────────────────────────────────────
+  // ── Step 3: 품목 ─────────────────────────────────────────────────────────
 
-  function initYearInput() {
-    var input = qs('#ca-year');
-    if (!input) return;
-    input.value = state.year;
-    input.addEventListener('change', function () {
-      var v = parseInt(input.value, 10);
-      if (!isNaN(v) && v >= 2018 && v <= 2030) {
-        state.year = v;
-      } else {
-        input.value = state.year;
-      }
-      checkRunnable();
-    });
+  function loadItems(category, subcategory) {
+    var group = qs('#ca-item-group');
+    if (!group) return;
+    group.innerHTML = '<span class="ca-placeholder">불러오는 중…</span>';
+    unlockStep(3);
+
+    var url = '/api/custom-analysis/items'
+      + '?category=' + encodeURIComponent(category)
+      + '&subcategory=' + encodeURIComponent(subcategory);
+
+    window.EtApi.fetchJson(url)
+      .then(function (data) {
+        var items = data.items || [];
+        var allBtn = '<button class="ca-btn active" data-code="all">전체</button>';
+        if (!items.length) {
+          group.innerHTML = allBtn;
+        } else {
+          var itemBtns = items.map(function (it) {
+            return '<button class="ca-btn" data-code="' + escAttr(it.code) + '">' + escHtml(it.label) + '</button>';
+          }).join('');
+          group.innerHTML = allBtn + itemBtns;
+        }
+        state.item = 'all';
+        group.addEventListener('click', onItemClick);
+        unlockStep(4);
+        unlockStep(5);
+        checkRunnable();
+      })
+      .catch(function () {
+        group.innerHTML = '<span class="ca-placeholder">불러오기 실패</span>';
+      });
   }
 
-  // ── Step 4: 분석 방식 ────────────────────────────────────────────────────
+  function onItemClick(e) {
+    var btn = e.target.closest('.ca-btn');
+    if (!btn) return;
+    var group = qs('#ca-item-group');
+    state.item = btn.dataset.code;
+    setActiveSingle(group, state.item);
+    checkRunnable();
+  }
+
+  function resetItemBtns() {
+    var group = qs('#ca-item-group');
+    if (!group) return;
+    group.innerHTML = '<span class="ca-placeholder">세부 카테고리를 먼저 선택하세요</span>';
+    state.item = 'all';
+  }
+
+  // ── Step 4: 기간 ─────────────────────────────────────────────────────────
+
+  function initYearInputs() {
+    var fromInput = qs('#ca-year-from');
+    var toInput = qs('#ca-year-to');
+    if (!fromInput || !toInput) return;
+
+    fromInput.value = state.yearFrom;
+    toInput.value = state.yearTo;
+
+    function validateAndSync() {
+      var from = parseInt(fromInput.value, 10);
+      var to = parseInt(toInput.value, 10);
+      if (!isNaN(from) && from >= 2018 && from <= 2030) {
+        state.yearFrom = from;
+      } else {
+        fromInput.value = state.yearFrom;
+      }
+      if (!isNaN(to) && to >= 2018 && to <= 2030) {
+        state.yearTo = to;
+      } else {
+        toInput.value = state.yearTo;
+      }
+      // 시작 > 끝이면 시각적 경고
+      fromInput.style.borderColor = state.yearFrom > state.yearTo ? 'var(--danger, #e85d6f)' : '';
+      toInput.style.borderColor = state.yearFrom > state.yearTo ? 'var(--danger, #e85d6f)' : '';
+      checkRunnable();
+    }
+
+    fromInput.addEventListener('change', validateAndSync);
+    toInput.addEventListener('change', validateAndSync);
+  }
+
+  // ── Step 5: 분석 방식 ────────────────────────────────────────────────────
 
   function renderMethodBtns(methods) {
     var group = qs('#ca-method-group');
     if (!group) return;
     group.innerHTML = methods.map(function (m) {
-      return '<button class="ca-btn" data-code="' + m.code + '" title="' + escAttr(m.desc || '') + '">' + m.label + '</button>';
+      return '<button class="ca-btn" data-code="' + escAttr(m.code) + '" title="' + escAttr(m.desc || '') + '">' + escHtml(m.label) + '</button>';
     }).join('');
     group.addEventListener('click', function (e) {
       var btn = e.target.closest('.ca-btn');
@@ -139,7 +216,8 @@
   // ── 분석 실행 ────────────────────────────────────────────────────────────
 
   function runAnalysis() {
-    if (!state.category || !state.subcategory || !state.year || !state.method) return;
+    if (!state.category || !state.subcategory || !state.yearFrom || !state.yearTo || !state.method) return;
+    if (state.yearFrom > state.yearTo) return;
     if (state.loading) return;
 
     state.loading = true;
@@ -162,7 +240,9 @@
     var url = '/api/custom-analysis/data'
       + '?category=' + encodeURIComponent(state.category)
       + '&subcategory=' + encodeURIComponent(state.subcategory)
-      + '&year=' + encodeURIComponent(state.year)
+      + '&item=' + encodeURIComponent(state.item)
+      + '&year_from=' + encodeURIComponent(state.yearFrom)
+      + '&year_to=' + encodeURIComponent(state.yearTo)
       + '&method=' + encodeURIComponent(state.method);
 
     window.EtApi.fetchJson(url)
@@ -283,7 +363,6 @@
     var gap = 5;
     var bw = Math.max(6, (iW - gap * (n - 1)) / n);
 
-    // 0 기준선
     var midY = mt + iH / 2;
     ctx.save();
     ctx.strokeStyle = 'rgba(234,240,255,.20)';
@@ -292,7 +371,6 @@
     ctx.beginPath(); ctx.moveTo(ml, midY); ctx.lineTo(ml + iW, midY); ctx.stroke();
     ctx.restore();
 
-    // 바
     ctx.save();
     for (var k = 0; k < series.length; k++) {
       var v = series[k] || 0;
@@ -308,7 +386,6 @@
     }
     ctx.restore();
 
-    // 범위 표시 (최대 절댓값)
     ctx.save();
     ctx.fillStyle = 'rgba(234,240,255,.45)';
     ctx.font = '10px ui-sans-serif,system-ui,sans-serif';
@@ -341,7 +418,7 @@
       })
       .catch(function () {/* meta 로드 실패는 무시 */});
 
-    initYearInput();
+    initYearInputs();
 
     var runBtn = qs('#ca-run-btn');
     if (runBtn) runBtn.addEventListener('click', runAnalysis);
