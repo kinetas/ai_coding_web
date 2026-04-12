@@ -871,6 +871,17 @@ body.manual-handoff--locked{overflow:hidden}
 
 /* 범례 */
 .ca-legend { margin-top: 4px; }
+.ca-live-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .875rem;
+  color: var(--accent, #00D4FF);
+  cursor: pointer;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+.ca-live-label input[type=checkbox] { accent-color: var(--accent, #00D4FF); width: 15px; height: 15px; }
 .ca-save-row {
   display: flex;
   align-items: center;

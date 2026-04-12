@@ -89,6 +89,10 @@
               <span class="ca-muted">년 ~</span>
               <input class="input ca-year-input" type="number" id="ca-year-to" min="2018" max="2030" />
               <span class="ca-muted">년</span>
+              <label class="ca-live-label" id="ca-live-label">
+                <input type="checkbox" id="ca-live-chk" />
+                <span>최신 4주 자동 반영</span>
+              </label>
             </div>
           </div>
 
@@ -141,7 +145,7 @@
                 aria-label="저장할 분석 이름"
               />
               <button class="btn btn--ghost" id="ca-save-btn" type="button">저장</button>
-              <span class="hint" id="ca-save-msg" aria-live="polite" hidden></span>
+              <div class="alert" id="ca-save-msg" role="alert" aria-live="polite" hidden></div>
             </div>
           </div>
         </div>

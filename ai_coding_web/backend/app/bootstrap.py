@@ -80,6 +80,18 @@ def _migrate_sqlite() -> None:
       except Exception:
         pass
 
+    # saved_custom_analyses: live 컬럼 추가
+    exists_sca = conn.execute(
+      text("SELECT name FROM sqlite_master WHERE type='table' AND name='saved_custom_analyses'")
+    ).fetchone()
+    if exists_sca:
+      sca_cols = conn.execute(text("PRAGMA table_info(saved_custom_analyses)")).fetchall()
+      sca_names = {row[1] for row in sca_cols}
+      if "live" not in sca_names:
+        conn.exec_driver_sql(
+          "ALTER TABLE saved_custom_analyses ADD COLUMN live INTEGER NOT NULL DEFAULT 0"
+        )
+
     exists_saved = conn.execute(
       text("SELECT name FROM sqlite_master WHERE type='table' AND name='saved_builder_analyses'")
     ).fetchone()
@@ -144,6 +156,25 @@ def _migrate_postgres() -> None:
           "ON saved_builder_analyses (category_label)"
         )
       )
+
+    # saved_custom_analyses: live 컬럼 추가
+    has_sca = conn.execute(
+      text(
+        "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
+        "WHERE table_schema='public' AND table_name='saved_custom_analyses')"
+      )
+    ).scalar()
+    if has_sca:
+      sca_col = conn.execute(
+        text(
+          "SELECT column_name FROM information_schema.columns "
+          "WHERE table_schema='public' AND table_name='saved_custom_analyses' AND column_name='live'"
+        )
+      ).fetchone()
+      if not sca_col:
+        conn.execute(text(
+          "ALTER TABLE saved_custom_analyses ADD COLUMN live BOOLEAN NOT NULL DEFAULT FALSE"
+        ))
 
     has_bc = conn.execute(
       text(

@@ -240,25 +240,60 @@
     checkRunnable();
   }
 
+  // ── 최신 4주 체크박스 ─────────────────────────────────────────────────────
+
+  function initLiveCheckbox() {
+    var chk = qs('#ca-live-chk');
+    if (!chk) return;
+    chk.addEventListener('change', function () {
+      state.live = chk.checked;
+      var fromIn = qs('#ca-year-from');
+      var toIn = qs('#ca-year-to');
+      if (fromIn) fromIn.disabled = chk.checked;
+      if (toIn) toIn.disabled = chk.checked;
+      checkRunnable();
+    });
+  }
+
   // ── 저장 ─────────────────────────────────────────────────────────────────
+
+  function _defaultTitle() {
+    var sub = state.subcategory || state.category || '';
+    var methodLabel = { trend: '추이', compare: '비교', distribution: '비중', movers: '등락' }[state.method] || state.method;
+    if (state.live) return sub + ' 최신4주 ' + methodLabel;
+    return sub + ' ' + state.yearFrom + (state.yearFrom !== state.yearTo ? '~' + state.yearTo : '') + ' ' + methodLabel;
+  }
 
   function showSaveRow() {
     var row = qs('#ca-save-row');
-    var msg = qs('#ca-save-msg');
-    var titleInput = qs('#ca-save-title');
     if (!row) return;
-    row.hidden = false;
-    if (msg) { msg.hidden = true; msg.textContent = ''; }
-    if (titleInput && !titleInput.value) {
-      // 기본 제목 자동 생성
-      var cat = state.category || '';
-      var sub = state.subcategory || '';
-      var method = state.method || '';
-      var methodLabel = { trend: '추이', compare: '비교', distribution: '비중', movers: '등락' }[method] || method;
-      titleInput.value = (sub || cat) + ' ' + state.yearFrom
-        + (state.yearFrom !== state.yearTo ? '~' + state.yearTo : '')
-        + ' ' + methodLabel;
-    }
+
+    // 로그인 여부 먼저 확인
+    window.EtAuth.init().then(function (user) {
+      row.hidden = false;
+      var titleInput = qs('#ca-save-title');
+      var saveBtn = qs('#ca-save-btn');
+      var msgEl = qs('#ca-save-msg');
+
+      if (!user) {
+        // 로그인 안 된 상태: 입력 숨기고 로그인 유도
+        if (titleInput) titleInput.hidden = true;
+        if (saveBtn) { saveBtn.hidden = true; }
+        if (msgEl) {
+          msgEl.className = 'alert alert--error';
+          msgEl.innerHTML = '저장하려면 <a href="' + window.EtAuth.buildLoginUrl('my-analysis.html') + '">로그인</a>이 필요합니다.';
+          msgEl.hidden = false;
+        }
+      } else {
+        // 로그인된 상태: 정상 저장 UI
+        if (titleInput) {
+          titleInput.hidden = false;
+          if (!titleInput.value) titleInput.value = _defaultTitle();
+        }
+        if (saveBtn) { saveBtn.hidden = false; saveBtn.disabled = false; saveBtn.textContent = '저장'; }
+        if (msgEl) { msgEl.hidden = true; msgEl.innerHTML = ''; }
+      }
+    });
   }
 
   function hideSaveRow() {
@@ -274,13 +309,13 @@
 
     var title = (titleInput ? titleInput.value : '').trim();
     if (!title) {
-      if (msgEl) { msgEl.textContent = '분석 이름을 입력하세요.'; msgEl.hidden = false; }
+      if (msgEl) { msgEl.className = 'alert alert--error'; msgEl.textContent = '분석 이름을 입력하세요.'; msgEl.hidden = false; }
       if (titleInput) titleInput.focus();
       return;
     }
 
     if (saveBtn) saveBtn.disabled = true;
-    if (msgEl) { msgEl.textContent = '저장 중…'; msgEl.hidden = false; }
+    if (msgEl) { msgEl.className = 'alert'; msgEl.textContent = '저장 중…'; msgEl.hidden = false; }
 
     window.EtApi.fetchJson('/api/custom-analysis/save', {
       method: 'POST',
@@ -293,18 +328,25 @@
         year_from: state.yearFrom,
         year_to: state.yearTo,
         method: state.method,
+        live: !!state.live,
       }),
     })
       .then(function () {
         if (msgEl) {
-          msgEl.innerHTML = '저장되었습니다. <a href="./my-analyses.html">저장된 분석 보기</a>';
+          msgEl.className = 'alert alert--success';
+          msgEl.innerHTML = '저장 완료! <a href="./my-analyses.html" style="color:inherit;font-weight:700">→ 저장된 분석 보기</a>';
           msgEl.hidden = false;
         }
         if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '다시 저장'; }
+        if (titleInput) titleInput.value = '';
       })
       .catch(function (e) {
-        var msg = (e && e.message) ? e.message : '저장에 실패했습니다. 로그인 후 이용하세요.';
-        if (msgEl) { msgEl.textContent = msg; msgEl.hidden = false; }
+        var errMsg = (e && e.message) ? e.message : '저장 실패';
+        if (msgEl) {
+          msgEl.className = 'alert alert--error';
+          msgEl.innerHTML = errMsg + ' — <a href="' + window.EtAuth.buildLoginUrl('my-analysis.html') + '">로그인하기</a>';
+          msgEl.hidden = false;
+        }
         if (saveBtn) saveBtn.disabled = false;
       });
   }
@@ -341,7 +383,8 @@
       + '&year_from=' + encodeURIComponent(state.yearFrom)
       + '&year_to=' + encodeURIComponent(state.yearTo)
       + '&method=' + encodeURIComponent(state.method)
-      + '&breakdown=' + encodeURIComponent(needBreakdown ? state.breakdown : 'auto');
+      + '&breakdown=' + encodeURIComponent(needBreakdown ? state.breakdown : 'auto')
+      + (state.live ? '&live=true' : '');
 
     window.EtApi.fetchJson(url)
       .then(function (data) {
@@ -521,6 +564,7 @@
       .catch(function () {});
 
     initYearInputs();
+    initLiveCheckbox();
 
     // 단일 위임: ca-step--locked의 pointer-events:none 영향을 받지 않는
     // 패널 루트에 등록. 버튼 소속 그룹을 closest()로 판별한다.

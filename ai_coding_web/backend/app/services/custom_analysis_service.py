@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from sqlalchemy import select
@@ -145,12 +145,40 @@ class CustomAnalysisService:
 
     # ── 차트 데이터 ──────────────────────────────────────────────────────────
 
-    def get_data(self, category: str, subcategory: str, item: str, year_from: int, year_to: int, method: str, breakdown: str = "auto") -> dict:
+    def get_data(
+        self,
+        category: str,
+        subcategory: str,
+        item: str,
+        year_from: int,
+        year_to: int,
+        method: str,
+        breakdown: str = "auto",
+        live: bool = False,
+    ) -> dict:
+        if live and category == "agri":
+            year_from, year_to = self._latest_4week_range()
         if category == "agri":
             return self._agri_data(subcategory, item, year_from, year_to, method, breakdown)
         if category in PUBLIC_CATEGORIES:
             return self._public_data(category, subcategory, year_from, year_to, method)
         return self._empty(category, subcategory, year_from, method, "line", "알 수 없는 카테고리")
+
+    def _latest_4week_range(self) -> tuple[int, int]:
+        """AgriPriceHistory 최신 날짜 기준 4주 범위의 year_from, year_to 반환."""
+        with self._sf() as db:
+            latest_ymd = db.scalar(
+                select(AgriPriceHistory.exmn_ymd).order_by(AgriPriceHistory.exmn_ymd.desc()).limit(1)
+            )
+        if not latest_ymd:
+            cur = datetime.now()
+            return cur.year, cur.year
+        try:
+            latest = datetime.strptime(str(latest_ymd), "%Y%m%d")
+        except ValueError:
+            cur = datetime.now()
+            return cur.year, cur.year
+        return (latest - timedelta(weeks=4)).year, latest.year
 
     # ── 농산물 ───────────────────────────────────────────────────────────────
 
@@ -440,6 +468,7 @@ class CustomAnalysisService:
         year_from: int,
         year_to: int,
         method: str,
+        live: bool = False,
     ) -> dict:
         with self._sf() as db:
             row = SavedCustomAnalysis(
@@ -451,6 +480,7 @@ class CustomAnalysisService:
                 year_from=year_from,
                 year_to=year_to,
                 method=method,
+                live=live,
             )
             db.add(row)
             db.commit()
@@ -477,6 +507,7 @@ class CustomAnalysisService:
             "year_from": row.year_from,
             "year_to": row.year_to,
             "method": row.method,
+            "live": bool(row.live),
             "saved_at": row.created_at.isoformat() if row.created_at else "",
         }
 

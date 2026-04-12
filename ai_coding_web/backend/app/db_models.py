@@ -201,6 +201,7 @@ class SavedCustomAnalysis(Base):
   year_from: Mapped[int] = mapped_column(Integer)
   year_to: Mapped[int] = mapped_column(Integer)
   method: Mapped[str] = mapped_column(String(40))
+  live: Mapped[bool] = mapped_column(Boolean, server_default="0")  # 최신 4주 자동 업데이트
   created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
 
   user: Mapped[User] = relationship()

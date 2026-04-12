@@ -15,6 +15,7 @@ class SaveCustomAnalysisPayload(BaseModel):
     year_from: int = Field(..., ge=2018, le=2030)
     year_to: int = Field(..., ge=2018, le=2030)
     method: str = Field(..., max_length=40)
+    live: bool = Field(default=False)
 
 
 def build_router(service: CustomAnalysisService) -> APIRouter:
@@ -45,9 +46,10 @@ def build_router(service: CustomAnalysisService) -> APIRouter:
         year_from: int = Query(default=2024, ge=2018, le=2030, description="시작 연도"),
         year_to: int = Query(default=2024, ge=2018, le=2030, description="종료 연도"),
         method: str = Query(default="trend", description="trend/compare/distribution/movers"),
-        breakdown: str = Query(default="auto", description="비교 세분화 기준 (auto/item_nm/vrty_nm/se_nm/grd_nm)"),
+        breakdown: str = Query(default="auto", description="비교 세분화 기준"),
+        live: bool = Query(default=False, description="최신 4주 데이터 사용"),
     ) -> dict:
-        return service.get_data(category, subcategory, item, year_from, year_to, method, breakdown)
+        return service.get_data(category, subcategory, item, year_from, year_to, method, breakdown, live)
 
     @router.get("/custom-analysis/saved")
     def list_saved(current_user: dict = Depends(get_current_user)) -> dict:
@@ -68,6 +70,7 @@ def build_router(service: CustomAnalysisService) -> APIRouter:
             year_from=payload.year_from,
             year_to=payload.year_to,
             method=payload.method,
+            live=payload.live,
         )
 
     return router

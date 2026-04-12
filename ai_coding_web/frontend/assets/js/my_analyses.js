@@ -61,6 +61,14 @@
           var tdYear = document.createElement('td');
           tdYear.textContent = it.year_from === it.year_to ? String(it.year_from) : it.year_from + '~' + it.year_to;
 
+          var tdLive = document.createElement('td');
+          if (it.live) {
+            var badge = document.createElement('span');
+            badge.style.cssText = 'background:var(--accent,#00D4FF);color:#000;font-size:.75rem;padding:2px 7px;border-radius:20px;font-weight:700;white-space:nowrap';
+            badge.textContent = '최신 4주';
+            tdLive.appendChild(badge);
+          }
+
           var tdDate = document.createElement('td');
           tdDate.textContent = fmtDate(it.saved_at);
 
@@ -79,6 +87,7 @@
           tr.appendChild(tdSub);
           tr.appendChild(tdMethod);
           tr.appendChild(tdYear);
+          tr.appendChild(tdLive);
           tr.appendChild(tdDate);
           tr.appendChild(tdAlert);
           if (tbody) tbody.appendChild(tr);
