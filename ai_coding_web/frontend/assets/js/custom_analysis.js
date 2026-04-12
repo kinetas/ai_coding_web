@@ -219,6 +219,72 @@
     state.method = null;
   }
 
+  // ── 저장 ─────────────────────────────────────────────────────────────────
+
+  function showSaveRow() {
+    var row = qs('#ca-save-row');
+    var msg = qs('#ca-save-msg');
+    var titleInput = qs('#ca-save-title');
+    if (!row) return;
+    row.hidden = false;
+    if (msg) { msg.hidden = true; msg.textContent = ''; }
+    if (titleInput && !titleInput.value) {
+      // 기본 제목 자동 생성
+      var cat = state.category || '';
+      var sub = state.subcategory || '';
+      var method = state.method || '';
+      var methodLabel = { trend: '추이', compare: '비교', distribution: '비중', movers: '등락' }[method] || method;
+      titleInput.value = (sub || cat) + ' ' + state.yearFrom
+        + (state.yearFrom !== state.yearTo ? '~' + state.yearTo : '')
+        + ' ' + methodLabel;
+    }
+  }
+
+  function hideSaveRow() {
+    var row = qs('#ca-save-row');
+    if (row) row.hidden = true;
+  }
+
+  function saveAnalysis() {
+    if (!window.EtApi) return;
+    var titleInput = qs('#ca-save-title');
+    var msgEl = qs('#ca-save-msg');
+    var saveBtn = qs('#ca-save-btn');
+
+    var title = (titleInput ? titleInput.value : '').trim();
+    if (!title) {
+      if (msgEl) { msgEl.textContent = '분석 이름을 입력하세요.'; msgEl.hidden = false; }
+      if (titleInput) titleInput.focus();
+      return;
+    }
+
+    if (saveBtn) saveBtn.disabled = true;
+    if (msgEl) { msgEl.textContent = '저장 중…'; msgEl.hidden = false; }
+
+    window.EtApi.fetchJson('/api/custom-analysis/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: title,
+        category: state.category,
+        subcategory: state.subcategory,
+        item: state.item,
+        year_from: state.yearFrom,
+        year_to: state.yearTo,
+        method: state.method,
+      }),
+    })
+      .then(function () {
+        if (msgEl) { msgEl.textContent = '저장되었습니다. 저장된 분석에서 확인하세요.'; msgEl.hidden = false; }
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '다시 저장'; }
+      })
+      .catch(function (e) {
+        var msg = (e && e.message) ? e.message : '저장에 실패했습니다. 로그인 후 이용하세요.';
+        if (msgEl) { msgEl.textContent = msg; msgEl.hidden = false; }
+        if (saveBtn) saveBtn.disabled = false;
+      });
+  }
+
   // ── 분석 실행 ────────────────────────────────────────────────────────────
 
   function runAnalysis() {
@@ -256,10 +322,12 @@
         state.loading = false;
         checkRunnable();
         renderResult(data);
+        showSaveRow();
       })
       .catch(function (e) {
         state.loading = false;
         checkRunnable();
+        hideSaveRow();
         if (titleEl) titleEl.textContent = '요청 실패';
         if (noteEl) { noteEl.textContent = e && e.message ? e.message : '오류가 발생했습니다.'; noteEl.hidden = false; }
       });
@@ -417,11 +485,12 @@
   function init() {
     if (!window.EtApi) return;
 
-    // 메타 로드 (카테고리·분석방식)
+    // 메타 로드 (카테고리·분석방식) → 완료 후 URL 파라미터 복원
     window.EtApi.fetchJson('/api/custom-analysis/meta')
       .then(function (meta) {
         renderCategoryBtns(meta.categories || []);
         renderMethodBtns(meta.methods || []);
+        _restoreFromParams();
       })
       .catch(function () {});
 
@@ -444,6 +513,62 @@
 
     var runBtn = qs('#ca-run-btn');
     if (runBtn) runBtn.addEventListener('click', runAnalysis);
+
+    var saveBtn = qs('#ca-save-btn');
+    if (saveBtn) saveBtn.addEventListener('click', saveAnalysis);
+  }
+
+  // ── URL 파라미터 복원 (meta 로드 완료 후 호출) ───────────────────────────
+
+  function _restoreFromParams() {
+    var sp = new URLSearchParams(window.location.search);
+    var cat = sp.get('ca_category');
+    if (!cat) return;
+
+    var sub = sp.get('ca_subcategory') || '';
+    var item = sp.get('ca_item') || 'all';
+    var yFrom = parseInt(sp.get('ca_year_from'), 10) || DEFAULT_YEAR;
+    var yTo = parseInt(sp.get('ca_year_to'), 10) || DEFAULT_YEAR;
+    var method = sp.get('ca_method') || 'trend';
+
+    // 카테고리 선택
+    var catBtn = document.querySelector('#ca-category-group [data-code="' + cat + '"]');
+    if (!catBtn) return;
+    onCategoryBtn(catBtn);
+
+    // 서브카테고리 버튼이 생길 때까지 대기
+    var attempts = 0;
+    function waitAndSelect() {
+      if (attempts++ > 20) return;
+      var subBtn = document.querySelector('#ca-subcategory-group [data-code="' + sub + '"]');
+      if (!subBtn) { return setTimeout(waitAndSelect, 150); }
+      onSubcategoryBtn(subBtn);
+
+      // step-4(기간)가 unlock될 때까지 대기
+      var attempts2 = 0;
+      function waitItem() {
+        if (attempts2++ > 20) return;
+        var step4 = document.getElementById('ca-step-4');
+        if (!step4 || step4.classList.contains('ca-step--locked')) { return setTimeout(waitItem, 150); }
+        // 품목
+        if (item !== 'all') {
+          var itemBtn = document.querySelector('#ca-item-group [data-code="' + item + '"]');
+          if (itemBtn) onItemBtn(itemBtn);
+        }
+        // 기간
+        var fromIn = qs('#ca-year-from');
+        var toIn = qs('#ca-year-to');
+        if (fromIn) { fromIn.value = yFrom; fromIn.dispatchEvent(new Event('change')); }
+        if (toIn) { toIn.value = yTo; toIn.dispatchEvent(new Event('change')); }
+        // 분석방식
+        var mBtn = document.querySelector('#ca-method-group [data-code="' + method + '"]');
+        if (mBtn) onMethodBtn(mBtn);
+        // 자동 실행
+        setTimeout(runAnalysis, 50);
+      }
+      setTimeout(waitItem, 150);
+    }
+    setTimeout(waitAndSelect, 150);
   }
 
   document.addEventListener('DOMContentLoaded', init);

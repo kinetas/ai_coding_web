@@ -41,27 +41,30 @@
         </div>
       </section>
 
+      <!-- 저장된 맞춤 분석 목록 -->
       <section class="panel">
         <div class="container">
           <div class="panel-head">
             <div>
-              <h2 class="panel-title">목록</h2>
-              <p class="panel-desc">행을 클릭하면 동일한 조건으로 분석 만들기가 열립니다.</p>
+              <h2 class="panel-title">저장된 맞춤 분석</h2>
+              <p class="panel-desc">행을 클릭하면 동일한 조건으로 분석이 열립니다. 농산물 품목 분석은 가격 알림을 바로 설정할 수 있습니다.</p>
             </div>
           </div>
 
-          <div class="alert" id="list-empty" hidden>아직 저장된 분석이 없습니다.</div>
-          <table class="table" id="list-table" aria-label="저장된 분석" hidden>
+          <div class="alert" id="ca-list-empty" hidden>아직 저장된 분석이 없습니다. 분석 만들기에서 실행 후 저장해 보세요.</div>
+          <table class="table" id="ca-list-table" aria-label="저장된 맞춤 분석" hidden>
             <thead>
               <tr>
                 <th>이름</th>
-                <th>분류</th>
-                <th>키워드</th>
-                <th>지표</th>
+                <th>카테고리</th>
+                <th>세부/품목</th>
+                <th>방식</th>
+                <th>기간</th>
                 <th>저장 시각</th>
+                <th></th>
               </tr>
             </thead>
-            <tbody id="saved-list-body"></tbody>
+            <tbody id="ca-saved-list-body"></tbody>
           </table>
 
           <div class="filters" style="margin-top:14px">

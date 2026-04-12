@@ -188,6 +188,24 @@ class PriceAlert(Base):
   user: Mapped[User] = relationship()
 
 
+class SavedCustomAnalysis(Base):
+  """맞춤 분석 위저드에서 사용자가 저장한 분석 설정."""
+  __tablename__ = "saved_custom_analyses"
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+  user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+  title: Mapped[str] = mapped_column(String(80))
+  category: Mapped[str] = mapped_column(String(32), index=True)
+  subcategory: Mapped[str] = mapped_column(String(80))
+  item: Mapped[str] = mapped_column(String(80), server_default="all")
+  year_from: Mapped[int] = mapped_column(Integer)
+  year_to: Mapped[int] = mapped_column(Integer)
+  method: Mapped[str] = mapped_column(String(40))
+  created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+  user: Mapped[User] = relationship()
+
+
 class PublicCategoryRaw(Base):
   """공공 카테고리별 원본 데이터 스냅샷."""
   __tablename__ = "public_category_raw"

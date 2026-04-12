@@ -1,8 +1,20 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel, Field
 
+from backend.app.auth import get_current_user
 from backend.app.services.custom_analysis_service import CustomAnalysisService
+
+
+class SaveCustomAnalysisPayload(BaseModel):
+    title: str = Field(..., max_length=80)
+    category: str = Field(..., max_length=32)
+    subcategory: str = Field(..., max_length=80)
+    item: str = Field(default="all", max_length=80)
+    year_from: int = Field(..., ge=2018, le=2030)
+    year_to: int = Field(..., ge=2018, le=2030)
+    method: str = Field(..., max_length=40)
 
 
 def build_router(service: CustomAnalysisService) -> APIRouter:
@@ -35,5 +47,26 @@ def build_router(service: CustomAnalysisService) -> APIRouter:
         method: str = Query(default="trend", description="trend/compare/distribution/movers"),
     ) -> dict:
         return service.get_data(category, subcategory, item, year_from, year_to, method)
+
+    @router.get("/custom-analysis/saved")
+    def list_saved(current_user: dict = Depends(get_current_user)) -> dict:
+        items = service.list_saved(int(current_user["id"]))
+        return {"items": items}
+
+    @router.post("/custom-analysis/save", status_code=201)
+    def save(
+        payload: SaveCustomAnalysisPayload,
+        current_user: dict = Depends(get_current_user),
+    ) -> dict:
+        return service.save(
+            user_id=int(current_user["id"]),
+            title=payload.title,
+            category=payload.category,
+            subcategory=payload.subcategory,
+            item=payload.item,
+            year_from=payload.year_from,
+            year_to=payload.year_to,
+            method=payload.method,
+        )
 
     return router

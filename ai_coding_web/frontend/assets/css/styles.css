@@ -865,9 +865,22 @@ body.manual-handoff--locked{overflow:hidden}
   color: var(--muted2);
   text-align: center;
 }
+.ca-no-data[hidden] {
+  display: none !important;
+}
 
 /* 범례 */
 .ca-legend { margin-top: 4px; }
+.ca-save-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.ca-save-input { flex: 1; min-width: 180px; max-width: 340px; }
 .ca-legend-unit {
   font-size: 11px;
   color: var(--muted2);

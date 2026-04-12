@@ -120,6 +120,20 @@
               </div>
             </div>
             <div class="ca-legend" id="ca-legend"></div>
+
+            <!-- 저장 -->
+            <div class="ca-save-row" id="ca-save-row" hidden>
+              <input
+                class="input ca-save-input"
+                type="text"
+                id="ca-save-title"
+                placeholder="분석 이름 입력 (예: 과채류 2024 추이)"
+                maxlength="80"
+                aria-label="저장할 분석 이름"
+              />
+              <button class="btn btn--ghost" id="ca-save-btn" type="button">저장</button>
+              <span class="hint" id="ca-save-msg" aria-live="polite" hidden></span>
+            </div>
           </div>
         </div>
       </section>

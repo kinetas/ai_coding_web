@@ -80,7 +80,12 @@
       "Bash($PYEXE:*)",
       "Bash(python:*)",
       "Bash(where py:*)",
-      "Bash(dir C:\\\\Users\\\\Administrator\\\\web:*)"
+      "Bash(dir C:\\\\Users\\\\Administrator\\\\web:*)",
+      "Skill(browse)",
+      "WebFetch(domain:211.58.194.46)",
+      "Bash(pip show:*)",
+      "Bash(python3.11 -c \"import sqlalchemy; print\\('ok'\\)\")",
+      "Bash(\"C:/Users/kimjh/AppData/Local/Programs/Python/Python311/python.exe\" -c \"import sqlalchemy; print\\('sqlalchemy:', sqlalchemy.__version__\\)\")"
     ]
   }
 }

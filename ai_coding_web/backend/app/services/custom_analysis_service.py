@@ -9,7 +9,7 @@ from typing import Any
 from sqlalchemy import select
 
 from backend.app.db import SessionLocal
-from backend.app.db_models import AgriPriceHistory, AgriPriceRaw, PublicCategoryAnalytics
+from backend.app.db_models import AgriPriceHistory, AgriPriceRaw, PublicCategoryAnalytics, SavedCustomAnalysis
 
 
 CATEGORY_LABELS: dict[str, str] = {
@@ -404,6 +404,58 @@ class CustomAnalysisService:
             }
 
         return self._empty(category_code, subcategory, year_from, method, "line", "지원하지 않는 분석 방식")
+
+    # ── 저장 / 목록 ──────────────────────────────────────────────────────────
+
+    def save(
+        self,
+        user_id: int,
+        title: str,
+        category: str,
+        subcategory: str,
+        item: str,
+        year_from: int,
+        year_to: int,
+        method: str,
+    ) -> dict:
+        with self._sf() as db:
+            row = SavedCustomAnalysis(
+                user_id=user_id,
+                title=title,
+                category=category,
+                subcategory=subcategory,
+                item=item,
+                year_from=year_from,
+                year_to=year_to,
+                method=method,
+            )
+            db.add(row)
+            db.commit()
+            db.refresh(row)
+            return self._row_to_dict(row)
+
+    def list_saved(self, user_id: int) -> list[dict]:
+        with self._sf() as db:
+            rows = db.scalars(
+                select(SavedCustomAnalysis)
+                .where(SavedCustomAnalysis.user_id == user_id)
+                .order_by(SavedCustomAnalysis.created_at.desc())
+            ).all()
+            return [self._row_to_dict(row) for row in rows]
+
+    @staticmethod
+    def _row_to_dict(row: SavedCustomAnalysis) -> dict:
+        return {
+            "id": row.id,
+            "title": row.title,
+            "category": row.category,
+            "subcategory": row.subcategory,
+            "item": row.item,
+            "year_from": row.year_from,
+            "year_to": row.year_to,
+            "method": row.method,
+            "saved_at": row.created_at.isoformat() if row.created_at else "",
+        }
 
     # ── 공통 헬퍼 ────────────────────────────────────────────────────────────
 
