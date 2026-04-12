@@ -100,6 +100,15 @@
             <div class="ca-btn-group" id="ca-method-group">
               <span class="ca-placeholder">불러오는 중…</span>
             </div>
+            <!-- 항목 비교·비중 분석 + 특정 품목 선택 시 세분화 기준 표시 -->
+            <div id="ca-breakdown-row" hidden style="margin-top:14px">
+              <div class="ca-step__hint" style="margin-bottom:6px">세분화 기준 <span class="ca-muted">(선택한 품목을 어떤 기준으로 비교할지 선택)</span></div>
+              <div class="ca-btn-group" id="ca-breakdown-group">
+                <button class="ca-btn active" data-code="vrty_nm">품종</button>
+                <button class="ca-btn" data-code="se_nm">거래단계</button>
+                <button class="ca-btn" data-code="grd_nm">등급</button>
+              </div>
+            </div>
           </div>
 
           <!-- 실행 버튼 -->

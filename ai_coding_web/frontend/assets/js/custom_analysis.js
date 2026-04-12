@@ -12,6 +12,7 @@
     yearFrom: DEFAULT_YEAR,
     yearTo: DEFAULT_YEAR,
     method: null,
+    breakdown: 'vrty_nm',
     loading: false,
   };
 
@@ -154,6 +155,7 @@
   function onItemBtn(btn) {
     state.item = btn.dataset.code;
     setActiveSingle('ca-item-group', state.item);
+    updateBreakdownVisibility();
     checkRunnable();
   }
 
@@ -209,6 +211,7 @@
   function onMethodBtn(btn) {
     state.method = btn.dataset.code;
     setActiveSingle('ca-method-group', state.method);
+    updateBreakdownVisibility();
     checkRunnable();
   }
 
@@ -217,6 +220,24 @@
     if (!group) return;
     group.querySelectorAll('.ca-btn').forEach(function (b) { b.classList.remove('active'); });
     state.method = null;
+    updateBreakdownVisibility();
+  }
+
+  // ── Step 5 세분화 기준 ────────────────────────────────────────────────────
+
+  var BREAKDOWN_METHODS = ['compare', 'distribution'];
+
+  function updateBreakdownVisibility() {
+    var row = qs('#ca-breakdown-row');
+    if (!row) return;
+    var needBreakdown = state.item !== 'all' && BREAKDOWN_METHODS.indexOf(state.method) !== -1;
+    row.hidden = !needBreakdown;
+  }
+
+  function onBreakdownBtn(btn) {
+    state.breakdown = btn.dataset.code;
+    setActiveSingle('ca-breakdown-group', state.breakdown);
+    checkRunnable();
   }
 
   // ── 저장 ─────────────────────────────────────────────────────────────────
@@ -275,7 +296,10 @@
       }),
     })
       .then(function () {
-        if (msgEl) { msgEl.textContent = '저장되었습니다. 저장된 분석에서 확인하세요.'; msgEl.hidden = false; }
+        if (msgEl) {
+          msgEl.innerHTML = '저장되었습니다. <a href="./my-analyses.html">저장된 분석 보기</a>';
+          msgEl.hidden = false;
+        }
         if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '다시 저장'; }
       })
       .catch(function (e) {
@@ -309,13 +333,15 @@
     if (noDataEl) noDataEl.hidden = true;
     if (canvas) { var ctx2 = canvas.getContext('2d'); if (ctx2) ctx2.clearRect(0, 0, canvas.width, canvas.height); }
 
+    var needBreakdown = state.item !== 'all' && BREAKDOWN_METHODS.indexOf(state.method) !== -1;
     var url = '/api/custom-analysis/data'
       + '?category=' + encodeURIComponent(state.category)
       + '&subcategory=' + encodeURIComponent(state.subcategory)
       + '&item=' + encodeURIComponent(state.item)
       + '&year_from=' + encodeURIComponent(state.yearFrom)
       + '&year_to=' + encodeURIComponent(state.yearTo)
-      + '&method=' + encodeURIComponent(state.method);
+      + '&method=' + encodeURIComponent(state.method)
+      + '&breakdown=' + encodeURIComponent(needBreakdown ? state.breakdown : 'auto');
 
     window.EtApi.fetchJson(url)
       .then(function (data) {
@@ -507,6 +533,7 @@
         if (btn.closest('#ca-category-group'))    { onCategoryBtn(btn);    return; }
         if (btn.closest('#ca-subcategory-group')) { onSubcategoryBtn(btn); return; }
         if (btn.closest('#ca-item-group'))        { onItemBtn(btn);        return; }
+        if (btn.closest('#ca-breakdown-group'))   { onBreakdownBtn(btn);   return; }
         if (btn.closest('#ca-method-group'))      { onMethodBtn(btn);      return; }
       });
     }

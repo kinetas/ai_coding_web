@@ -145,18 +145,33 @@ class CustomAnalysisService:
 
     # ── 차트 데이터 ──────────────────────────────────────────────────────────
 
-    def get_data(self, category: str, subcategory: str, item: str, year_from: int, year_to: int, method: str) -> dict:
+    def get_data(self, category: str, subcategory: str, item: str, year_from: int, year_to: int, method: str, breakdown: str = "auto") -> dict:
         if category == "agri":
-            return self._agri_data(subcategory, item, year_from, year_to, method)
+            return self._agri_data(subcategory, item, year_from, year_to, method, breakdown)
         if category in PUBLIC_CATEGORIES:
             return self._public_data(category, subcategory, year_from, year_to, method)
         return self._empty(category, subcategory, year_from, method, "line", "알 수 없는 카테고리")
 
     # ── 농산물 ───────────────────────────────────────────────────────────────
 
-    def _agri_data(self, subcategory: str, item: str, year_from: int, year_to: int, method: str) -> dict:
+    # 허용된 breakdown 필드 목록 (SQL injection 방지용 화이트리스트)
+    _VALID_BREAKDOWNS = {"item_nm", "vrty_nm", "se_nm", "grd_nm"}
+    _BREAKDOWN_LABELS = {
+        "item_nm": "품목",
+        "vrty_nm": "품종",
+        "se_nm": "거래단계",
+        "grd_nm": "등급",
+    }
+
+    def _agri_data(self, subcategory: str, item: str, year_from: int, year_to: int, method: str, breakdown: str = "auto") -> dict:
         if method == "movers":
             return self._agri_movers(subcategory, item)
+
+        # breakdown 결정: auto면 item이 all인 경우 item_nm, 아니면 vrty_nm
+        if breakdown == "auto" or breakdown not in self._VALID_BREAKDOWNS:
+            effective_breakdown = "item_nm" if item == "all" else "vrty_nm"
+        else:
+            effective_breakdown = breakdown
 
         with self._sf() as db:
             rows = db.scalars(
@@ -189,9 +204,9 @@ class CustomAnalysisService:
         if method == "trend":
             return self._agri_trend(sub_label, year_from, year_to, filtered)
         if method == "compare":
-            return self._agri_compare(sub_label, year_from, year_to, filtered)
+            return self._agri_compare(sub_label, year_from, year_to, filtered, effective_breakdown)
         if method == "distribution":
-            return self._agri_distribution(sub_label, year_from, year_to, filtered)
+            return self._agri_distribution(sub_label, year_from, year_to, filtered, effective_breakdown)
         return self._empty("agri", subcategory, year_from, method, "bar", "지원하지 않는 분석 방식")
 
     def _agri_trend(self, label: str, year_from: int, year_to: int, filtered: list) -> dict:
@@ -233,49 +248,57 @@ class CustomAnalysisService:
             "unit": "원/kg환산",
         }
 
-    def _agri_compare(self, label: str, year_from: int, year_to: int, filtered: list) -> dict:
-        item_prices: dict[str, list[float]] = defaultdict(list)
+    def _agri_compare(self, label: str, year_from: int, year_to: int, filtered: list, breakdown: str = "item_nm") -> dict:
+        breakdown_label = self._BREAKDOWN_LABELS.get(breakdown, breakdown)
+        bucket: dict[str, list[float]] = defaultdict(list)
         for r, p in filtered:
-            nm = str(p.get("item_nm") or p.get("품목명") or "").strip()
+            key = str(p.get(breakdown) or "기타").strip()
+            if not key:
+                key = "기타"
             price = _get_price(p)
-            if nm and price and price > 0:
-                item_prices[nm].append(price)
+            if key and price and price > 0:
+                bucket[key].append(price)
 
         items_sorted = sorted(
-            [(nm, round(sum(ps) / len(ps), 1)) for nm, ps in item_prices.items()],
+            [(k, round(sum(ps) / len(ps), 1)) for k, ps in bucket.items()],
             key=lambda x: -x[1],
         )[:15]
 
         period_label = f"{year_from}" if year_from == year_to else f"{year_from}~{year_to}"
+        title = f"{label} {breakdown_label}별 평균 가격 비교 ({period_label})"
         return {
             "category": "agri", "subcategory": label, "year": year_from, "method": "compare",
             "chart_type": "bar",
             "labels": [x[0] for x in items_sorted],
             "series": [x[1] for x in items_sorted],
-            "title": f"{label} 품목별 평균 가격 비교 ({period_label})",
+            "title": title,
             "unit": "원/kg환산",
         }
 
-    def _agri_distribution(self, label: str, year_from: int, year_to: int, filtered: list) -> dict:
-        item_prices: dict[str, list[float]] = defaultdict(list)
+    def _agri_distribution(self, label: str, year_from: int, year_to: int, filtered: list, breakdown: str = "item_nm") -> dict:
+        breakdown_label = self._BREAKDOWN_LABELS.get(breakdown, breakdown)
+        bucket: dict[str, list[float]] = defaultdict(list)
         for r, p in filtered:
-            nm = str(p.get("item_nm") or p.get("품목명") or "").strip()
+            key = str(p.get(breakdown) or "기타").strip()
+            if not key:
+                key = "기타"
             price = _get_price(p)
-            if nm and price and price > 0:
-                item_prices[nm].append(price)
+            if key and price and price > 0:
+                bucket[key].append(price)
 
         items_sorted = sorted(
-            [(nm, round(sum(ps) / len(ps), 1)) for nm, ps in item_prices.items()],
+            [(k, round(sum(ps) / len(ps), 1)) for k, ps in bucket.items()],
             key=lambda x: -x[1],
         )[:8]
 
         period_label = f"{year_from}" if year_from == year_to else f"{year_from}~{year_to}"
+        title = f"{label} {breakdown_label}별 가격 비중 ({period_label})"
         return {
             "category": "agri", "subcategory": label, "year": year_from, "method": "distribution",
             "chart_type": "donut",
             "labels": [x[0] for x in items_sorted],
             "series": [x[1] for x in items_sorted],
-            "title": f"{label} 가격 비중 ({period_label})",
+            "title": title,
             "unit": "원/kg환산",
         }
 

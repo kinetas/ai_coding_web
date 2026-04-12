@@ -45,8 +45,9 @@ def build_router(service: CustomAnalysisService) -> APIRouter:
         year_from: int = Query(default=2024, ge=2018, le=2030, description="시작 연도"),
         year_to: int = Query(default=2024, ge=2018, le=2030, description="종료 연도"),
         method: str = Query(default="trend", description="trend/compare/distribution/movers"),
+        breakdown: str = Query(default="auto", description="비교 세분화 기준 (auto/item_nm/vrty_nm/se_nm/grd_nm)"),
     ) -> dict:
-        return service.get_data(category, subcategory, item, year_from, year_to, method)
+        return service.get_data(category, subcategory, item, year_from, year_to, method, breakdown)
 
     @router.get("/custom-analysis/saved")
     def list_saved(current_user: dict = Depends(get_current_user)) -> dict:
