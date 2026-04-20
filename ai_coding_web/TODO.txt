@@ -1,0 +1,72 @@
+========================================
+datagarden.p-e.kr 할 일 목록
+작성일: 2026-04-20
+========================================
+
+## 1단계 — 배포 (순서 중요)
+
+[ ] ① 포트포워딩
+    - 공유기 관리 페이지 접속 (192.168.0.1 또는 192.168.1.1)
+    - 포트포워딩 / NAT 메뉴에서 아래 규칙 추가:
+      TCP 80  → 서버 내부 IP : 80
+      TCP 443 → 서버 내부 IP : 443
+    - 서버 내부 IP 확인: ip addr 또는 hostname -I
+
+[ ] ② DNS 확인
+    - 서버 공인 IP 확인: curl https://api.ipify.org
+    - DNS 전파 확인: nslookup datagarden.p-e.kr
+    - 두 IP가 같아야 함 (전파 수 분~수 시간 소요)
+
+[ ] ③ .env 수정
+    변경 전:
+      CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      AUTH_COOKIE_SECURE=false
+      AUTH_COOKIE_SAMESITE=lax
+    변경 후:
+      CORS_ALLOWED_ORIGINS=https://datagarden.p-e.kr
+      AUTH_COOKIE_SECURE=true
+      AUTH_COOKIE_SAMESITE=strict
+    ※ AUTH_COOKIE_SECURE=true는 HTTPS 완료 후 적용할 것
+
+[ ] ④ HTTPS 초기 인증서 발급
+    1. nginx/nginx.conf에서 443 server 블록 전체 주석 처리
+    2. docker compose up -d nginx
+    3. ./init-cert.sh 실행
+    4. nginx.conf에서 주석 해제
+    5. docker compose restart nginx
+    6. 확인: curl -I https://datagarden.p-e.kr
+       → HTTP/2 200 이 나오면 성공
+    ※ 이후 갱신은 certbot 컨테이너가 12시간마다 자동 처리
+
+
+## 2단계 — 코드 개선
+
+[ ] ⑤ nginx-init.conf 분리 (선택)
+    - HTTP 전용 설정 파일을 분리해 init-cert.sh 수동 주석 작업 자동화
+
+[ ] ⑥ ETL 지수 백오프
+    - 대상: etl.py, crawler/*.py
+    - 재시도: 1초 → 2초 → 4초 → 8초 (최대 3회)
+    - 타임아웃 명시
+    - 실패해도 기존 DB 데이터 유지 (부분 실패 허용)
+
+[ ] ⑦ Last Updated 표시
+    - ETL 완료 시 DB에 타임스탬프 저장
+    - API로 노출
+    - 프론트에서 "마지막 업데이트: 3시간 전" 형태로 표시
+
+[ ] ⑧ 빈 상태 메시지 개선
+    - "데이터 없음" → "워드클라우드 생성 중 (수집된 단어: 8/15)"
+    - 빈 차트 → "아직 데이터가 없습니다. 보통 수집 후 1시간 내 표시됩니다."
+
+
+## 3단계 — 데이터 품질
+
+[ ] ⑨ 불용어 사전 강화
+    - 대상: crawler/news_pipeline.py
+    - 카테고리별 불용어 추가
+    - 예: "기자", "뉴스", "오늘", "관련" 등 의미 없는 토큰 제거
+
+[ ] ⑩ 워드클라우드 품질 기준 명시
+    - 최소 토큰 수 상수로 정의 (예: 최소 15개)
+    - 부족 시 사용자에게 이유 표시
