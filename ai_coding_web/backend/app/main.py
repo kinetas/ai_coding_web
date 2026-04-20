@@ -16,6 +16,7 @@ from backend.app.controllers.alert_controller import build_router as build_alert
 from backend.app.controllers.custom_analysis_controller import build_router as build_custom_analysis_router
 from backend.app.controllers.health_controller import router as health_router
 from backend.app.controllers.agri_analytics_controller import build_router as build_agri_analytics_router
+from backend.app.controllers.agri_news_controller import build_router as build_agri_news_router
 from backend.app.controllers.public_category_controller import build_router as build_public_category_router
 from backend.app.controllers.wordcloud_controller import build_router as build_wordcloud_router
 from backend.app.db import SessionLocal
@@ -68,6 +69,7 @@ def create_app() -> FastAPI:
   app.include_router(build_analysis_router(analysis_service), prefix="/api")
   app.include_router(build_builder_router(builder_service), prefix="/api")
   app.include_router(build_agri_analytics_router(agri_analytics_service), prefix="/api")
+  app.include_router(build_agri_news_router(), prefix="/api")
   app.include_router(build_public_category_router(public_category_service), prefix="/api")
   app.include_router(build_custom_analysis_router(custom_analysis_service), prefix="/api")
   app.include_router(build_alert_router(alert_service), prefix="/api")

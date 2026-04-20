@@ -59,18 +59,14 @@ def _load_env() -> None:
 
 _WORDCLOUD_TARGETS: list[tuple[str, str]] = [
   ("agri", "kr"),
-  ("health", "kr"),
-  ("traffic", "kr"),
-  ("tour", "kr"),
-  ("env", "kr"),
 ]
 
 _ANALYSIS_PAGES: list[str] = [
   "analysis-1",
-  "analysis-2",
-  "analysis-3",
-  "analysis-4",
-  "analysis-5",
+]
+
+_CROP_TARGETS: list[str] = [
+  "배추", "무", "사과", "대파", "양파", "감자", "고추", "쌀", "토마토", "오이",
 ]
 
 
@@ -129,6 +125,35 @@ def run_analysis(*, dry_run: bool = False) -> None:
     store.record_etl_run("news_analysis", "success")
 
 
+def run_crop_keywords(*, dry_run: bool = False, crop: str | None = None) -> None:
+  """품목별 뉴스 키워드 수집 — 가격-뉴스 상관 분석용."""
+  from crawler.news_pipeline import pipeline_crop_keywords
+  from backend.app.db import SessionLocal
+  from backend.app.repositories.memory_store import ContentStore
+  from backend.app.models.wordcloud import Word
+
+  store = ContentStore(SessionLocal)
+  targets = [c for c in _CROP_TARGETS if crop is None or c == crop]
+
+  for crop_name in targets:
+    print(f"[crops] {crop_name} 뉴스 키워드 수집 중...")
+    words = pipeline_crop_keywords(crop_name, "kr")
+    print(f"  → {len(words)}개 단어 수집")
+    if dry_run:
+      for w in words[:5]:
+        print(f"     {w['text']}: {w['weight']:.1f}")
+    else:
+      word_objs = [Word(text=w["text"], weight=float(w["weight"])) for w in words]
+      saved = store.set_wordcloud(f"crop_{crop_name}", "kr", word_objs, min_words=5)
+      if saved:
+        print(f"  ✓ 저장 완료 ({saved}개)")
+      else:
+        print(f"  ⚠ 수집 단어 부족({len(words)}개) — 기존 데이터 유지")
+
+  if not dry_run:
+    store.record_etl_run("crop_keywords", "success")
+
+
 def run_agri_price(*, dry_run: bool = False) -> None:
   """공공데이터포털 농가격 API → agri_price_analytics / agri_price_raw / agri_price_history."""
   from crawler.at_price_trend import fetch_full_agri_from_env
@@ -166,15 +191,17 @@ def main() -> None:
   _load_env()
 
   parser = argparse.ArgumentParser(description="ET 데이터 ETL 수동 실행")
-  parser.add_argument("--wordcloud", action="store_true", help="워드클라우드 업데이트")
+  parser.add_argument("--wordcloud", action="store_true", help="농산물 워드클라우드 업데이트")
   parser.add_argument("--analysis", action="store_true", help="분석 스냅샷 업데이트")
   parser.add_argument("--agri", action="store_true", help="농가격(공공데이터 API → agri_price_*)")
-  parser.add_argument("--all", dest="all_", action="store_true", help="워드클라우드+분석+농가격")
+  parser.add_argument("--crops", action="store_true", help="품목별 뉴스 키워드 수집 (가격-뉴스 상관 분석용)")
+  parser.add_argument("--all", dest="all_", action="store_true", help="워드클라우드+분석+농가격+품목키워드")
   parser.add_argument("--dry-run", action="store_true", help="저장하지 않고 미리보기만")
-  parser.add_argument("--category", default=None, help="특정 카테고리만 (agri/health/traffic/tour/env)")
+  parser.add_argument("--category", default=None, help="특정 카테고리만 (agri)")
+  parser.add_argument("--crop", default=None, help="특정 품목만 (배추/무/사과 등, --crops와 함께)")
   args = parser.parse_args()
 
-  if not (args.wordcloud or args.analysis or args.agri or args.all_):
+  if not (args.wordcloud or args.analysis or args.agri or args.crops or args.all_):
     parser.print_help()
     sys.exit(1)
 
@@ -189,6 +216,9 @@ def main() -> None:
 
   if args.agri or args.all_:
     run_agri_price(dry_run=args.dry_run)
+
+  if args.crops or args.all_:
+    run_crop_keywords(dry_run=args.dry_run, crop=args.crop)
 
   print("\n완료.")
 

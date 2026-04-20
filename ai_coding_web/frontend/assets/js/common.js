@@ -49,23 +49,19 @@
     });
   }
 
-  /** body data-page (e.g. analysis-2) → nav data-nav (e.g. health) */
+  /** body data-page → nav data-nav */
   var PAGE_TO_NAV_KEY = {
     home: "home",
     "agri-analytics": "agri-analytics",
-    "analysis-2": "health",
-    "analysis-3": "traffic",
-    "analysis-4": "tour",
-    "analysis-5": "env"
+    "agri-news": "agri-news",
+    "agri-weather": "agri-weather"
   };
 
   var PRIMARY_NAV_LABELS = {
     home: "홈",
     "agri-analytics": "농산물 가격",
-    health: "보건",
-    traffic: "교통",
-    tour: "관광",
-    env: "환경"
+    "agri-news": "뉴스",
+    "agri-weather": "기상"
   };
 
   function applyPrimaryNavLabels() {

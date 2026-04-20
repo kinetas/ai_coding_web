@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 농업 뉴스</title>
+    <meta name="description" content="농산물 품목별 최신 뉴스 제목과 원문 링크" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+    <style>
+      .news-list { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+      .news-item {
+        display: flex; flex-direction: column; gap: 6px;
+        padding: 16px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,.10);
+        background: rgba(255,255,255,.05);
+        transition: background .15s ease, border-color .15s ease;
+      }
+      .news-item:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); }
+      .news-item__title { font-size: 15px; font-weight: 700; line-height: 1.4; }
+      .news-item__title a { text-decoration: none; color: var(--text); }
+      .news-item__title a:hover { color: var(--accent); }
+      .news-item__meta { font-size: 12px; color: var(--muted2); }
+      .news-item__summary { font-size: 13px; color: var(--muted); line-height: 1.5; }
+      .news-empty { text-align: center; padding: 48px 0; color: var(--muted2); font-size: 14px; }
+      .news-count { font-size: 13px; color: var(--muted2); margin-top: 12px; }
+    </style>
+  </head>
+  <body data-page="agri-news">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">홈</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 가격</a>
+          <a class="nav-link" href="./agri-news.html" data-nav="agri-news">뉴스</a>
+          <a class="nav-link" href="./agri-weather.html" data-nav="agri-weather">기상</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">농업 뉴스</p>
+          <h1 class="hero-title">농산물 관련 뉴스</h1>
+          <p class="hero-subtitle">품목을 선택해 관련 뉴스의 제목과 원문 링크를 확인하세요.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">최신 뉴스</h2>
+              <p id="news-count" class="news-count">불러오는 중…</p>
+            </div>
+          </div>
+
+          <div class="filters" aria-label="품목 필터" id="crop-filters">
+            <button class="chip is-active" type="button" data-crop="">전체</button>
+            <button class="chip" type="button" data-crop="배추">배추</button>
+            <button class="chip" type="button" data-crop="무">무</button>
+            <button class="chip" type="button" data-crop="사과">사과</button>
+            <button class="chip" type="button" data-crop="대파">대파</button>
+            <button class="chip" type="button" data-crop="양파">양파</button>
+            <button class="chip" type="button" data-crop="감자">감자</button>
+            <button class="chip" type="button" data-crop="고추">고추</button>
+            <button class="chip" type="button" data-crop="쌀">쌀</button>
+            <button class="chip" type="button" data-crop="토마토">토마토</button>
+            <button class="chip" type="button" data-crop="오이">오이</button>
+          </div>
+
+          <div id="news-list" class="news-list" aria-live="polite">
+            <p class="news-empty">뉴스를 불러오는 중입니다…</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈">Et</a>
+        <p class="muted">농업 뉴스 · Google News RSS</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/config.js"></script>
+    <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/agri-news.js"></script>
+  </body>
+</html>

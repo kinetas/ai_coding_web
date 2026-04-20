@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Et | 기상 정보</title>
+    <meta name="description" content="농업 기상 7일 예보 및 농작업 주의보" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+    <style>
+      .weather-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .weather-card {
+        padding: 16px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,.10);
+        background: rgba(255,255,255,.05);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .weather-card--today {
+        border-color: rgba(0,212,255,.35);
+        background: rgba(0,212,255,.08);
+      }
+      .weather-card__date { font-size: 12px; color: var(--muted2); }
+      .weather-card__icon { font-size: 32px; line-height: 1; }
+      .weather-card__temp { font-size: 14px; font-weight: 700; }
+      .weather-card__temp span { color: var(--muted); font-weight: 400; }
+      .weather-card__rain { font-size: 12px; color: #60a5fa; }
+      .weather-card__wind { font-size: 12px; color: var(--muted2); }
+
+      .advisory-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+      .advisory-item {
+        display: flex; align-items: flex-start; gap: 10px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,.10);
+        background: rgba(255,255,255,.04);
+        font-size: 13px;
+      }
+      .advisory-item--warn { border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.06); }
+      .advisory-item--danger { border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.06); }
+      .advisory-item--info { border-color: rgba(96,165,250,.30); background: rgba(96,165,250,.05); }
+      .advisory-item__icon { font-size: 18px; flex-shrink: 0; }
+      .advisory-item__text { line-height: 1.5; color: var(--muted); }
+      .advisory-item__text strong { color: var(--text); display: block; margin-bottom: 2px; }
+
+      .weather-loading { text-align: center; padding: 48px 0; color: var(--muted2); font-size: 14px; }
+      .weather-error { text-align: center; padding: 32px 0; color: rgba(239,68,68,.85); font-size: 14px; }
+      .weather-updated { font-size: 12px; color: var(--muted2); margin-top: 8px; }
+    </style>
+  </head>
+  <body data-page="agri-weather">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Et 홈">Et</a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="sr-only">메뉴 열기</span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="주 메뉴">
+          <a class="nav-link" href="./index.html" data-nav="home">홈</a>
+          <a class="nav-link" href="./agri-analytics.html" data-nav="agri-analytics">농산물 가격</a>
+          <a class="nav-link" href="./agri-news.html" data-nav="agri-news">뉴스</a>
+          <a class="nav-link" href="./agri-weather.html" data-nav="agri-weather">기상</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <section class="hero">
+        <div class="container">
+          <p class="badge">기상 정보</p>
+          <h1 class="hero-title">농업 기상 정보</h1>
+          <p class="hero-subtitle">7일 날씨 예보와 농작업 주의보를 확인하세요. (기준: 서울·경기)</p>
+          <p id="weather-updated" class="weather-updated"></p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <h2 class="panel-title">7일 예보</h2>
+          <div id="forecast-grid" class="weather-grid">
+            <p class="weather-loading">날씨 정보를 불러오는 중…</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="container">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">농작업 주의보</h2>
+              <p class="panel-desc">날씨 데이터 기반으로 주의가 필요한 항목을 알려드립니다.</p>
+            </div>
+          </div>
+          <div id="advisory-list" class="advisory-list">
+            <p class="weather-loading">분석 중…</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand brand--sm" href="./index.html" aria-label="Et 홈">Et</a>
+        <p class="muted">기상 정보 · Open-Meteo</p>
+      </div>
+    </footer>
+
+    <script src="./assets/js/config.js"></script>
+    <script src="./assets/js/common.js"></script>
+    <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/agri-weather.js"></script>
+  </body>
+</html>

@@ -20,18 +20,14 @@ _scheduler = BackgroundScheduler(timezone="Asia/Seoul")
 
 _WORDCLOUD_TARGETS: list[tuple[str, str]] = [
   ("agri", "kr"),
-  ("health", "kr"),
-  ("traffic", "kr"),
-  ("tour", "kr"),
-  ("env", "kr"),
 ]
 
 _ANALYSIS_PAGES: list[str] = [
   "analysis-1",
-  "analysis-2",
-  "analysis-3",
-  "analysis-4",
-  "analysis-5",
+]
+
+_CROP_TARGETS: list[str] = [
+  "배추", "무", "사과", "대파", "양파", "감자", "고추", "쌀", "토마토", "오이",
 ]
 
 
@@ -119,15 +115,42 @@ def run_agri_price_etl() -> None:
     store.record_etl_run("agri_price_data_go_kr", "error", str(exc)[:500])
 
 
+def run_crop_keywords_etl() -> None:
+  """Daily 01:00 — 품목별 뉴스 키워드 수집 (가격-뉴스 상관 분석용)."""
+  from crawler.news_pipeline import pipeline_crop_keywords
+  from backend.app.db import SessionLocal
+  from backend.app.repositories.memory_store import ContentStore
+  from backend.app.models.wordcloud import Word
+
+  logger.info("[ETL] Crop keywords update started")
+  store = ContentStore(SessionLocal)
+  errors: list[str] = []
+
+  for crop in _CROP_TARGETS:
+    try:
+      words = pipeline_crop_keywords(crop, "kr")
+      word_objs = [Word(text=w["text"], weight=float(w["weight"])) for w in words]
+      store.set_wordcloud(f"crop_{crop}", "kr", word_objs, min_words=5)
+      logger.info("[ETL] Crop keywords OK: %s (%d terms)", crop, len(word_objs))
+    except Exception as exc:
+      logger.error("[ETL] Crop keywords failed: %s — %s", crop, exc)
+      errors.append(f"{crop}: {exc}")
+
+  status = "success" if not errors else "partial_error"
+  store.record_etl_run("crop_keywords", status, "; ".join(errors))
+  logger.info("[ETL] Crop keywords finished (status=%s)", status)
+
+
 _KST = "Asia/Seoul"
 
 
 def start_scheduler() -> None:
   _scheduler.add_job(run_wordcloud_etl, CronTrigger(hour=0, minute=0, timezone=_KST), id="wordcloud_daily")
   _scheduler.add_job(run_agri_price_etl, CronTrigger(hour=0, minute=30, timezone=_KST), id="agri_price_daily")
+  _scheduler.add_job(run_crop_keywords_etl, CronTrigger(hour=1, minute=0, timezone=_KST), id="crop_keywords_daily")
   _scheduler.add_job(run_analysis_etl, CronTrigger(day_of_week="mon", hour=0, minute=0, timezone=_KST), id="analysis_weekly")
   _scheduler.start()
-  logger.info("[Scheduler] Started — wordcloud 00:00 / agri 00:30 / analysis Mon 00:00 (Asia/Seoul)")
+  logger.info("[Scheduler] Started — wordcloud 00:00 / agri 00:30 / crops 01:00 / analysis Mon 00:00 (Asia/Seoul)")
 
 
 def stop_scheduler() -> None:

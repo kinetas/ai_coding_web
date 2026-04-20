@@ -85,7 +85,8 @@
       "WebFetch(domain:211.58.194.46)",
       "Bash(pip show:*)",
       "Bash(python3.11 -c \"import sqlalchemy; print\\('ok'\\)\")",
-      "Bash(\"C:/Users/kimjh/AppData/Local/Programs/Python/Python311/python.exe\" -c \"import sqlalchemy; print\\('sqlalchemy:', sqlalchemy.__version__\\)\")"
+      "Bash(\"C:/Users/kimjh/AppData/Local/Programs/Python/Python311/python.exe\" -c \"import sqlalchemy; print\\('sqlalchemy:', sqlalchemy.__version__\\)\")",
+      "Bash(python3 -c \"import sys; sys.path.insert\\(0,'C:/Users/Administrator/web/ai_coding_web'\\); from crawler.news_pipeline import CATEGORY_SEARCH_KR; print\\(list\\(CATEGORY_SEARCH_KR.keys\\(\\)\\)\\)\")"
     ]
   }
 }

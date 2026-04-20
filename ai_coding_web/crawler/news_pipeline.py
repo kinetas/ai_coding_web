@@ -54,36 +54,34 @@ def _retry_with_backoff(max_retries: int = 3, base_delay: float = 1.0):
 
 # 앱 카테고리 코드 → 사용자 지정 검색어 (한국 / 글로벌)
 CATEGORY_SEARCH_KR: dict[str, str] = {
-  "agri": "농산물",
-  "health": "의료",
-  "traffic": "교통",
-  "tour": "관광",
-  "env": "환경",
+  "agri": "농산물 가격",
 }
 
 CATEGORY_SEARCH_GLOBAL: dict[str, str] = {
-  "agri": "agricultural products OR farming",
-  "health": "healthcare OR medical",
-  "traffic": "transportation OR traffic",
-  "tour": "tourism OR travel",
-  "env": "environment OR climate",
+  "agri": "agricultural price OR farm price OR crop price",
+}
+
+# 주요 농산물 품목별 검색어 — 품목 키워드 수집 및 가격-뉴스 연결에 사용
+CROP_SEARCH_KR: dict[str, list[str]] = {
+  "배추": ["배추 가격", "배추 작황", "배추 폭등", "배추 폭락"],
+  "무": ["무 가격", "무 작황", "무 생산"],
+  "사과": ["사과 가격", "사과 작황", "사과 수확"],
+  "대파": ["대파 가격", "대파 폭등", "대파 작황"],
+  "양파": ["양파 가격", "양파 작황", "양파 수급"],
+  "감자": ["감자 가격", "감자 작황", "감자 생산"],
+  "고추": ["고추 가격", "고추 작황", "고춧가루 가격"],
+  "쌀": ["쌀 가격", "쌀 생산량", "쌀 수급"],
+  "토마토": ["토마토 가격", "토마토 작황"],
+  "오이": ["오이 가격", "오이 작황"],
 }
 
 # 카테고리별 RSS (검색 피드 실패 시에만 순서대로 시도)
 DIRECT_FEEDS_KR: dict[str, list[str]] = {
   "agri": ["https://www.yna.co.kr/rss/economy.xml", "https://www.korea.kr/rss/economy.xml"],
-  "health": ["https://www.yna.co.kr/rss/health.xml"],
-  "traffic": ["https://www.yna.co.kr/rss/society.xml"],
-  "tour": ["https://www.yna.co.kr/rss/culture.xml", "https://www.korea.kr/rss/culture.xml"],
-  "env": ["https://www.yna.co.kr/rss/local.xml"],
 }
 
 DIRECT_FEEDS_GLOBAL: dict[str, list[str]] = {
   "agri": ["http://feeds.bbci.co.uk/news/business/rss.xml"],
-  "health": ["http://feeds.bbci.co.uk/news/health/rss.xml"],
-  "traffic": ["http://feeds.bbci.co.uk/news/technology/rss.xml"],
-  "tour": ["http://feeds.bbci.co.uk/news/world/rss.xml"],
-  "env": ["http://feeds.bbci.co.uk/news/science_and_environment/rss.xml"],
 }
 
 
@@ -128,21 +126,13 @@ _HTTP_HEADERS = {
   "Accept": "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
 }
 
-# 분석 페이지(차트)와 집계할 카테고리 매핑 — env는 차트 슬롯이 없어 워드클라우드만 별도 적재
+# 분석 페이지(차트)와 집계할 카테고리 매핑
 CATEGORY_TO_ANALYSIS_PAGE: dict[str, str] = {
   "agri": "analysis-1",
-  "health": "analysis-2",
-  "traffic": "analysis-3",
-  "tour": "analysis-4",
-  "env": "analysis-5",
 }
 
 BAR_SEEDS: dict[str, list[str]] = {
-  "agri": ["농산물", "농업", "수출", "가격", "채소", "과일", "farm", "crop", "price"],
-  "health": ["의료", "병원", "치료", "환자", "백신", "hospital", "patient", "health"],
-  "traffic": ["교통", "지하철", "버스", "도로", "subway", "bus", "train", "traffic"],
-  "tour": ["관광", "여행", "호텔", "항공", "travel", "tour", "hotel", "flight"],
-  "env": ["환경", "기후", "탄소", "미세먼지", "climate", "carbon", "environment"],
+  "agri": ["배추", "무", "사과", "대파", "양파", "감자", "고추", "쌀", "작황", "수급", "폭등", "폭락"],
 }
 
 KR_STOPWORDS = frozenset(
@@ -162,29 +152,9 @@ KR_STOPWORDS = frozenset(
 # 카테고리별 도메인 특수 불용어 (공통 불용어 외 추가)
 CATEGORY_STOPWORDS_KR: dict[str, frozenset[str]] = {
   "agri": frozenset([
-    "농산물", "농업", "농가", "농촌", "농식품", "농림", "작물", "품목", "수확",
+    "농산물", "농업", "농가", "농촌", "농식품", "농림", "작물", "품목",
     "출하", "도매", "소매", "유통", "판매", "구매", "구입", "공급", "수요",
-    "시장", "가격", "물가", "상승", "하락", "변동", "급등", "급락",
-  ]),
-  "health": frozenset([
-    "의료", "병원", "보건", "건강", "진료", "치료", "환자", "의사", "간호",
-    "질환", "질병", "증상", "예방", "검사", "처방", "약물", "복용",
-    "임상", "감염", "전파", "확산", "사망", "발생", "집계",
-  ]),
-  "traffic": frozenset([
-    "교통", "도로", "노선", "운행", "운전", "차량", "열차", "버스", "지하철",
-    "승객", "이용", "탑승", "정류", "역사", "구간", "통행", "혼잡",
-    "사고", "통제", "우회", "지연", "연착", "결행",
-  ]),
-  "tour": frozenset([
-    "관광", "여행", "방문", "관광객", "외국인", "관광지", "관광업",
-    "숙박", "호텔", "펜션", "리조트", "예약", "취소", "환불",
-    "항공", "비행", "여객", "입국", "출국", "출발", "도착",
-  ]),
-  "env": frozenset([
-    "환경", "기후", "탄소", "온실", "배출", "오염", "미세먼지", "대기",
-    "수질", "토양", "폐기물", "재활용", "에너지", "전력", "신재생",
-    "태양광", "풍력", "탄소중립", "그린", "친환경",
+    "시장", "물가", "상승", "하락", "변동",
   ]),
 }
 
@@ -236,6 +206,7 @@ class NewsItem:
   title: str
   summary: str
   published_at: datetime | None
+  url: str = ""
 
 
 @_retry_with_backoff(max_retries=3, base_delay=2.0)
@@ -253,8 +224,9 @@ def fetch_rss_items(feed_url: str, *, timeout: float = 22.0, max_items: int = DE
     title = (getattr(entry, "title", None) or "").strip()
     summary = (getattr(entry, "summary", None) or getattr(entry, "description", None) or "").strip()
     pub = _utc_from_struct(getattr(entry, "published_parsed", None) or getattr(entry, "updated_parsed", None))
+    url = (getattr(entry, "link", None) or "").strip()
     if title:
-      out.append(NewsItem(title=title, summary=summary, published_at=pub))
+      out.append(NewsItem(title=title, summary=summary, published_at=pub, url=url))
     if len(out) >= max_items:
       break
   return out
@@ -470,6 +442,29 @@ def pipeline_wordcloud(category: str, region: str) -> list[dict[str, float]]:
   return words
 
 
+def pipeline_crop_keywords(crop: str, region: str = "kr") -> list[dict[str, float]]:
+  """특정 농산물 품목 뉴스에서 키워드를 수집합니다. 가격-뉴스 상관 분석용."""
+  queries = CROP_SEARCH_KR.get(crop) if region == "kr" else None
+  if not queries:
+    return []
+  all_items: list[NewsItem] = []
+  seen: set[str] = set()
+  for q in queries:
+    url = _google_news_search_rss_url(q, region)
+    try:
+      items = fetch_rss_items(url, max_items=60)
+      for it in items:
+        key = it.title.strip()[:160]
+        if key not in seen:
+          seen.add(key)
+          all_items.append(it)
+    except Exception:
+      continue
+  if not all_items:
+    return []
+  return build_word_weights(all_items, category="agri", top_n=15)
+
+
 def pipeline_analysis(page: str, *, region_kr: bool = True) -> dict:
   cat = None
   for c, p in CATEGORY_TO_ANALYSIS_PAGE.items():
@@ -483,3 +478,37 @@ def pipeline_analysis(page: str, *, region_kr: bool = True) -> dict:
   entries = collect_for_category(cat, region)
   body = build_analysis_payload(cat, region, entries)
   return body
+
+
+def fetch_agri_news(*, crop: str | None = None, limit: int = 30, region: str = "kr") -> list[dict]:
+  """농업 뉴스 목록(제목+링크+날짜) 반환. crop 지정 시 해당 품목 전용 검색."""
+  if crop and crop in CROP_SEARCH_KR:
+    queries = CROP_SEARCH_KR[crop]
+    items: list[NewsItem] = []
+    seen: set[str] = set()
+    for q in queries:
+      feed_url = _google_news_search_rss_url(q, region)
+      try:
+        batch = fetch_rss_items(feed_url, max_items=limit)
+        for it in batch:
+          key = it.title.strip()[:160]
+          if key not in seen:
+            seen.add(key)
+            items.append(it)
+            if len(items) >= limit:
+              break
+      except Exception:
+        continue
+  else:
+    items = collect_for_category("agri", region, max_items=limit)
+
+  return [
+    {
+      "title": it.title,
+      "url": it.url,
+      "summary": (it.summary or "")[:200],
+      "published_at": it.published_at.isoformat() if it.published_at else None,
+    }
+    for it in items[:limit]
+    if it.url
+  ]
